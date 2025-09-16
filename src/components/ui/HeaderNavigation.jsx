@@ -1,0 +1,254 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import Icon from '../AppIcon';
+import Button from './Button';
+
+const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeControlsToggle }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const navigationItems = [
+    {
+      label: 'Home',
+      path: '/portfolio-home-hero',
+      icon: 'Home',
+      tooltip: 'Portfolio home and hero showcase'
+    },
+    {
+      label: 'Projects',
+      path: '/projects-portfolio-grid',
+      icon: 'FolderOpen',
+      tooltip: 'Browse project portfolio'
+    },
+    {
+      label: 'Blog',
+      path: '/blog-content-hub',
+      icon: 'BookOpen',
+      tooltip: 'Read latest blog posts'
+    },
+    {
+      label: 'Dashboard',
+      path: '/admin-dashboard-content-management',
+      icon: 'Settings',
+      tooltip: 'Admin content management',
+      adminOnly: true
+    }
+  ];
+
+  const isActivePath = (path) => {
+    return location.pathname === path;
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    closeMobileMenu();
+  }, [location.pathname]);
+
+  // Close mobile menu on escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        closeMobileMenu();
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
+
+  const filteredNavItems = navigationItems.filter(item => 
+    !item.adminOnly || (item.adminOnly && isAuthenticated)
+  );
+
+  return (
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-md border-b border-border-accent/20">
+        <nav className="max-w-9xl mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 lg:h-18">
+            {/* Logo */}
+            <Link 
+              to="/portfolio-home-hero" 
+              className="flex items-center space-x-3 group"
+              aria-label="CyberKraft Portfolio Home"
+            >
+              <div className="relative">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center group-hover:shadow-glow-primary transition-all duration-fast">
+                  <Icon name="Zap" size={20} className="text-background" />
+                </div>
+                <div className="absolute -inset-1 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-fast -z-10"></div>
+              </div>
+              <div className="hidden sm:block">
+                <span className="font-heading font-bold text-lg text-primary group-hover:text-secondary transition-colors duration-fast">
+                  CyberKraft
+                </span>
+                <div className="text-xs text-text-secondary font-caption">
+                  Portfolio
+                </div>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center space-x-1">
+              {filteredNavItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`
+                    relative px-4 py-2 rounded-lg font-medium text-sm transition-all duration-fast
+                    flex items-center space-x-2 min-h-[44px]
+                    ${isActivePath(item.path)
+                      ? 'text-primary bg-primary/10 shadow-glow-primary'
+                      : 'text-text-secondary hover:text-primary hover:bg-primary/5'
+                    }
+                  `}
+                  title={item.tooltip}
+                >
+                  <Icon name={item.icon} size={18} />
+                  <span>{item.label}</span>
+                  {isActivePath(item.path) && (
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div>
+                  )}
+                </Link>
+              ))}
+            </div>
+
+            {/* Desktop Auth Toggle and Theme Controls */}
+            <div className="hidden lg:flex items-center space-x-4">
+              {onThemeControlsToggle && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onThemeControlsToggle}
+                  iconName="Palette"
+                  className="p-2"
+                  title="Open theme controls"
+                />
+              )}
+              <Button
+                variant={isAuthenticated ? "secondary" : "outline"}
+                size="sm"
+                onClick={onAuthToggle}
+                iconName={isAuthenticated ? "LogOut" : "LogIn"}
+                iconPosition="left"
+                className="min-w-[100px]"
+              >
+                {isAuthenticated ? "Logout" : "Admin"}
+              </Button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="lg:hidden flex items-center space-x-2">
+              {onThemeControlsToggle && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onThemeControlsToggle}
+                  iconName="Palette"
+                  className="p-2"
+                  title="Open theme controls"
+                />
+              )}
+              <Button
+                variant={isAuthenticated ? "secondary" : "ghost"}
+                size="sm"
+                onClick={onAuthToggle}
+                iconName={isAuthenticated ? "LogOut" : "LogIn"}
+                className="p-2"
+                title={isAuthenticated ? "Logout" : "Admin Login"}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleMobileMenu}
+                iconName={isMobileMenuOpen ? "X" : "Menu"}
+                className="p-2"
+                title="Toggle navigation menu"
+              />
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40 lg:hidden"
+          onClick={closeMobileMenu}
+        >
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
+        </div>
+      )}
+
+      {/* Mobile Menu Drawer */}
+      <div className={`
+        fixed top-16 right-0 bottom-0 z-50 w-80 max-w-[85vw] bg-surface border-l border-border-accent/20
+        transform transition-transform duration-normal lg:hidden
+        ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
+      `}>
+        <div className="flex flex-col h-full">
+          <div className="flex-1 overflow-y-auto py-6">
+            <nav className="px-6 space-y-2">
+              {filteredNavItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={closeMobileMenu}
+                  className={`
+                    flex items-center space-x-3 px-4 py-3 rounded-lg font-medium
+                    transition-all duration-fast min-h-[48px]
+                    ${isActivePath(item.path)
+                      ? 'text-primary bg-primary/10 shadow-glow-primary'
+                      : 'text-text-secondary hover:text-primary hover:bg-primary/5'
+                    }
+                  `}
+                >
+                  <Icon name={item.icon} size={20} />
+                  <div className="flex-1">
+                    <div className="font-medium">{item.label}</div>
+                    <div className="text-xs text-text-secondary font-caption">
+                      {item.tooltip}
+                    </div>
+                  </div>
+                  {isActivePath(item.path) && (
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  )}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Mobile Menu Footer */}
+          <div className="border-t border-border-accent/20 p-6">
+            <div className="text-center">
+              <div className="text-sm text-text-secondary font-caption">
+                CyberKraft Portfolio
+              </div>
+              <div className="text-xs text-text-secondary/60 mt-1">
+                Neo-Cyberpunk Experience
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default HeaderNavigation;

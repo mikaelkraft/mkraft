@@ -1,0 +1,290 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary Colors */
+    --color-primary: #00FFFF; /* electric cyan */
+    --color-primary-foreground: #0A0A0F; /* deep space blue-black */
+    
+    /* Secondary Colors */
+    --color-secondary: #FF0080; /* vibrant magenta */
+    --color-secondary-foreground: #E0E0E0; /* high-contrast light gray */
+    
+    /* Accent Colors */
+    --color-accent: #39FF14; /* matrix green */
+    --color-accent-foreground: #0A0A0F; /* deep space blue-black */
+    
+    /* Background Colors */
+    --color-background: #0A0A0F; /* deep space blue-black */
+    --color-surface: #1A1A2E; /* elevated dark blue-gray */
+    
+    /* Text Colors */
+    --color-text-primary: #E0E0E0; /* high-contrast light gray */
+    --color-text-secondary: #A0A0B0; /* muted blue-gray */
+    
+    /* Status Colors */
+    --color-success: #39FF14; /* matrix green */
+    --color-success-foreground: #0A0A0F; /* deep space blue-black */
+    
+    --color-warning: #FFB000; /* amber */
+    --color-warning-foreground: #0A0A0F; /* deep space blue-black */
+    
+    --color-error: #FF3366; /* bright red-pink */
+    --color-error-foreground: #E0E0E0; /* high-contrast light gray */
+    
+    /* Border Colors */
+    --color-border: #1A1A2E; /* elevated dark blue-gray */
+    --color-border-accent: #00FFFF; /* electric cyan */
+    
+    /* Shadow Colors */
+    --shadow-primary: 0 0 8px rgba(0, 255, 255, 0.2); /* cyan glow */
+    --shadow-secondary: 0 0 8px rgba(255, 0, 128, 0.2); /* magenta glow */
+    --shadow-accent: 0 0 8px rgba(57, 255, 20, 0.2); /* green glow */
+    
+    /* Animation Timing */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  code, pre {
+    font-family: 'Fira Code', monospace;
+    font-weight: 400;
+  }
+
+  .caption, .metadata {
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 400;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-secondary);
+  }
+
+  /* Focus Styles */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Selection Styles */
+  ::selection {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Glow Effects */
+  .glow-primary {
+    box-shadow: var(--shadow-primary);
+  }
+
+  .glow-secondary {
+    box-shadow: var(--shadow-secondary);
+  }
+
+  .glow-accent {
+    box-shadow: var(--shadow-accent);
+  }
+
+  /* Hover Glow Effects */
+  .hover-glow-primary:hover {
+    box-shadow: var(--shadow-primary);
+    transition: box-shadow var(--transition-fast);
+  }
+
+  .hover-glow-secondary:hover {
+    box-shadow: var(--shadow-secondary);
+    transition: box-shadow var(--transition-fast);
+  }
+
+  .hover-glow-accent:hover {
+    box-shadow: var(--shadow-accent);
+    transition: box-shadow var(--transition-fast);
+  }
+
+  /* Cyberpunk Grid Pattern */
+  .cyber-grid {
+    background-image: 
+      linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Pulse Animation */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    from {
+      box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+    }
+    to {
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+    }
+  }
+
+  /* Terminal Loading Animation */
+  .terminal-loading {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .terminal-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(0, 255, 255, 0.2),
+      transparent
+    );
+    animation: terminal-scan 1.5s ease-in-out infinite;
+  }
+
+  @keyframes terminal-scan {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+
+  /* Neon Border */
+  .neon-border {
+    border: 1px solid var(--color-primary);
+    box-shadow: 
+      0 0 4px rgba(0, 255, 255, 0.3),
+      inset 0 0 4px rgba(0, 255, 255, 0.1);
+  }
+
+  /* Glass Effect */
+  .glass-effect {
+    background: rgba(26, 26, 46, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+  }
+}
+
+@layer utilities {
+  /* Typography Utilities */
+  .font-heading {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .font-body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .font-caption {
+    font-family: 'Roboto Mono', monospace;
+  }
+
+  .font-code {
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* Transition Utilities */
+  .transition-fast {
+    transition-duration: var(--transition-fast);
+  }
+
+  .transition-normal {
+    transition-duration: var(--transition-normal);
+  }
+
+  .transition-slow {
+    transition-duration: var(--transition-slow);
+  }
+
+  /* Responsive Typography */
+  .text-fluid-xs {
+    font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  }
+
+  .text-fluid-sm {
+    font-size: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+  }
+
+  .text-fluid-base {
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  }
+
+  .text-fluid-lg {
+    font-size: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+  }
+
+  .text-fluid-xl {
+    font-size: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  }
+
+  .text-fluid-2xl {
+    font-size: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+  }
+
+  .text-fluid-3xl {
+    font-size: clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem);
+  }
+
+  .text-fluid-4xl {
+    font-size: clamp(2.25rem, 1.9rem + 1.75vw, 3rem);
+  }
+}
