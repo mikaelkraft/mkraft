@@ -3,37 +3,54 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
+import { LogIn, Mail, Hash, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ADMIN_EMAIL } from '../../utils/authService';
 
 const Login = ({ onClose, onSuccess }) => {
-  const [email, setEmail] = useState('admin@cyberkraft.dev');
-  const [password, setPassword] = useState('CyberKraft2024!');
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState(ADMIN_EMAIL);
+  const [code, setCode] = useState('');
+  const [step, setStep] = useState('request'); // 'request' | 'verify'
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { signIn } = useAuth();
+  const { requestOtp, verifyOtp } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleRequest = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
     try {
-      const result = await signIn(email, password);
+      const result = await requestOtp(email);
+      if (result.success) {
+        setStep('verify');
+      } else {
+        setError(result.error || 'Failed to send code');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.log('Request OTP error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    try {
+      const result = await verifyOtp(email, code);
       if (result.success) {
         onSuccess?.();
         onClose?.();
-        // Navigate to admin dashboard
         navigate('/admin-dashboard-content-management');
       } else {
-        setError(result.error || 'Login failed');
+        setError(result.error || 'Invalid code');
       }
-    } catch (error) {
+    } catch (err) {
       setError('An unexpected error occurred');
-      console.log('Login error:', error);
+      console.log('Verify OTP error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -61,96 +78,90 @@ const Login = ({ onClose, onSuccess }) => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-text-primary mb-2">
-              Email Address
-            </label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@cyberkraft.dev"
-              required
-              autoComplete="email"
-              className="w-full"
-              disabled={isLoading}
-            />
-          </div>
+        {step === 'request' ? (
+          <form onSubmit={handleRequest} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-text-primary mb-2">
+                Admin Email
+              </label>
+              <div className="relative">
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={ADMIN_EMAIL}
+                  required
+                  autoComplete="email"
+                  className="w-full pl-10"
+                  disabled={isLoading}
+                />
+                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+              </div>
+              <p className="text-xs text-text-secondary mt-1">
+                We’ll email you a one-time code to sign in.
+              </p>
+            </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-text-primary mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-                autoComplete="current-password"
-                className="w-full pr-10"
-                disabled={isLoading}
-              />
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full shadow-glow-primary"
+              disabled={isLoading}
+              iconName={isLoading ? 'Loader2' : 'LogIn'}
+              iconPosition="left"
+            >
+              {isLoading ? 'Sending Code…' : 'Send Login Code'}
+            </Button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerify} className="space-y-4">
+            <div>
+              <label htmlFor="code" className="block text-sm font-medium text-text-primary mb-2">
+                Enter Code
+              </label>
+              <div className="relative">
+                <Input
+                  id="code"
+                  type="text"
+                  inputMode="numeric"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.trim())}
+                  placeholder="6-digit code"
+                  required
+                  className="w-full pl-10 tracking-widest"
+                  disabled={isLoading}
+                />
+                <Hash className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+              </div>
+              <p className="text-xs text-text-secondary mt-1">
+                We sent a code to <span className="font-mono">{email}</span>.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
+                onClick={() => setStep('request')}
+                className="text-sm text-text-secondary hover:text-text-primary"
                 disabled={isLoading}
               >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                Use a different email
               </button>
             </div>
-          </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                className="rounded border-border-primary text-primary focus:ring-primary focus:ring-offset-0"
-                disabled={isLoading}
-              />
-              <span className="ml-2 text-text-secondary">Remember me</span>
-            </label>
-            <button
-              type="button"
-              className="text-primary hover:text-primary/80 transition-colors"
-              disabled={isLoading}
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full shadow-glow-primary"
+              disabled={isLoading || code.length < 4}
+              iconName={isLoading ? 'Loader2' : 'Check'}
+              iconPosition="left"
             >
-              Forgot password?
-            </button>
-          </div>
-
-          <Button
-            type="submit"
-            variant="primary"
-            className="w-full shadow-glow-primary"
-            disabled={isLoading}
-            iconName={isLoading ? 'Loader2' : 'LogIn'}
-            iconPosition="left"
-          >
-            {isLoading ? 'Signing In...' : 'Sign In'}
-          </Button>
-        </form>
-
-        <div className="mt-6 pt-6 border-t border-border-primary">
-          <div className="text-center">
-            <p className="text-text-secondary text-sm mb-3">
-              Demo Credentials for Testing:
-            </p>
-            <div className="bg-background/50 rounded-lg p-3 text-xs font-mono">
-              <div className="text-text-secondary">Email: admin@cyberkraft.dev</div>
-              <div className="text-text-secondary">Password: CyberKraft2024!</div>
-            </div>
-          </div>
-        </div>
+              {isLoading ? 'Verifying…' : 'Verify & Sign In'}
+            </Button>
+          </form>
+        )}
 
         {onClose && (
           <div className="mt-4 text-center">

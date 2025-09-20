@@ -12,6 +12,88 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
 
+  const Modal = ({ title, onClose, onSubmit, submitText = 'Save', children }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="bg-surface border border-border-accent/20 rounded-lg shadow-glow-primary w-full max-w-2xl">
+        <div className="px-6 py-4 border-b border-border-accent/20 flex items-center justify-between">
+          <h3 className="text-lg font-heading font-semibold text-text-primary">{title}</h3>
+          <button onClick={onClose} className="text-text-secondary hover:text-primary">✕</button>
+        </div>
+        <form onSubmit={onSubmit} className="p-6 space-y-4">
+          {children}
+          <div className="flex items-center justify-end space-x-2 pt-2">
+            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="submit" variant="primary">{submitText}</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  const [createForm, setCreateForm] = useState({
+    title: '',
+    description: '',
+    image: '',
+    technologies: '',
+    status: 'draft',
+    github_url: '',
+    live_url: '',
+  });
+
+  const [editForm, setEditForm] = useState({});
+
+  const openEdit = (project) => {
+    setEditingProject(project);
+    setEditForm({
+      title: project.title || '',
+      description: project.description || '',
+      image: project.image || '',
+      technologies: (project.technologies || []).join(', '),
+      status: project.status || 'draft',
+      github_url: project.github_url || '',
+      live_url: project.live_url || '',
+    });
+  };
+
+  const submitCreate = (e) => {
+    e.preventDefault();
+    const technologies = (createForm.technologies || '')
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    onProjectCreate({
+      title: createForm.title,
+      description: createForm.description,
+      image: createForm.image,
+      technologies,
+      status: createForm.status,
+      github_url: createForm.github_url || undefined,
+      live_url: createForm.live_url || undefined,
+      date: new Date().toISOString(),
+    });
+    setShowCreateModal(false);
+    setCreateForm({ title: '', description: '', image: '', technologies: '', status: 'draft', github_url: '', live_url: '' });
+  };
+
+  const submitEdit = (e) => {
+    e.preventDefault();
+    if (!editingProject) return;
+    const technologies = (editForm.technologies || '')
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    onProjectUpdate(editingProject.id, {
+      title: editForm.title,
+      description: editForm.description,
+      image: editForm.image,
+      technologies,
+      status: editForm.status,
+      github_url: editForm.github_url || undefined,
+      live_url: editForm.live_url || undefined,
+    });
+    setEditingProject(null);
+  };
+
   const filteredProjects = projects
     .filter(project => 
       project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -115,7 +197,7 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setEditingProject(project)}
+            onClick={() => openEdit(project)}
             iconName="Edit"
             className="p-2"
             title="Edit project"
@@ -294,6 +376,84 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
           <div className="text-sm text-text-secondary font-caption">Filtered Results</div>
         </div>
       </div>
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <Modal title="Create Project" onClose={() => setShowCreateModal(false)} onSubmit={submitCreate} submitText="Create">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Title</label>
+              <Input value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} required />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Status</label>
+              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Description</label>
+              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={4} value={createForm.description} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Image URL</label>
+              <Input type="url" value={createForm.image} onChange={(e) => setCreateForm({ ...createForm, image: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Technologies (comma-separated)</label>
+              <Input value={createForm.technologies} onChange={(e) => setCreateForm({ ...createForm, technologies: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">GitHub URL</label>
+              <Input type="url" value={createForm.github_url} onChange={(e) => setCreateForm({ ...createForm, github_url: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Live URL</label>
+              <Input type="url" value={createForm.live_url} onChange={(e) => setCreateForm({ ...createForm, live_url: e.target.value })} />
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Modal */}
+      {editingProject && (
+        <Modal title="Edit Project" onClose={() => setEditingProject(null)} onSubmit={submitEdit} submitText="Update">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Title</label>
+              <Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Status</label>
+              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Description</label>
+              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={4} value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Image URL</label>
+              <Input type="url" value={editForm.image} onChange={(e) => setEditForm({ ...editForm, image: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Technologies (comma-separated)</label>
+              <Input value={editForm.technologies} onChange={(e) => setEditForm({ ...editForm, technologies: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">GitHub URL</label>
+              <Input type="url" value={editForm.github_url} onChange={(e) => setEditForm({ ...editForm, github_url: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Live URL</label>
+              <Input type="url" value={editForm.live_url} onChange={(e) => setEditForm({ ...editForm, live_url: e.target.value })} />
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

@@ -10,6 +10,63 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
   const [editingSlide, setEditingSlide] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [draggedSlide, setDraggedSlide] = useState(null);
+  const [createForm, setCreateForm] = useState({
+    title: '',
+    subtitle: '',
+    backgroundImage: '',
+    ctaText: '',
+    ctaLink: '',
+    duration: 5,
+    status: 'active',
+    order: (slides?.length || 0) + 1,
+  });
+  const [editForm, setEditForm] = useState({});
+
+  const Modal = ({ title, onClose, onSubmit, submitText = 'Save', children }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="bg-surface border border-border-accent/20 rounded-lg shadow-glow-primary w-full max-w-2xl">
+        <div className="px-6 py-4 border-b border-border-accent/20 flex items-center justify-between">
+          <h3 className="text-lg font-heading font-semibold text-text-primary">{title}</h3>
+          <button onClick={onClose} className="text-text-secondary hover:text-primary">✕</button>
+        </div>
+        <form onSubmit={onSubmit} className="p-6 space-y-4">
+          {children}
+          <div className="flex items-center justify-end space-x-2 pt-2">
+            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="submit" variant="primary">{submitText}</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  const openEdit = (slide) => {
+    setEditingSlide(slide);
+    setEditForm({
+      title: slide.title || '',
+      subtitle: slide.subtitle || '',
+      backgroundImage: slide.backgroundImage || '',
+      ctaText: slide.ctaText || '',
+      ctaLink: slide.ctaLink || '',
+      duration: slide.duration || 5,
+      status: slide.status || 'active',
+      order: slide.order || 1,
+    });
+  };
+
+  const submitCreate = (e) => {
+    e.preventDefault();
+    onSlideCreate({ ...createForm });
+    setShowCreateModal(false);
+    setCreateForm({ title: '', subtitle: '', backgroundImage: '', ctaText: '', ctaLink: '', duration: 5, status: 'active', order: (slides?.length || 0) + 1 });
+  };
+
+  const submitEdit = (e) => {
+    e.preventDefault();
+    if (!editingSlide) return;
+    onSlideUpdate(editingSlide.id, { ...editForm });
+    setEditingSlide(null);
+  };
 
   const filteredSlides = slides
     .filter(slide => 
@@ -139,7 +196,7 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setEditingSlide(slide)}
+              onClick={() => openEdit(slide)}
               iconName="Edit"
               className="p-2"
               title="Edit slide"
@@ -301,6 +358,92 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
           </div>
         </div>
       </div>
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <Modal title="Create Slide" onClose={() => setShowCreateModal(false)} onSubmit={submitCreate} submitText="Create">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Title</label>
+              <Input value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} required />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Subtitle</label>
+              <Input value={createForm.subtitle} onChange={(e) => setCreateForm({ ...createForm, subtitle: e.target.value })} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Background Image URL</label>
+              <Input type="url" value={createForm.backgroundImage} onChange={(e) => setCreateForm({ ...createForm, backgroundImage: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">CTA Text</label>
+              <Input value={createForm.ctaText} onChange={(e) => setCreateForm({ ...createForm, ctaText: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">CTA Link</label>
+              <Input value={createForm.ctaLink} onChange={(e) => setCreateForm({ ...createForm, ctaLink: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Duration (seconds)</label>
+              <Input type="number" min="1" value={createForm.duration} onChange={(e) => setCreateForm({ ...createForm, duration: Number(e.target.value) || 5 })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Status</label>
+              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Order</label>
+              <Input type="number" min="1" value={createForm.order} onChange={(e) => setCreateForm({ ...createForm, order: Number(e.target.value) || 1 })} />
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Modal */}
+      {editingSlide && (
+        <Modal title="Edit Slide" onClose={() => setEditingSlide(null)} onSubmit={submitEdit} submitText="Update">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Title</label>
+              <Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Subtitle</label>
+              <Input value={editForm.subtitle} onChange={(e) => setEditForm({ ...editForm, subtitle: e.target.value })} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Background Image URL</label>
+              <Input type="url" value={editForm.backgroundImage} onChange={(e) => setEditForm({ ...editForm, backgroundImage: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">CTA Text</label>
+              <Input value={editForm.ctaText} onChange={(e) => setEditForm({ ...editForm, ctaText: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">CTA Link</label>
+              <Input value={editForm.ctaLink} onChange={(e) => setEditForm({ ...editForm, ctaLink: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Duration (seconds)</label>
+              <Input type="number" min="1" value={editForm.duration} onChange={(e) => setEditForm({ ...editForm, duration: Number(e.target.value) || 5 })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Status</label>
+              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Order</label>
+              <Input type="number" min="1" value={editForm.order} onChange={(e) => setEditForm({ ...editForm, order: Number(e.target.value) || 1 })} />
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

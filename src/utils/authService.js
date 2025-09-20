@@ -1,5 +1,7 @@
 import supabase from './supabase';
 
+export const ADMIN_EMAIL = 'mikewillkraft@gmail.com';
+
 class AuthService {
   // Sign in with email and password
   async signIn(email, password) {
@@ -77,6 +79,106 @@ class AuthService {
         };
       }
       return { success: false, error: 'An unexpected error occurred during sign out' };
+    }
+  }
+
+  // Request email OTP or magic link (admin email only)
+  async requestOtp(email) {
+    try {
+      if (!email || email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        return { success: false, error: 'This email is not allowed.' };
+      }
+
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+          shouldCreateUser: true,
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      if (
+        error?.message?.includes('Failed to fetch') ||
+        error?.message?.includes('AuthRetryableFetchError')
+      ) {
+        return {
+          success: false,
+          error:
+            'Cannot connect to authentication service. Your Supabase project may be paused or inactive. Please check your Supabase dashboard and resume your project if needed.',
+        };
+      }
+      return { success: false, error: 'Failed to send OTP' };
+    }
+  }
+
+  // Verify email OTP code
+  async verifyOtp(email, token) {
+    try {
+      if (!email || email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        return { success: false, error: 'This email is not allowed.' };
+      }
+
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      // Ensure profile exists/updated
+      if (data?.user?.id) {
+        await this.ensureAdminProfile(data.user.id, email);
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      if (
+        error?.message?.includes('Failed to fetch') ||
+        error?.message?.includes('AuthRetryableFetchError')
+      ) {
+        return {
+          success: false,
+          error:
+            'Cannot connect to authentication service. Your Supabase project may be paused or inactive. Please check your Supabase dashboard and resume your project if needed.',
+        };
+      }
+      return { success: false, error: 'Invalid or expired OTP' };
+    }
+  }
+
+  async ensureAdminProfile(userId, email) {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .upsert(
+          {
+            id: userId,
+            email,
+            full_name: email.split('@')[0],
+            role: 'admin',
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'id' }
+        )
+        .select('id')
+        .single();
+
+      if (error) {
+        console.log('ensureAdminProfile error:', error);
+      }
+      return { success: true, data };
+    } catch (e) {
+      console.log('ensureAdminProfile catch:', e);
+      return { success: false };
     }
   }
 

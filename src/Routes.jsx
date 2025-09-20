@@ -7,6 +7,7 @@ import PortfolioHomeHero from "pages/portfolio-home-hero";
 import ProjectsPortfolioGrid from "pages/projects-portfolio-grid";
 import BlogContentHub from "pages/blog-content-hub";
 import AdminDashboardContentManagement from "pages/admin-dashboard-content-management";
+import RequireAdmin from "components/auth/RequireAdmin";
 import NotFound from "pages/NotFound";
 
 const Routes = () => {
@@ -20,7 +21,14 @@ const Routes = () => {
         <Route path="/portfolio-home-hero" element={<PortfolioHomeHero />} />
         <Route path="/projects-portfolio-grid" element={<ProjectsPortfolioGrid />} />
         <Route path="/blog-content-hub" element={<BlogContentHub />} />
-        <Route path="/admin-dashboard-content-management" element={<AdminDashboardContentManagement />} />
+        <Route
+          path="/admin-dashboard-content-management"
+          element={
+            <RequireAdmin>
+              <AdminDashboardContentManagement />
+            </RequireAdmin>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
       </ErrorBoundary>

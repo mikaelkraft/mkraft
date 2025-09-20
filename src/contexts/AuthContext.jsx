@@ -104,6 +104,42 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Request OTP (admin only)
+  const requestOtp = async (email) => {
+    try {
+      setAuthError(null);
+      const result = await authService.requestOtp(email);
+      if (!result?.success) {
+        setAuthError(result?.error || 'Failed to send OTP');
+        return { success: false, error: result?.error };
+      }
+      return { success: true };
+    } catch (error) {
+      const errorMsg = 'Something went wrong sending OTP. Please try again.';
+      setAuthError(errorMsg);
+      console.log('Request OTP error:', error);
+      return { success: false, error: errorMsg };
+    }
+  };
+
+  // Verify OTP and sign in
+  const verifyOtp = async (email, code) => {
+    try {
+      setAuthError(null);
+      const result = await authService.verifyOtp(email, code);
+      if (!result?.success) {
+        setAuthError(result?.error || 'OTP verification failed');
+        return { success: false, error: result?.error };
+      }
+      return { success: true };
+    } catch (error) {
+      const errorMsg = 'OTP verification failed. Please try again.';
+      setAuthError(errorMsg);
+      console.log('Verify OTP error:', error);
+      return { success: false, error: errorMsg };
+    }
+  };
+
   // Sign up function
   const signUp = async (email, password, userData = {}) => {
     try {
@@ -204,6 +240,8 @@ export function AuthProvider({ children }) {
     signOut,
     updateProfile,
     resetPassword,
+    requestOtp,
+    verifyOtp,
     clearError: () => setAuthError(null),
   };
 

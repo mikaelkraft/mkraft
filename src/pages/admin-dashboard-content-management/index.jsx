@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import HeaderNavigation from '../../components/ui/HeaderNavigation';
 import DashboardSidebar from './components/DashboardSidebar';
 import DashboardOverview from './components/DashboardOverview';
@@ -6,17 +6,79 @@ import ProjectsManagement from './components/ProjectsManagement';
 import BlogManagement from './components/BlogManagement';
 import SlidesManagement from './components/SlidesManagement';
 import SiteSettings from './components/SiteSettings';
+import projectService from '../../utils/projectService';
+import blogService from '../../utils/blogService';
+import slideService from '../../utils/slideService';
+import settingsService from '../../utils/settingsService';
 
 const AdminDashboardContentManagement = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [projects, setProjects] = useState([]);
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [slides, setSlides] = useState([]);
+  const [settings, setSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Helper mappers (UI shape -> DB shape)
+  const toDbProject = (data = {}) => {
+    const {
+      image,
+      date, // UI-only
+      ...rest
+    } = data || {};
+    return {
+      ...rest,
+      featured_image: image,
+      // created_at is managed by DB; ignore date from UI
+    };
+  };
+
+  const toDbPost = (data = {}) => {
+    const {
+      featuredImage,
+      publishDate,
+      views, comments, likes, readTime,
+      id, // ignore client-provided id
+      ...rest
+    } = data || {};
+    return {
+      ...rest,
+      featured_image: featuredImage,
+      published_at: publishDate,
+      read_time: readTime,
+      // counters managed by DB
+    };
+  };
+
+  const toDbSlide = (data = {}) => {
+    const {
+      backgroundImage,
+      ctaText,
+      ctaLink,
+      order,
+      views, // ignore
+      status,
+      ...rest
+    } = data || {};
+    return {
+      ...rest,
+      background_image: backgroundImage,
+      cta_text: ctaText,
+      cta_link: ctaLink,
+      display_order: order,
+      // Map UI status to DB content_status
+      status: status === 'active' ? 'published' : status === 'inactive' ? 'draft' : status,
+    };
+  };
 
   // Mock data for dashboard
   const mockStats = {
-    projects: 12,
-    blogPosts: 24,
-    slides: 5,
-    totalViews: 24700
+    projects: projects.length,
+    blogPosts: blogPosts.length,
+    slides: slides.length,
+    totalViews: 0
   };
 
   const mockAnalytics = {
@@ -68,146 +130,99 @@ const AdminDashboardContentManagement = () => {
     ]
   };
 
-  const mockProjects = [
-    {
-      id: 1,
-      title: "CyberKraft E-commerce Platform",
-      description: "Full-stack e-commerce solution with React, Node.js, and advanced payment integration",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400",
-      technologies: ["React", "Node.js", "MongoDB", "Stripe", "AWS"],
-      status: "published",
-      date: "2024-01-15",
-      views: 1250,
-      likes: 89
-    },
-    {
-      id: 2,
-      title: "Neural Network Visualization Tool",
-      description: "Interactive web application for visualizing and understanding neural network architectures",
-      image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400",
-      technologies: ["Python", "TensorFlow", "D3.js", "Flask"],
-      status: "published",
-      date: "2024-01-10",
-      views: 980,
-      likes: 67
-    },
-    {
-      id: 3,
-      title: "Blockchain Analytics Dashboard",
-      description: "Real-time cryptocurrency and blockchain data analysis platform",
-      image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400",
-      technologies: ["React", "Web3.js", "Solidity", "Chart.js"],
-      status: "draft",
-      date: "2024-01-08",
-      views: 0,
-      likes: 0
-    }
-  ];
+  // Load data
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [proj, posts, sld, stg] = await Promise.all([
+          projectService.getAllProjects(),
+          blogService.getAllPosts(),
+          slideService.getAllSlides(),
+          settingsService.getSettings(),
+        ]);
+        if (!mounted) return;
+        if (proj.success) setProjects(proj.data);
+        if (posts.success) setBlogPosts(posts.data);
+        if (sld.success) setSlides(sld.data);
+        if (stg.success) setSettings(stg.data);
+      } catch (e) {
+        if (mounted) setError('Failed to load admin data');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  const mockBlogPosts = [
-    {
-      id: 1,
-      title: "Advanced React Patterns for Modern Applications",
-      excerpt: "Exploring compound components, render props, and custom hooks for building scalable React applications",
-      featuredImage: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400",
-      tags: ["React", "JavaScript", "Frontend"],
-      status: "published",
-      publishDate: "2024-01-20",
-      views: 2340,
-      comments: 45,
-      likes: 156
-    },
-    {
-      id: 2,
-      title: "Building Secure APIs with Node.js and JWT",
-      excerpt: "Complete guide to implementing authentication and authorization in Node.js applications",
-      featuredImage: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400",
-      tags: ["Node.js", "Security", "Backend"],
-      status: "published",
-      publishDate: "2024-01-18",
-      views: 1890,
-      comments: 32,
-      likes: 98
-    },
-    {
-      id: 3,
-      title: "Machine Learning in Web Development",
-      excerpt: "Integrating ML models into web applications for enhanced user experiences",
-      featuredImage: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400",
-      tags: ["Machine Learning", "AI", "Web Development"],
-      status: "draft",
-      publishDate: "2024-01-22",
-      views: 0,
-      comments: 0,
-      likes: 0
-    }
-  ];
+  const normalizedPosts = blogPosts.map((p) => ({
+    id: p.id,
+    title: p.title,
+    excerpt: p.excerpt,
+    content: p.content,
+    category: p.category,
+    featuredImage: p.featured_image,
+    tags: p.tags || [],
+    status: p.status,
+    publishDate: p.published_at,
+    readTime: p.read_time,
+    views: p.view_count,
+    comments: p.comment_count,
+    likes: p.like_count,
+    slug: p.slug,
+  }));
 
-  const mockSlides = [
-    {
-      id: 1,
-      title: "Welcome to CyberKraft",
-      subtitle: "Innovative solutions for the digital future",
-      backgroundImage: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800",
-      ctaText: "Explore Projects",
-      ctaLink: "/projects",
-      duration: 5,
-      order: 1,
-      status: "active",
-      views: 5600
-    },
-    {
-      id: 2,
-      title: "Cutting-Edge Technology",
-      subtitle: "Building tomorrow\'s applications today",
-      backgroundImage: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
-      ctaText: "View Blog",
-      ctaLink: "/blog",
-      duration: 5,
-      order: 2,
-      status: "active",
-      views: 4200
-    },
-    {
-      id: 3,
-      title: "Let\'s Collaborate",
-      subtitle: "Ready to bring your ideas to life",
-      backgroundImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800",
-      ctaText: "Contact Me",
-      ctaLink: "/contact",
-      duration: 5,
-      order: 3,
-      status: "inactive",
-      views: 1800
-    }
-  ];
+  const normalizedSlides = slides.map((s) => ({
+    id: s.id,
+    title: s.title,
+    subtitle: s.subtitle,
+    backgroundImage: s.background_image,
+    ctaText: s.cta_text,
+    ctaLink: s.cta_link,
+    duration: s.duration,
+    order: s.display_order,
+    status: s.status === 'published' ? 'active' : 'inactive',
+    views: s.view_count,
+  }));
 
-  const mockSettings = {
-    siteTitle: "CyberKraft Portfolio",
-    siteTagline: "Neo-Cyberpunk Experience",
-    siteDescription: "A futuristic portfolio showcasing cutting-edge development work and innovative solutions for the digital future.",
-    contactEmail: "contact@cyberkraft.dev",
-    adminEmail: "admin@cyberkraft.dev",
+  const normalizedSettings = settings && {
+    siteTitle: settings.site_title,
+    siteTagline: settings.site_tagline,
+    siteDescription: settings.site_description,
+    contactEmail: settings.contact_email,
+    adminEmail: settings.admin_email,
+    enableVideo: settings.enable_video,
+    defaultTheme: settings.default_theme,
+    defaultFontSize: settings.default_font_size,
+    logoUrl: settings.logo_url,
+    faviconUrl: settings.favicon_url,
+    socialMedia: settings.social_media,
+    seo: settings.seo_settings,
+    maintenanceMode: settings.maintenance_mode,
+    customCSS: settings.custom_css,
+    customJS: settings.custom_js,
+  };
+
+  const defaultUiSettings = {
+    siteTitle: 'CyberKraft Portfolio',
+    siteTagline: 'Neo-Cyberpunk Experience',
+    siteDescription: '',
+    contactEmail: '',
+    adminEmail: '',
     enableVideo: true,
-    defaultTheme: "cyberpunk",
-    defaultFontSize: "medium",
-    logoUrl: "",
-    faviconUrl: "",
-    socialMedia: {
-      twitter: "mikael_kraft",
-      linkedin: "in/mikael-kraft",
-      github: "mikaelkraft",
-      email: "contact@cyberkraft.dev"
-    },
-    seo: {
-      keywords: "portfolio, developer, cyberpunk, react, javascript, web development",
-      ogImage: "https://cyberkraft.dev/og-image.jpg",
-      googleAnalytics: "",
-      searchConsole: ""
-    },
+    defaultTheme: 'cyberpunk',
+    defaultFontSize: 'medium',
+    logoUrl: '',
+    faviconUrl: '',
+    socialMedia: { twitter: '', linkedin: '', github: '', email: '' },
+    seo: { keywords: '', ogImage: '', googleAnalytics: '', searchConsole: '' },
     maintenanceMode: false,
-    customCSS: "",
-    customJS: ""
+    customCSS: '',
+    customJS: '',
   };
 
   const handleSectionChange = (section, action = null) => {
@@ -222,55 +237,82 @@ const AdminDashboardContentManagement = () => {
     setIsAuthenticated(!isAuthenticated);
   };
 
-  const handleProjectUpdate = (projectId, updatedData) => {
-    console.log('Update project:', projectId, updatedData);
+  const handleProjectUpdate = async (projectId, updatedData) => {
+    const res = await projectService.updateProject(projectId, toDbProject(updatedData));
+    if (res.success) setProjects((prev) => prev.map((p) => (p.id === projectId ? res.data : p)));
   };
 
-  const handleProjectDelete = (projectId) => {
-    console.log('Delete project:', projectId);
+  const handleProjectDelete = async (projectId) => {
+    const res = await projectService.deleteProject(projectId);
+    if (res.success) setProjects((prev) => prev.filter((p) => p.id !== projectId));
   };
 
-  const handleProjectCreate = (projectData) => {
-    console.log('Create project:', projectData);
+  const handleProjectCreate = async (projectData) => {
+    const res = await projectService.createProject(toDbProject(projectData));
+    if (res.success) setProjects((prev) => [res.data, ...prev]);
   };
 
-  const handlePostUpdate = (postId, updatedData) => {
-    console.log('Update post:', postId, updatedData);
+  const handlePostUpdate = async (postId, updatedData) => {
+    const res = await blogService.updatePost(postId, toDbPost(updatedData));
+    if (res.success) setBlogPosts((prev) => prev.map((b) => (b.id === postId ? res.data : b)));
   };
 
-  const handlePostDelete = (postId) => {
-    console.log('Delete post:', postId);
+  const handlePostDelete = async (postId) => {
+    const res = await blogService.deletePost(postId);
+    if (res.success) setBlogPosts((prev) => prev.filter((b) => b.id !== postId));
   };
 
-  const handlePostCreate = (postData) => {
-    console.log('Create post:', postData);
+  const handlePostCreate = async (postData) => {
+    const res = await blogService.createPost(toDbPost(postData));
+    if (res.success) setBlogPosts((prev) => [res.data, ...prev]);
   };
 
-  const handleSlideUpdate = (slideId, updatedData) => {
-    console.log('Update slide:', slideId, updatedData);
+  const handleSlideUpdate = async (slideId, updatedData) => {
+    const res = await slideService.updateSlide(slideId, toDbSlide(updatedData));
+    if (res.success) setSlides((prev) => prev.map((s) => (s.id === slideId ? res.data : s)));
   };
 
-  const handleSlideDelete = (slideId) => {
-    console.log('Delete slide:', slideId);
+  const handleSlideDelete = async (slideId) => {
+    const res = await slideService.deleteSlide(slideId);
+    if (res.success) setSlides((prev) => prev.filter((s) => s.id !== slideId));
   };
 
-  const handleSlideCreate = (slideData) => {
-    console.log('Create slide:', slideData);
+  const handleSlideCreate = async (slideData) => {
+    const res = await slideService.createSlide(toDbSlide(slideData));
+    if (res.success) setSlides((prev) => [res.data, ...prev]);
   };
 
-  const handleSlideReorder = (slideId, newOrder) => {
-    console.log('Reorder slide:', slideId, 'to position:', newOrder);
+  const handleSlideReorder = async (slideId, newOrder) => {
+    const res = await slideService.updateSlideOrder(slideId, newOrder);
+    if (res.success) setSlides((prev) => prev.map((s) => (s.id === slideId ? { ...s, display_order: newOrder } : s)));
   };
 
-  const handleSettingsUpdate = (updatedSettings) => {
-    console.log('Update settings:', updatedSettings);
+  const handleSettingsUpdate = async (updatedSettings) => {
+    const res = await settingsService.updateSettings({
+      site_title: updatedSettings.siteTitle,
+      site_tagline: updatedSettings.siteTagline,
+      site_description: updatedSettings.siteDescription,
+      contact_email: updatedSettings.contactEmail,
+      admin_email: updatedSettings.adminEmail,
+      enable_video: updatedSettings.enableVideo,
+      default_theme: updatedSettings.defaultTheme,
+      default_font_size: updatedSettings.defaultFontSize,
+      logo_url: updatedSettings.logoUrl,
+      favicon_url: updatedSettings.faviconUrl,
+      social_media: updatedSettings.socialMedia,
+      seo_settings: updatedSettings.seo,
+      maintenance_mode: updatedSettings.maintenanceMode,
+      custom_css: updatedSettings.customCSS,
+      custom_js: updatedSettings.customJS,
+    });
+    if (res.success) setSettings(res.data);
   };
 
   const renderMainContent = () => {
     switch (activeSection) {
       case 'overview':
         return (
-          <DashboardOverview 
+              <DashboardOverview 
             stats={mockStats} 
             analytics={mockAnalytics} 
           />
@@ -278,7 +320,15 @@ const AdminDashboardContentManagement = () => {
       case 'projects':
         return (
           <ProjectsManagement
-            projects={mockProjects}
+            projects={(projects || []).map((p) => ({
+              id: p.id,
+              title: p.title,
+              description: p.description,
+              image: p.featured_image || '/assets/images/no_image.png',
+              technologies: p.technologies || [],
+              status: p.status,
+              date: p.created_at,
+            }))}
             onProjectUpdate={handleProjectUpdate}
             onProjectDelete={handleProjectDelete}
             onProjectCreate={handleProjectCreate}
@@ -287,7 +337,7 @@ const AdminDashboardContentManagement = () => {
       case 'blog':
         return (
           <BlogManagement
-            blogPosts={mockBlogPosts}
+            blogPosts={normalizedPosts}
             onPostUpdate={handlePostUpdate}
             onPostDelete={handlePostDelete}
             onPostCreate={handlePostCreate}
@@ -296,7 +346,7 @@ const AdminDashboardContentManagement = () => {
       case 'slides':
         return (
           <SlidesManagement
-            slides={mockSlides}
+            slides={normalizedSlides}
             onSlideUpdate={handleSlideUpdate}
             onSlideDelete={handleSlideDelete}
             onSlideCreate={handleSlideCreate}
@@ -306,7 +356,7 @@ const AdminDashboardContentManagement = () => {
       case 'settings':
         return (
           <SiteSettings
-            settings={mockSettings}
+            settings={normalizedSettings || defaultUiSettings}
             onSettingsUpdate={handleSettingsUpdate}
           />
         );
@@ -322,6 +372,19 @@ const AdminDashboardContentManagement = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80">
+          <div className="bg-surface border border-border-accent/20 rounded-lg px-6 py-4 shadow-glow-primary">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
+            <div className="text-sm text-text-secondary">Loading admin data…</div>
+          </div>
+        </div>
+      )}
+      {error && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-error text-background px-4 py-2 rounded shadow">
+          {error}
+        </div>
+      )}
       <HeaderNavigation 
         isAuthenticated={isAuthenticated}
         onAuthToggle={handleAuthToggle}

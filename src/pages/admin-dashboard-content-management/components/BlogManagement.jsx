@@ -14,48 +14,42 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
   const [sortOrder, setSortOrder] = useState('desc');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Initialize with default posts if none provided
+  const Modal = ({ title, onClose, onSubmit, submitText = 'Save', children }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="bg-surface border border-border-accent/20 rounded-lg shadow-glow-primary w-full max-w-3xl">
+        <div className="px-6 py-4 border-b border-border-accent/20 flex items-center justify-between">
+          <h3 className="text-lg font-heading font-semibold text-text-primary">{title}</h3>
+          <button onClick={onClose} className="text-text-secondary hover:text-primary">✕</button>
+        </div>
+        <form onSubmit={onSubmit} className="p-6 space-y-4">
+          {children}
+          <div className="flex items-center justify-end space-x-2 pt-2">
+            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="submit" variant="primary">{submitText}</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  // Create/Edit form state
+  const [createForm, setCreateForm] = useState({
+    title: '',
+    excerpt: '',
+    content: '',
+    category: '',
+    tags: '',
+    featuredImage: '',
+    status: 'draft',
+    readTime: 5,
+  });
+  const [editForm, setEditForm] = useState({});
+
+  // Disable demo auto-seeding when a create handler is provided (wired to backend)
   useEffect(() => {
-    if (!blogPosts || blogPosts.length === 0) {
-      // Create sample posts for demo
-      const defaultPosts = [
-        {
-          id: 1,
-          title: 'Getting Started with React and Cyberpunk Themes',
-          excerpt: 'Learn how to create stunning cyberpunk-themed web applications using React and modern CSS techniques.',
-          content: 'This comprehensive guide will walk you through creating immersive cyberpunk experiences...',
-          category: 'Tutorial',
-          tags: ['React', 'CSS', 'Cyberpunk', 'Tutorial'],
-          featuredImage: '/assets/images/no_image.png',
-          status: 'published',
-          publishDate: '2024-01-15T10:00:00Z',
-          author: 'Mikael Kraft',
-          views: 1250,
-          comments: 8,
-          likes: 42,
-          readTime: 5
-        },
-        {
-          id: 2,
-          title: 'Advanced JavaScript Patterns for Modern Development',
-          excerpt: 'Explore advanced JavaScript patterns that will elevate your development skills.',
-          content: 'Modern JavaScript offers powerful patterns for building scalable applications...',
-          category: 'Development',
-          tags: ['JavaScript', 'Patterns', 'Advanced'],
-          featuredImage: '/assets/images/no_image.png',
-          status: 'draft',
-          publishDate: '2024-01-20T14:30:00Z',
-          author: 'Mikael Kraft',
-          views: 890,
-          comments: 12,
-          likes: 67,
-          readTime: 8
-        }
-      ];
-      
-      if (onPostCreate) {
-        defaultPosts.forEach(post => onPostCreate(post));
-      }
+    if ((!blogPosts || blogPosts.length === 0) && !onPostCreate) {
+      // Keep UI empty if parent manages data; demo seed only when unmanaged
+      // (No-op when onPostCreate exists)
     }
   }, [blogPosts, onPostCreate]);
 
@@ -119,27 +113,43 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
     }
   };
 
-  const handleCreatePost = () => {
-    const newPost = {
-      id: Date.now(),
-      title: 'New Blog Post',
-      excerpt: 'Add your excerpt here...',
-      content: 'Write your content here...',
-      category: 'General',
-      tags: ['New'],
-      featuredImage: '/assets/images/no_image.png',
-      status: 'draft',
+  const openCreate = () => {
+    setCreateForm({ title: '', excerpt: '', content: '', category: '', tags: '', featuredImage: '', status: 'draft', readTime: 5 });
+    setShowCreateModal(true);
+  };
+
+  const openEdit = (post) => {
+    // Initialize edit form from the selected post
+    setEditForm({
+      title: post?.title || '',
+      excerpt: post?.excerpt || '',
+      content: post?.content || '',
+      category: post?.category || '',
+      tags: (post?.tags || []).join(', '),
+      featuredImage: post?.featuredImage || '',
+      status: post?.status || 'draft',
+      readTime: post?.readTime || 5,
+    });
+    setEditingPost(post);
+  };
+
+  const submitCreate = async (e) => {
+    e.preventDefault();
+    const tags = (createForm.tags || '')
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    await onPostCreate({
+      title: createForm.title,
+      excerpt: createForm.excerpt,
+      content: createForm.content,
+      category: createForm.category || undefined,
+      tags,
+      featuredImage: createForm.featuredImage || undefined,
+      status: createForm.status,
+      readTime: Number(createForm.readTime) || 5,
       publishDate: new Date().toISOString(),
-      author: 'Mikael Kraft',
-      views: 0,
-      comments: 0,
-      likes: 0,
-      readTime: 1
-    };
-    
-    if (onPostCreate) {
-      onPostCreate(newPost);
-    }
+    });
     setShowCreateModal(false);
   };
 
@@ -229,7 +239,7 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setEditingPost(post)}
+            onClick={() => openEdit(post)}
             iconName="Edit"
             className="p-2"
             title="Edit post"
@@ -269,7 +279,7 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
         </div>
         <Button
           variant="primary"
-          onClick={handleCreatePost}
+          onClick={openCreate}
           iconName="PenTool"
           iconPosition="left"
           disabled={isLoading}
@@ -399,7 +409,7 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
             </div>
             <Button
               variant="primary"
-              onClick={handleCreatePost}
+              onClick={openCreate}
               iconName="PenTool"
               iconPosition="left"
               className="mt-4"
@@ -451,6 +461,110 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
             <span className="text-text-primary">Processing...</span>
           </div>
         </div>
+      )}
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <Modal title="Create Blog Post" onClose={() => setShowCreateModal(false)} onSubmit={submitCreate} submitText="Create">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Title</label>
+              <Input value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} required />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Status</label>
+              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Excerpt</label>
+              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={3} value={createForm.excerpt} onChange={(e) => setCreateForm({ ...createForm, excerpt: e.target.value })} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Content</label>
+              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={6} value={createForm.content} onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Category</label>
+              <Input value={createForm.category} onChange={(e) => setCreateForm({ ...createForm, category: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Tags (comma-separated)</label>
+              <Input value={createForm.tags} onChange={(e) => setCreateForm({ ...createForm, tags: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Featured Image URL</label>
+              <Input type="url" value={createForm.featuredImage} onChange={(e) => setCreateForm({ ...createForm, featuredImage: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Read Time (minutes)</label>
+              <Input type="number" min="1" value={createForm.readTime} onChange={(e) => setCreateForm({ ...createForm, readTime: e.target.value })} />
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Modal */}
+      {editingPost && (
+        <Modal title="Edit Blog Post" onClose={() => setEditingPost(null)} onSubmit={async (e) => {
+          e.preventDefault();
+          const tags = (editForm.tags || '')
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean);
+          await onPostUpdate(editingPost.id, {
+            title: editForm.title,
+            excerpt: editForm.excerpt,
+            content: editForm.content,
+            category: editForm.category || undefined,
+            tags,
+            featuredImage: editForm.featuredImage || undefined,
+            status: editForm.status,
+            readTime: Number(editForm.readTime) || 5,
+            publishDate: editingPost.publishDate || new Date().toISOString(),
+          });
+          setEditingPost(null);
+        }} submitText="Save Changes">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Title</label>
+              <Input value={editForm.title || ''} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Status</label>
+              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={editForm.status || 'draft'} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Excerpt</label>
+              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={3} value={editForm.excerpt || ''} onChange={(e) => setEditForm({ ...editForm, excerpt: e.target.value })} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Content</label>
+              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={6} value={editForm.content || ''} onChange={(e) => setEditForm({ ...editForm, content: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Category</label>
+              <Input value={editForm.category || ''} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Tags (comma-separated)</label>
+              <Input value={editForm.tags || ''} onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Featured Image URL</label>
+              <Input type="url" value={editForm.featuredImage || ''} onChange={(e) => setEditForm({ ...editForm, featuredImage: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Read Time (minutes)</label>
+              <Input type="number" min="1" value={editForm.readTime || 5} onChange={(e) => setEditForm({ ...editForm, readTime: e.target.value })} />
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );
