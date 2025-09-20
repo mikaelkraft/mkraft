@@ -41,6 +41,17 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
   });
 
   const [editForm, setEditForm] = useState({});
+  const [formErrors, setFormErrors] = useState({});
+
+  const isValidUrl = (v = '') => !v || /^https?:\/\//i.test(v);
+  const validateProject = (data = {}) => {
+    const errs = {};
+    if (!data.title?.trim()) errs.title = 'Title is required';
+    if (!isValidUrl(data.image)) errs.image = 'Image must be a valid URL';
+    if (!isValidUrl(data.github_url)) errs.github_url = 'GitHub URL must be valid';
+    if (!isValidUrl(data.live_url)) errs.live_url = 'Live URL must be valid';
+    return errs;
+  };
 
   const openEdit = (project) => {
     setEditingProject(project);
@@ -57,6 +68,9 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
 
   const submitCreate = (e) => {
     e.preventDefault();
+    const errs = validateProject(createForm);
+    setFormErrors(errs);
+    if (Object.keys(errs).length) return;
     const technologies = (createForm.technologies || '')
       .split(',')
       .map((t) => t.trim())
@@ -78,6 +92,9 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
   const submitEdit = (e) => {
     e.preventDefault();
     if (!editingProject) return;
+    const errs = validateProject(editForm);
+    setFormErrors(errs);
+    if (Object.keys(errs).length) return;
     const technologies = (editForm.technologies || '')
       .split(',')
       .map((t) => t.trim())
@@ -384,6 +401,7 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
             <div>
               <label className="block text-sm text-text-secondary mb-1">Title</label>
               <Input value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} required />
+              {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Status</label>
@@ -399,6 +417,7 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
             <div>
               <label className="block text-sm text-text-secondary mb-1">Image URL</label>
               <Input type="url" value={createForm.image} onChange={(e) => setCreateForm({ ...createForm, image: e.target.value })} />
+              {formErrors.image && <p className="mt-1 text-xs text-error">{formErrors.image}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Technologies (comma-separated)</label>
@@ -407,10 +426,12 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
             <div>
               <label className="block text-sm text-text-secondary mb-1">GitHub URL</label>
               <Input type="url" value={createForm.github_url} onChange={(e) => setCreateForm({ ...createForm, github_url: e.target.value })} />
+              {formErrors.github_url && <p className="mt-1 text-xs text-error">{formErrors.github_url}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Live URL</label>
               <Input type="url" value={createForm.live_url} onChange={(e) => setCreateForm({ ...createForm, live_url: e.target.value })} />
+              {formErrors.live_url && <p className="mt-1 text-xs text-error">{formErrors.live_url}</p>}
             </div>
           </div>
         </Modal>
@@ -423,6 +444,7 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
             <div>
               <label className="block text-sm text-text-secondary mb-1">Title</label>
               <Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required />
+              {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Status</label>
@@ -438,6 +460,7 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
             <div>
               <label className="block text-sm text-text-secondary mb-1">Image URL</label>
               <Input type="url" value={editForm.image} onChange={(e) => setEditForm({ ...editForm, image: e.target.value })} />
+              {formErrors.image && <p className="mt-1 text-xs text-error">{formErrors.image}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Technologies (comma-separated)</label>
@@ -446,10 +469,12 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
             <div>
               <label className="block text-sm text-text-secondary mb-1">GitHub URL</label>
               <Input type="url" value={editForm.github_url} onChange={(e) => setEditForm({ ...editForm, github_url: e.target.value })} />
+              {formErrors.github_url && <p className="mt-1 text-xs text-error">{formErrors.github_url}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Live URL</label>
               <Input type="url" value={editForm.live_url} onChange={(e) => setEditForm({ ...editForm, live_url: e.target.value })} />
+              {formErrors.live_url && <p className="mt-1 text-xs text-error">{formErrors.live_url}</p>}
             </div>
           </div>
         </Modal>

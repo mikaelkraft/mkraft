@@ -21,6 +21,18 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
     order: (slides?.length || 0) + 1,
   });
   const [editForm, setEditForm] = useState({});
+  const [formErrors, setFormErrors] = useState({});
+
+  const isValidUrl = (v = '') => !v || /^https?:\/\//i.test(v);
+  const validateSlide = (data = {}) => {
+    const errs = {};
+    if (!data.title?.trim()) errs.title = 'Title is required';
+    if (!isValidUrl(data.backgroundImage)) errs.backgroundImage = 'Background Image must be a valid URL';
+    if (data.ctaLink && !isValidUrl(data.ctaLink)) errs.ctaLink = 'CTA Link must be a valid URL';
+    if (data.duration && Number(data.duration) < 1) errs.duration = 'Duration must be at least 1 second';
+    if (data.order && Number(data.order) < 1) errs.order = 'Order must be >= 1';
+    return errs;
+  };
 
   const Modal = ({ title, onClose, onSubmit, submitText = 'Save', children }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
@@ -56,6 +68,9 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
 
   const submitCreate = (e) => {
     e.preventDefault();
+    const errs = validateSlide(createForm);
+    setFormErrors(errs);
+    if (Object.keys(errs).length) return;
     onSlideCreate({ ...createForm });
     setShowCreateModal(false);
     setCreateForm({ title: '', subtitle: '', backgroundImage: '', ctaText: '', ctaLink: '', duration: 5, status: 'active', order: (slides?.length || 0) + 1 });
@@ -64,6 +79,9 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
   const submitEdit = (e) => {
     e.preventDefault();
     if (!editingSlide) return;
+    const errs = validateSlide(editForm);
+    setFormErrors(errs);
+    if (Object.keys(errs).length) return;
     onSlideUpdate(editingSlide.id, { ...editForm });
     setEditingSlide(null);
   };
@@ -366,6 +384,7 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             <div>
               <label className="block text-sm text-text-secondary mb-1">Title</label>
               <Input value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} required />
+              {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Subtitle</label>
@@ -374,6 +393,7 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             <div className="md:col-span-2">
               <label className="block text-sm text-text-secondary mb-1">Background Image URL</label>
               <Input type="url" value={createForm.backgroundImage} onChange={(e) => setCreateForm({ ...createForm, backgroundImage: e.target.value })} />
+              {formErrors.backgroundImage && <p className="mt-1 text-xs text-error">{formErrors.backgroundImage}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">CTA Text</label>
@@ -382,10 +402,12 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             <div>
               <label className="block text-sm text-text-secondary mb-1">CTA Link</label>
               <Input value={createForm.ctaLink} onChange={(e) => setCreateForm({ ...createForm, ctaLink: e.target.value })} />
+              {formErrors.ctaLink && <p className="mt-1 text-xs text-error">{formErrors.ctaLink}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Duration (seconds)</label>
               <Input type="number" min="1" value={createForm.duration} onChange={(e) => setCreateForm({ ...createForm, duration: Number(e.target.value) || 5 })} />
+              {formErrors.duration && <p className="mt-1 text-xs text-error">{formErrors.duration}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Status</label>
@@ -397,6 +419,7 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             <div>
               <label className="block text-sm text-text-secondary mb-1">Order</label>
               <Input type="number" min="1" value={createForm.order} onChange={(e) => setCreateForm({ ...createForm, order: Number(e.target.value) || 1 })} />
+              {formErrors.order && <p className="mt-1 text-xs text-error">{formErrors.order}</p>}
             </div>
           </div>
         </Modal>
@@ -409,6 +432,7 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             <div>
               <label className="block text-sm text-text-secondary mb-1">Title</label>
               <Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required />
+              {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Subtitle</label>
@@ -417,6 +441,7 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             <div className="md:col-span-2">
               <label className="block text-sm text-text-secondary mb-1">Background Image URL</label>
               <Input type="url" value={editForm.backgroundImage} onChange={(e) => setEditForm({ ...editForm, backgroundImage: e.target.value })} />
+              {formErrors.backgroundImage && <p className="mt-1 text-xs text-error">{formErrors.backgroundImage}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">CTA Text</label>
@@ -425,10 +450,12 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             <div>
               <label className="block text-sm text-text-secondary mb-1">CTA Link</label>
               <Input value={editForm.ctaLink} onChange={(e) => setEditForm({ ...editForm, ctaLink: e.target.value })} />
+              {formErrors.ctaLink && <p className="mt-1 text-xs text-error">{formErrors.ctaLink}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Duration (seconds)</label>
               <Input type="number" min="1" value={editForm.duration} onChange={(e) => setEditForm({ ...editForm, duration: Number(e.target.value) || 5 })} />
+              {formErrors.duration && <p className="mt-1 text-xs text-error">{formErrors.duration}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Status</label>
@@ -440,6 +467,7 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             <div>
               <label className="block text-sm text-text-secondary mb-1">Order</label>
               <Input type="number" min="1" value={editForm.order} onChange={(e) => setEditForm({ ...editForm, order: Number(e.target.value) || 1 })} />
+              {formErrors.order && <p className="mt-1 text-xs text-error">{formErrors.order}</p>}
             </div>
           </div>
         </Modal>

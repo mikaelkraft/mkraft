@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
@@ -13,6 +14,9 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
   const [isLoading, setIsLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [showCreatePreview, setShowCreatePreview] = useState(false);
+  const [showEditPreview, setShowEditPreview] = useState(false);
 
   const Modal = ({ title, onClose, onSubmit, submitText = 'Save', children }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
@@ -44,6 +48,15 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
     readTime: 5,
   });
   const [editForm, setEditForm] = useState({});
+  const isValidUrl = (v = '') => !v || /^https?:\/\//i.test(v);
+  const validateBlog = (data = {}) => {
+    const errs = {};
+    if (!data.title?.trim()) errs.title = 'Title is required';
+    if (data.status === 'published' && !data.content?.trim()) errs.content = 'Content is required to publish';
+    if (!isValidUrl(data.featuredImage)) errs.featuredImage = 'Featured Image must be a valid URL';
+    if (data.readTime && Number(data.readTime) < 1) errs.readTime = 'Read time must be at least 1 minute';
+    return errs;
+  };
 
   // Disable demo auto-seeding when a create handler is provided (wired to backend)
   useEffect(() => {
@@ -135,6 +148,9 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
 
   const submitCreate = async (e) => {
     e.preventDefault();
+    const errs = validateBlog(createForm);
+    setFormErrors(errs);
+    if (Object.keys(errs).length) return;
     const tags = (createForm.tags || '')
       .split(',')
       .map((t) => t.trim())
@@ -151,6 +167,7 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
       publishDate: new Date().toISOString(),
     });
     setShowCreateModal(false);
+    setShowCreatePreview(false);
   };
 
   const handleDeletePost = async (postId) => {
@@ -483,21 +500,35 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
               <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={3} value={createForm.excerpt} onChange={(e) => setCreateForm({ ...createForm, excerpt: e.target.value })} />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-text-secondary mb-1">Content</label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm text-text-secondary mb-1">Content</label>
+                <Button type="button" size="sm" variant="outline" onClick={() => setShowCreatePreview(v => !v)}>
+                  {showCreatePreview ? 'Hide Preview' : 'Preview Markdown'}
+                </Button>
+              </div>
               <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={6} value={createForm.content} onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })} />
+              {formErrors.content && <p className="mt-1 text-xs text-error">{formErrors.content}</p>}
+              {showCreatePreview && (
+                <div className="mt-3 p-3 border border-border-accent/20 rounded bg-background/40 prose prose-invert max-w-none">
+                  <ReactMarkdown>{createForm.content || ''}</ReactMarkdown>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Category</label>
               <Input value={createForm.category} onChange={(e) => setCreateForm({ ...createForm, category: e.target.value })} />
             </div>
+            {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
             <div>
               <label className="block text-sm text-text-secondary mb-1">Tags (comma-separated)</label>
               <Input value={createForm.tags} onChange={(e) => setCreateForm({ ...createForm, tags: e.target.value })} />
             </div>
+            {formErrors.featuredImage && <p className="mt-1 text-xs text-error">{formErrors.featuredImage}</p>}
             <div>
               <label className="block text-sm text-text-secondary mb-1">Featured Image URL</label>
               <Input type="url" value={createForm.featuredImage} onChange={(e) => setCreateForm({ ...createForm, featuredImage: e.target.value })} />
             </div>
+            {formErrors.readTime && <p className="mt-1 text-xs text-error">{formErrors.readTime}</p>}
             <div>
               <label className="block text-sm text-text-secondary mb-1">Read Time (minutes)</label>
               <Input type="number" min="1" value={createForm.readTime} onChange={(e) => setCreateForm({ ...createForm, readTime: e.target.value })} />
@@ -508,8 +539,11 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
 
       {/* Edit Modal */}
       {editingPost && (
-        <Modal title="Edit Blog Post" onClose={() => setEditingPost(null)} onSubmit={async (e) => {
+        <Modal title="Edit Blog Post" onClose={() => { setEditingPost(null); setShowEditPreview(false); }} onSubmit={async (e) => {
           e.preventDefault();
+          const errs = validateBlog(editForm);
+          setFormErrors(errs);
+          if (Object.keys(errs).length) return;
           const tags = (editForm.tags || '')
             .split(',')
             .map((t) => t.trim())
@@ -526,11 +560,13 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
             publishDate: editingPost.publishDate || new Date().toISOString(),
           });
           setEditingPost(null);
+          setShowEditPreview(false);
         }} submitText="Save Changes">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-text-secondary mb-1">Title</label>
               <Input value={editForm.title || ''} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required />
+              {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Status</label>
@@ -544,8 +580,19 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
               <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={3} value={editForm.excerpt || ''} onChange={(e) => setEditForm({ ...editForm, excerpt: e.target.value })} />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-text-secondary mb-1">Content</label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm text-text-secondary mb-1">Content</label>
+                <Button type="button" size="sm" variant="outline" onClick={() => setShowEditPreview(v => !v)}>
+                  {showEditPreview ? 'Hide Preview' : 'Preview Markdown'}
+                </Button>
+              </div>
               <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={6} value={editForm.content || ''} onChange={(e) => setEditForm({ ...editForm, content: e.target.value })} />
+              {formErrors.content && <p className="mt-1 text-xs text-error">{formErrors.content}</p>}
+              {showEditPreview && (
+                <div className="mt-3 p-3 border border-border-accent/20 rounded bg-background/40 prose prose-invert max-w-none">
+                  <ReactMarkdown>{editForm.content || ''}</ReactMarkdown>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Category</label>
@@ -558,10 +605,12 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
             <div>
               <label className="block text-sm text-text-secondary mb-1">Featured Image URL</label>
               <Input type="url" value={editForm.featuredImage || ''} onChange={(e) => setEditForm({ ...editForm, featuredImage: e.target.value })} />
+              {formErrors.featuredImage && <p className="mt-1 text-xs text-error">{formErrors.featuredImage}</p>}
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Read Time (minutes)</label>
               <Input type="number" min="1" value={editForm.readTime || 5} onChange={(e) => setEditForm({ ...editForm, readTime: e.target.value })} />
+              {formErrors.readTime && <p className="mt-1 text-xs text-error">{formErrors.readTime}</p>}
             </div>
           </div>
         </Modal>
