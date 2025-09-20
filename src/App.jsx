@@ -1,12 +1,16 @@
 import React from "react";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ToastProvider, ToastContainer } from "./contexts/ToastContext";
 import Routes from "./Routes";
 
 function App() {
   return (
-    <AuthProvider>
-      <Routes />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <Routes />
+        <ToastContainer />
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 

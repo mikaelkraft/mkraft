@@ -10,8 +10,10 @@ import projectService from '../../utils/projectService';
 import blogService from '../../utils/blogService';
 import slideService from '../../utils/slideService';
 import settingsService from '../../utils/settingsService';
+import { useToast } from '../../contexts/ToastContext';
 
 const AdminDashboardContentManagement = () => {
+  const { show } = useToast();
   const [activeSection, setActiveSection] = useState('overview');
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [projects, setProjects] = useState([]);
@@ -239,52 +241,102 @@ const AdminDashboardContentManagement = () => {
 
   const handleProjectUpdate = async (projectId, updatedData) => {
     const res = await projectService.updateProject(projectId, toDbProject(updatedData));
-    if (res.success) setProjects((prev) => prev.map((p) => (p.id === projectId ? res.data : p)));
+    if (res.success) {
+      setProjects((prev) => prev.map((p) => (p.id === projectId ? res.data : p)));
+      show('Project updated successfully', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to update project', { type: 'error' });
+    }
   };
 
   const handleProjectDelete = async (projectId) => {
     const res = await projectService.deleteProject(projectId);
-    if (res.success) setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    if (res.success) {
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+      show('Project deleted', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to delete project', { type: 'error' });
+    }
   };
 
   const handleProjectCreate = async (projectData) => {
     const res = await projectService.createProject(toDbProject(projectData));
-    if (res.success) setProjects((prev) => [res.data, ...prev]);
+    if (res.success) {
+      setProjects((prev) => [res.data, ...prev]);
+      show('Project created', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to create project', { type: 'error' });
+    }
   };
 
   const handlePostUpdate = async (postId, updatedData) => {
     const res = await blogService.updatePost(postId, toDbPost(updatedData));
-    if (res.success) setBlogPosts((prev) => prev.map((b) => (b.id === postId ? res.data : b)));
+    if (res.success) {
+      setBlogPosts((prev) => prev.map((b) => (b.id === postId ? res.data : b)));
+      show('Post updated', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to update post', { type: 'error' });
+    }
   };
 
   const handlePostDelete = async (postId) => {
     const res = await blogService.deletePost(postId);
-    if (res.success) setBlogPosts((prev) => prev.filter((b) => b.id !== postId));
+    if (res.success) {
+      setBlogPosts((prev) => prev.filter((b) => b.id !== postId));
+      show('Post deleted', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to delete post', { type: 'error' });
+    }
   };
 
   const handlePostCreate = async (postData) => {
     const res = await blogService.createPost(toDbPost(postData));
-    if (res.success) setBlogPosts((prev) => [res.data, ...prev]);
+    if (res.success) {
+      setBlogPosts((prev) => [res.data, ...prev]);
+      show('Post created', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to create post', { type: 'error' });
+    }
   };
 
   const handleSlideUpdate = async (slideId, updatedData) => {
     const res = await slideService.updateSlide(slideId, toDbSlide(updatedData));
-    if (res.success) setSlides((prev) => prev.map((s) => (s.id === slideId ? res.data : s)));
+    if (res.success) {
+      setSlides((prev) => prev.map((s) => (s.id === slideId ? res.data : s)));
+      show('Slide updated', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to update slide', { type: 'error' });
+    }
   };
 
   const handleSlideDelete = async (slideId) => {
     const res = await slideService.deleteSlide(slideId);
-    if (res.success) setSlides((prev) => prev.filter((s) => s.id !== slideId));
+    if (res.success) {
+      setSlides((prev) => prev.filter((s) => s.id !== slideId));
+      show('Slide deleted', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to delete slide', { type: 'error' });
+    }
   };
 
   const handleSlideCreate = async (slideData) => {
     const res = await slideService.createSlide(toDbSlide(slideData));
-    if (res.success) setSlides((prev) => [res.data, ...prev]);
+    if (res.success) {
+      setSlides((prev) => [res.data, ...prev]);
+      show('Slide created', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to create slide', { type: 'error' });
+    }
   };
 
   const handleSlideReorder = async (slideId, newOrder) => {
     const res = await slideService.updateSlideOrder(slideId, newOrder);
-    if (res.success) setSlides((prev) => prev.map((s) => (s.id === slideId ? { ...s, display_order: newOrder } : s)));
+    if (res.success) {
+      setSlides((prev) => prev.map((s) => (s.id === slideId ? { ...s, display_order: newOrder } : s)));
+      show('Slide order updated', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to reorder slide', { type: 'error' });
+    }
   };
 
   const handleSettingsUpdate = async (updatedSettings) => {
@@ -305,7 +357,12 @@ const AdminDashboardContentManagement = () => {
       custom_css: updatedSettings.customCSS,
       custom_js: updatedSettings.customJS,
     });
-    if (res.success) setSettings(res.data);
+    if (res.success) {
+      setSettings(res.data);
+      show('Settings updated', { type: 'success' });
+    } else {
+      show(res.error || 'Failed to update settings', { type: 'error' });
+    }
   };
 
   const renderMainContent = () => {
