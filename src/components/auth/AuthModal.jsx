@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import Login from './Login';
-import Signup from './Signup';
 
 const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }) => {
-  const [mode, setMode] = useState(defaultMode);
+  const [mode, setMode] = useState('login');
 
   if (!isOpen) return null;
 
@@ -32,22 +31,11 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }) => {
           </button>
 
           {/* Auth Form */}
-          {mode === 'login' ? (
-            <Login onClose={onClose} onSuccess={handleSuccess} />
-          ) : (
-            <Signup onClose={onClose} onSuccess={handleSuccess} />
-          )}
+          <Login onClose={onClose} onSuccess={handleSuccess} />
 
           {/* Mode Switch */}
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-              className="text-primary hover:text-primary/80 transition-colors text-sm"
-            >
-              {mode === 'login' 
-                ? "Need an admin account? Sign up" :"Already have an account? Sign in"
-              }
-            </button>
+          <div className="mt-4 text-center text-sm text-text-secondary">
+            Signup is disabled. Only the site owner can access the admin dashboard.
           </div>
         </div>
       </div>

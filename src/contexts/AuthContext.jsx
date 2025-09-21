@@ -120,48 +120,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Request OTP (admin only)
-  const requestOtp = async (email) => {
-    try {
-      setAuthError(null);
-      const result = await authService.requestOtp(email);
-      if (!result?.success) {
-        setAuthError(result?.error || 'Failed to send OTP');
-        return { success: false, error: result?.error };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      const errorMsg = 'Something went wrong sending OTP. Please try again.';
-      setAuthError(errorMsg);
-      console.log('Request OTP error:', error);
-      return { success: false, error: errorMsg };
-    }
-  };
-
-  // Verify OTP and sign in
-  const verifyOtp = async (email, code) => {
-    try {
-      setAuthError(null);
-      const result = await authService.verifyOtp(email, code);
-      if (!result?.success) {
-        setAuthError(result?.error || 'OTP verification failed');
-        return { success: false, error: result?.error };
-      }
-      // If dev OTP flow, synthesize admin state immediately
-      if (result?.data?.dev) {
-        const syntheticUser = { id: 'dev-admin', email };
-        const syntheticProfile = { id: 'dev-admin', email, full_name: 'Dev Admin', role: 'admin' };
-        setUser(syntheticUser);
-        setUserProfile(syntheticProfile);
-      }
-      return { success: true };
-    } catch (error) {
-      const errorMsg = 'OTP verification failed. Please try again.';
-      setAuthError(errorMsg);
-      console.log('Verify OTP error:', error);
-      return { success: false, error: errorMsg };
-    }
-  };
+  // OTP flow removed for production; dev fallback remains in authService for local testing only
 
   // Sign up function
   const signUp = async (email, password, userData = {}) => {
@@ -263,8 +222,6 @@ export function AuthProvider({ children }) {
     signOut,
     updateProfile,
     resetPassword,
-    requestOtp,
-    verifyOtp,
     clearError: () => setAuthError(null),
   };
 

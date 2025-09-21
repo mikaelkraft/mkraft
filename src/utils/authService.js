@@ -16,6 +16,10 @@ class AuthService {
   // Sign in with email and password
   async signIn(email, password) {
     try {
+      // Restrict sign-in to admin email only
+      if (!email || email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        return { success: false, error: 'Access denied. This portal is for the admin only.' };
+      }
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -24,6 +28,13 @@ class AuthService {
       if (error) {
         return { success: false, error: error.message };
       }
+
+      // Ensure admin profile exists/updated
+      try {
+        if (data?.user?.id) {
+          await this.ensureAdminProfile(data.user.id, email);
+        }
+      } catch (_) {}
 
       return { success: true, data };
     } catch (error) {
@@ -41,22 +52,8 @@ class AuthService {
   // Sign up new user
   async signUp(email, password, userData = {}) {
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: userData.full_name || '',
-            role: userData.role || 'admin'
-          }
-        }
-      });
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
-
-      return { success: true, data };
+      // Disable public signup from the app to protect settings
+      return { success: false, error: 'Signup is disabled. Please contact the site owner.' };
     } catch (error) {
       if (error?.message?.includes('Failed to fetch') || 
           error?.message?.includes('AuthRetryableFetchError')) {
