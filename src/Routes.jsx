@@ -9,6 +9,7 @@ import BlogContentHub from "pages/blog-content-hub";
 import AdminDashboardContentManagement from "pages/admin-dashboard-content-management";
 import RequireAdmin from "components/auth/RequireAdmin";
 import NotFound from "pages/NotFound";
+import ResetPassword from "pages/ResetPassword";
 
 const Routes = () => {
   return (
@@ -21,6 +22,7 @@ const Routes = () => {
         <Route path="/portfolio-home-hero" element={<PortfolioHomeHero />} />
         <Route path="/projects-portfolio-grid" element={<ProjectsPortfolioGrid />} />
         <Route path="/blog-content-hub" element={<BlogContentHub />} />
+  <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           path="/admin-dashboard-content-management"
           element={
