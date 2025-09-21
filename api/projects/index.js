@@ -1,10 +1,10 @@
-import { json, error } from '../_lib/respond.js';
-import { query } from '../_lib/db.js';
+const { json, error, getUrl } = require('../_lib/respond.js');
+const { query } = require('../_lib/db.js');
 
 // GET /api/projects?published=true|false&featured=true|false
-export async function GET(req) {
+module.exports = async function handler(req, res) {
   try {
-    const url = new URL(req.url);
+    const url = getUrl(req);
     const published = url.searchParams.get('published');
     const featured = url.searchParams.get('featured');
 
@@ -25,8 +25,8 @@ export async function GET(req) {
 
     const limit = Number(url.searchParams.get('limit') || 100);
     const { rows } = await query(sql, [limit]);
-    return json(rows);
+    return json(res, rows);
   } catch (e) {
-    return error('Failed to load projects', 500, { detail: e.message });
+    return error(res, 'Failed to load projects', 500, { detail: e.message });
   }
 }

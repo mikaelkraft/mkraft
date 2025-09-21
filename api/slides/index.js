@@ -1,9 +1,9 @@
-import { json, error } from '../_lib/respond.js';
+import { json, error, getUrl } from '../_lib/respond.js';
 import { query } from '../_lib/db.js';
 
-export async function GET(req) {
+export default async function handler(req, res) {
   try {
-    const url = new URL(req.url);
+    const url = getUrl(req);
     const published = url.searchParams.get('published');
     const where = published === 'true' ? "WHERE status = 'published'" : '';
 
@@ -14,8 +14,8 @@ export async function GET(req) {
     `;
 
     const { rows } = await query(sql);
-    return json(rows);
+    return json(res, rows);
   } catch (e) {
-    return error('Failed to load slides', 500, { detail: e.message });
+    return error(res, 'Failed to load slides', 500, { detail: e.message });
   }
 }

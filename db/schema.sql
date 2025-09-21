@@ -1,6 +1,9 @@
 -- Schema for a plain Postgres deployment (Neon/Railway/Render)
 -- Create dedicated schema
 CREATE SCHEMA IF NOT EXISTS wisdomintech;
+-- Extensions for UUIDs (use whichever your provider supports)
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 SET search_path TO wisdomintech, public;
 
 -- Users/profile mapping (optional if you keep Supabase Auth; store minimal profile)

@@ -1,11 +1,10 @@
-import pg from 'pg';
-
+const pg = require('pg');
 const { Pool } = pg;
 
 // Single shared pool across all serverless invocations in this runtime
 let pool;
 
-export function getPool() {
+function getPool() {
   if (!pool) {
     const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
     if (!connectionString) {
@@ -22,7 +21,7 @@ export function getPool() {
   return pool;
 }
 
-export async function query(text, params) {
+async function query(text, params) {
   const client = await getPool().connect();
   try {
     const start = Date.now();
@@ -36,3 +35,5 @@ export async function query(text, params) {
     client.release();
   }
 }
+
+module.exports = { getPool, query };

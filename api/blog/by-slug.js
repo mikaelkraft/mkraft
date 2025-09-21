@@ -1,12 +1,12 @@
-import { json, error } from '../_lib/respond.js';
-import { query } from '../_lib/db.js';
+const { json, error, getUrl } = require('../_lib/respond.js');
+const { query } = require('../_lib/db.js');
 
 // GET /api/blog/by-slug?slug=...
-export async function GET(req) {
+module.exports = async function handler(req, res) {
   try {
-    const url = new URL(req.url);
+    const url = getUrl(req);
     const slug = url.searchParams.get('slug');
-    if (!slug) return error('slug is required');
+    if (!slug) return error(res, 'slug is required');
 
     const postSql = `
       SELECT 
@@ -42,9 +42,9 @@ export async function GET(req) {
     `;
 
     const { rows } = await query(postSql, [slug]);
-    if (!rows || rows.length === 0) return error('Not found', 404);
-    return json(rows[0]);
+    if (!rows || rows.length === 0) return error(res, 'Not found', 404);
+    return json(res, rows[0]);
   } catch (e) {
-    return error('Failed to load blog post', 500, { detail: e.message });
+    return error(res, 'Failed to load blog post', 500, { detail: e.message });
   }
 }

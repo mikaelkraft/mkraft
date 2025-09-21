@@ -1,12 +1,12 @@
-import { json, error } from '../_lib/respond.js';
+import { json, error, getUrl } from '../_lib/respond.js';
 import { query } from '../_lib/db.js';
 
 // GET /api/projects/by-id?id=uuid
-export async function GET(req) {
+export default async function handler(req, res) {
   try {
-    const url = new URL(req.url);
+    const url = getUrl(req);
     const id = url.searchParams.get('id');
-    if (!id) return error('id is required');
+    if (!id) return error(res, 'id is required');
 
     const sql = `
       SELECT p.*, 
@@ -18,9 +18,9 @@ export async function GET(req) {
     `;
 
     const { rows } = await query(sql, [id]);
-    if (!rows || rows.length === 0) return error('Not found', 404);
-    return json(rows[0]);
+    if (!rows || rows.length === 0) return error(res, 'Not found', 404);
+    return json(res, rows[0]);
   } catch (e) {
-    return error('Failed to load project', 500, { detail: e.message });
+    return error(res, 'Failed to load project', 500, { detail: e.message });
   }
 }
