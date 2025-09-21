@@ -129,7 +129,7 @@ export function AuthProvider({ children }) {
         setAuthError(result?.error || 'Failed to send OTP');
         return { success: false, error: result?.error };
       }
-      return { success: true };
+      return { success: true, data: result.data };
     } catch (error) {
       const errorMsg = 'Something went wrong sending OTP. Please try again.';
       setAuthError(errorMsg);
@@ -146,6 +146,13 @@ export function AuthProvider({ children }) {
       if (!result?.success) {
         setAuthError(result?.error || 'OTP verification failed');
         return { success: false, error: result?.error };
+      }
+      // If dev OTP flow, synthesize admin state immediately
+      if (result?.data?.dev) {
+        const syntheticUser = { id: 'dev-admin', email };
+        const syntheticProfile = { id: 'dev-admin', email, full_name: 'Dev Admin', role: 'admin' };
+        setUser(syntheticUser);
+        setUserProfile(syntheticProfile);
       }
       return { success: true };
     } catch (error) {

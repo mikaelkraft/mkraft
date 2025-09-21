@@ -26,7 +26,11 @@ const Login = ({ onClose, onSuccess }) => {
       const result = await requestOtp(email);
       if (result.success) {
         setStep('verify');
-        showToast('OTP code sent to your email', { type: 'success' });
+        if (result?.data?.dev) {
+          showToast('Dev OTP enabled: check browser console for code', { type: 'info', duration: 6000 });
+        } else {
+          showToast('OTP code sent to your email', { type: 'success' });
+        }
       } else {
         setError(result.error || 'Failed to send code');
         showToast(result.error || 'Failed to send code', { type: 'error' });

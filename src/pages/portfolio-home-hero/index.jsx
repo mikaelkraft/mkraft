@@ -69,6 +69,7 @@ const PortfolioHomeHero = () => {
         <meta name="author" content="Mikael Kraft" />
   <meta property="og:title" content="Mikael Kraft - WisdomInTech" />
         <meta property="og:description" content="Full Stack Developer & Cybersecurity Expert crafting digital experiences at the intersection of innovation and security." />
+    <meta property="og:image" content="/assets/images/no_image.png" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://mikaelkraft.dev" />
         <meta name="twitter:card" content="summary_large_image" />
