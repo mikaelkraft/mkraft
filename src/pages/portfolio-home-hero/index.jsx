@@ -12,7 +12,6 @@ import DynamicFooter from './components/DynamicFooter';
 const PortfolioHomeHero = () => {
   const [currentTheme, setCurrentTheme] = useState('cyberpunk');
   const [fontSize, setFontSize] = useState('medium');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isThemeControlsOpen, setIsThemeControlsOpen] = useState(false);
 
   // Apply theme and font size to document
@@ -40,10 +39,6 @@ const PortfolioHomeHero = () => {
     setFontSize(size);
   };
 
-  const handleAuthToggle = () => {
-    setIsAuthenticated(!isAuthenticated);
-  };
-
   const handleThemeControlsToggle = () => {
     setIsThemeControlsOpen(!isThemeControlsOpen);
   };
@@ -68,11 +63,11 @@ const PortfolioHomeHero = () => {
   return (
     <>
       <Helmet>
-        <title>Mikael Kraft - Full Stack Developer & Cybersecurity Expert | CyberKraft Portfolio</title>
+  <title>Mikael Kraft - Full Stack Developer & Cybersecurity Expert | WisdomInTech</title>
         <meta name="description" content="Explore Mikael Kraft's portfolio showcasing expertise in full-stack development, blockchain, AI/ML, and cybersecurity. Discover innovative projects and cutting-edge solutions." />
         <meta name="keywords" content="Mikael Kraft, Full Stack Developer, Cybersecurity, Blockchain, React, Node.js, Python, Portfolio, Web Development" />
         <meta name="author" content="Mikael Kraft" />
-        <meta property="og:title" content="Mikael Kraft - CyberKraft Portfolio" />
+  <meta property="og:title" content="Mikael Kraft - WisdomInTech" />
         <meta property="og:description" content="Full Stack Developer & Cybersecurity Expert crafting digital experiences at the intersection of innovation and security." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://mikaelkraft.dev" />
@@ -83,11 +78,7 @@ const PortfolioHomeHero = () => {
 
       <div className={`min-h-screen ${getBackgroundClass()} relative overflow-x-hidden`}>
         {/* Header Navigation */}
-        <HeaderNavigation 
-          isAuthenticated={isAuthenticated}
-          onAuthToggle={handleAuthToggle}
-          onThemeControlsToggle={handleThemeControlsToggle}
-        />
+        <HeaderNavigation onThemeControlsToggle={handleThemeControlsToggle} />
 
         {/* Theme Controls Modal */}
         <ThemeControls

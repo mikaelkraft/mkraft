@@ -206,11 +206,11 @@ class SettingsService {
   async resetToDefaults() {
     try {
       const defaultSettings = {
-        site_title: 'CyberKraft Portfolio',
+  site_title: 'WisdomInTech',
         site_tagline: 'Neo-Cyberpunk Experience',
         site_description: 'A futuristic portfolio showcasing cutting-edge development work and innovative solutions for the digital future.',
-        contact_email: 'contact@cyberkraft.dev',
-        admin_email: 'admin@cyberkraft.dev',
+  contact_email: 'contact@wisdomintech.dev',
+  admin_email: 'admin@wisdomintech.dev',
         enable_video: true,
         default_theme: 'cyberpunk',
         default_font_size: 'medium',
@@ -220,11 +220,11 @@ class SettingsService {
           twitter: 'mikael_kraft',
           linkedin: 'in/mikael-kraft',
           github: 'mikaelkraft',
-          email: 'contact@cyberkraft.dev'
+          email: 'contact@wisdomintech.dev'
         },
         seo_settings: {
           keywords: 'portfolio, developer, cyberpunk, react, javascript, web development',
-          ogImage: 'https://cyberkraft.dev/og-image.jpg',
+          ogImage: 'https://wisdomintech.dev/og-image.jpg',
           googleAnalytics: '',
           searchConsole: ''
         },
@@ -257,7 +257,7 @@ class SettingsService {
       return { 
         success: true, 
         data: exportData,
-        filename: `cyberkraft-settings-${new Date().toISOString().split('T')[0]}.json`
+  filename: `wisdomintech-settings-${new Date().toISOString().split('T')[0]}.json`
       };
     } catch (error) {
       return { success: false, error: 'Failed to export settings' };

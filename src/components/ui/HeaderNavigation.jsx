@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Icon from '../AppIcon';
 import Button from './Button';
+import { useAuth } from '../../contexts/AuthContext';
+import AuthModal from '../auth/AuthModal';
 
 const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeControlsToggle }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { userProfile, signOut } = useAuth();
+  const isAdmin = userProfile?.role === 'admin';
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const navigationItems = [
     {
@@ -74,7 +79,7 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
   }, [isMobileMenuOpen]);
 
   const filteredNavItems = navigationItems.filter(item => 
-    !item.adminOnly || (item.adminOnly && isAuthenticated)
+    !item.adminOnly || (item.adminOnly && isAdmin)
   );
 
   return (
@@ -141,16 +146,29 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
                   title="Open theme controls"
                 />
               )}
-              <Button
-                variant={isAuthenticated ? "secondary" : "outline"}
-                size="sm"
-                onClick={onAuthToggle}
-                iconName={isAuthenticated ? "LogOut" : "LogIn"}
-                iconPosition="left"
-                className="min-w-[100px]"
-              >
-                {isAuthenticated ? "Logout" : "Admin"}
-              </Button>
+              {isAdmin ? (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={signOut}
+                  iconName="LogOut"
+                  iconPosition="left"
+                  className="min-w-[100px]"
+                >
+                  Logout
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAuthModalOpen(true)}
+                  iconName="LogIn"
+                  iconPosition="left"
+                  className="min-w-[120px]"
+                >
+                  Admin Login
+                </Button>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -165,14 +183,25 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
                   title="Open theme controls"
                 />
               )}
-              <Button
-                variant={isAuthenticated ? "secondary" : "ghost"}
-                size="sm"
-                onClick={onAuthToggle}
-                iconName={isAuthenticated ? "LogOut" : "LogIn"}
-                className="p-2"
-                title={isAuthenticated ? "Logout" : "Admin Login"}
-              />
+              {isAdmin ? (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={signOut}
+                  iconName="LogOut"
+                  className="p-2"
+                  title="Logout"
+                />
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setAuthModalOpen(true)}
+                  iconName="LogIn"
+                  className="p-2"
+                  title="Admin Login"
+                />
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -247,6 +276,9 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} defaultMode="login" />
     </>
   );
 };

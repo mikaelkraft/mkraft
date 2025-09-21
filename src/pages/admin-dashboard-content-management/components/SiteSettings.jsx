@@ -92,7 +92,7 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
             type="email"
             value={localSettings.contactEmail}
             onChange={(e) => handleSettingChange('contactEmail', e.target.value)}
-            placeholder="mikael@cyberkraft.dev"
+            placeholder="hello@wisdomintech.dev"
           />
         </div>
         <div>
@@ -101,7 +101,7 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
             type="email"
             value={localSettings.adminEmail}
             onChange={(e) => handleSettingChange('adminEmail', e.target.value)}
-            placeholder="admin@cyberkraft.dev"
+            placeholder="admin@wisdomintech.dev"
           />
         </div>
       </div>
@@ -264,7 +264,7 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
             type="email"
             value={localSettings.socialMedia.email}
             onChange={(e) => handleSettingChange('socialMedia', { ...localSettings.socialMedia, email: e.target.value })}
-            placeholder="contact@cyberkraft.dev"
+            placeholder="contact@wisdomintech.dev"
           />
         </div>
       </div>

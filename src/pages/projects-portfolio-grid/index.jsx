@@ -25,15 +25,15 @@ const ProjectsPortfolioGrid = () => {
   const mockProjects = [
     {
       id: "1",
-      title: "CyberKraft Portfolio",
+  title: "WisdomInTech",
       description: "A futuristic cyberpunk-themed portfolio website built with React and modern web technologies. Features dynamic theming, admin CRUD operations, and responsive design.",
       fullDescription: `A comprehensive portfolio and blog management system designed with a cyberpunk aesthetic. This project showcases advanced React patterns, state management, and modern UI/UX principles.\n\nThe application features a complete admin dashboard for content management, dynamic theming system, and responsive design that works seamlessly across all devices.`,
       image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop",
       technologies: ["React", "JavaScript", "Tailwind CSS", "Vite", "React Router"],
       status: "completed",
       featured: true,
-      liveUrl: "https://cyberkraft-portfolio.netlify.app",
-      githubUrl: "https://github.com/mikaelkraft/cyberkraft-portfolio",
+  liveUrl: "#",
+  githubUrl: "#",
       completedDate: "2024-01-15",
       duration: "2 months",
       client: "Personal",
@@ -272,7 +272,7 @@ const ProjectsPortfolioGrid = () => {
   return (
     <>
       <Helmet>
-        <title>Projects Portfolio - CyberKraft</title>
+  <title>Projects Portfolio - WisdomInTech</title>
         <meta name="description" content="Explore Mikael Kraft's complete portfolio of web development, blockchain, and machine learning projects. View live demos, source code, and technical details." />
         <meta name="keywords" content="portfolio, projects, web development, React, blockchain, machine learning, cyberpunk" />
       </Helmet>

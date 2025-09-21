@@ -90,7 +90,7 @@ const Signup = ({ onClose, onSuccess }) => {
             Account Created!
           </h2>
           <p className="text-text-secondary mb-4">
-            Welcome to CyberKraft Admin Panel. Redirecting to dashboard...
+            Welcome to WisdomInTech Admin Panel. Redirecting to dashboard...
           </p>
         </div>
       </div>
@@ -146,7 +146,7 @@ const Signup = ({ onClose, onSuccess }) => {
               type="email"
               value={formData.email}
               onChange={(e) => handleChange('email', e.target.value)}
-              placeholder="admin@cyberkraft.dev"
+              placeholder="admin@wisdomintech.dev"
               required
               autoComplete="email"
               className="w-full"

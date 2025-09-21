@@ -144,7 +144,7 @@ const DashboardSidebar = ({ activeSection, onSectionChange, stats }) => {
       <div className="p-4 border-t border-border-accent/20">
         <div className="text-center">
           <div className="text-xs text-text-secondary font-caption">
-            CyberKraft Admin v2.0
+            WisdomInTech Admin v2.0
           </div>
           <div className="text-xs text-text-secondary/60 mt-1">
             Secure Content Management
