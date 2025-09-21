@@ -1,25 +1,51 @@
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+const https = require('https');
 
-// Verifies Supabase JWT on incoming requests (if provided)
-export async function verifyAuth(req) {
-  try {
-    const auth = req.headers.get('authorization') || req.headers.get('Authorization');
-    if (!auth) return { user: null };
+async function fetchSupabaseUser(accessToken) {
+  const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  if (!SUPABASE_URL || !accessToken) return null;
 
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-    if (!token) return { user: null };
-
-    const jwksUrl = process.env.SUPABASE_JWKS_URL || (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\/$/, '') + '/auth/v1/keys';
-    if (!jwksUrl) return { user: null };
-
-    const JWKS = createRemoteJWKSet(new URL(jwksUrl));
-    const { payload } = await jwtVerify(token, JWKS, {
-      issuer: 'supabase',
-      audience: undefined
+  const url = new URL('/auth/v1/user', SUPABASE_URL.replace(/\/$/, ''));
+  return new Promise((resolve) => {
+    const req = https.request(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        apikey: SUPABASE_ANON_KEY || ''
+      }
+    }, (res) => {
+      let data = '';
+      res.on('data', (c) => data += c);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); } catch { resolve(null); }
+      });
     });
+    req.on('error', () => resolve(null));
+    req.end();
+  });
+}
 
-    return { user: payload?.sub ? { id: payload.sub, email: payload.email } : null };
-  } catch (e) {
+async function verifyAuth(req) {
+  try {
+    const auth = req.headers['authorization'] || req.headers['Authorization'];
+    if (!auth || !auth.startsWith('Bearer ')) return { user: null };
+    const token = auth.slice(7);
+    const user = await fetchSupabaseUser(token);
+    if (!user || !user.id) return { user: null };
+    return { user: { id: user.id, email: user.email } };
+  } catch {
     return { user: null };
   }
 }
+
+async function requireAdmin(req, res) {
+  const { user } = await verifyAuth(req);
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.VITE_ADMIN_EMAIL;
+  if (!user || !user.email || (adminEmail && user.email !== adminEmail)) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return null;
+  }
+  return user;
+}
+
+module.exports = { verifyAuth, requireAdmin };

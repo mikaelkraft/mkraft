@@ -145,12 +145,19 @@ class ProjectService {
   // Create new project (admin only)
   async createProject(projectData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        return { success: false, error: 'Authentication required' };
+      const { data: { user }, error: authErr } = await supabase.auth.getUser();
+      if (!user || authErr) return { success: false, error: 'Authentication required' };
+      if (USE_API) {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        const res = await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/projects', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify(projectData)
+        });
+        if (!res.ok) return { success: false, error: await res.text() };
+        const data = await res.json();
+        return { success: true, data };
       }
-
       const { data, error } = await supabase
         .from('projects')
         .insert({
@@ -184,6 +191,21 @@ class ProjectService {
   // Update project (admin only)
   async updateProject(projectId, updates) {
     try {
+      const { data: { user }, error: authErr } = await supabase.auth.getUser();
+      if (!user || authErr) return { success: false, error: 'Authentication required' };
+      if (USE_API) {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        const url = new URL((import.meta.env.VITE_API_BASE_URL || '/api') + '/projects', window.location.origin);
+        url.searchParams.set('id', projectId);
+        const res = await fetch(url.toString(), {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify(updates)
+        });
+        if (!res.ok) return { success: false, error: await res.text() };
+        const data = await res.json();
+        return { success: true, data };
+      }
       const { data, error } = await supabase
         .from('projects')
         .update({
@@ -218,6 +240,19 @@ class ProjectService {
   // Delete project (admin only)
   async deleteProject(projectId) {
     try {
+      const { data: { user }, error: authErr } = await supabase.auth.getUser();
+      if (!user || authErr) return { success: false, error: 'Authentication required' };
+      if (USE_API) {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        const url = new URL((import.meta.env.VITE_API_BASE_URL || '/api') + '/projects', window.location.origin);
+        url.searchParams.set('id', projectId);
+        const res = await fetch(url.toString(), {
+          method: 'DELETE',
+          headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+        });
+        if (!res.ok) return { success: false, error: await res.text() };
+        return { success: true };
+      }
       const { error } = await supabase
         .from('projects')
         .delete()
@@ -244,10 +279,11 @@ class ProjectService {
   // Increment view count
   async incrementViewCount(projectId) {
     try {
-      await supabase.rpc('increment_view_count', {
-        content_type: 'project',
-        content_id: projectId
-      });
+      if (USE_API) {
+        await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/views/increment', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ content_type: 'project', content_id: projectId }) });
+        return;
+      }
+      await supabase.rpc('increment_view_count', { content_type: 'project', content_id: projectId });
     } catch (error) {
       // Silently fail view count increment
       console.log('Failed to increment view count:', error);
@@ -257,17 +293,14 @@ class ProjectService {
   // Toggle like for project
   async toggleLike(projectId, visitorIp, userAgent = '') {
     try {
-      const { data, error } = await supabase.rpc('toggle_like', {
-        content_type: 'project',
-        content_id: projectId,
-        visitor_ip_addr: visitorIp,
-        user_agent_str: userAgent
-      });
-
-      if (error) {
-        return { success: false, error: error.message };
+      if (USE_API) {
+        const res = await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/likes/toggle', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ content_type: 'project', content_id: projectId, visitor_ip: visitorIp, user_agent: userAgent }) });
+        if (!res.ok) return { success: false, error: await res.text() };
+        const data = await res.json();
+        return { success: true, liked: !!data.liked };
       }
-
+      const { data, error } = await supabase.rpc('toggle_like', { content_type: 'project', content_id: projectId, visitor_ip_addr: visitorIp, user_agent_str: userAgent });
+      if (error) return { success: false, error: error.message };
       return { success: true, liked: data };
     } catch (error) {
       if (error?.message?.includes('Failed to fetch') || 
