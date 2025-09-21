@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { validateProject, isValidUrl } from '../../../utils/validation';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
@@ -42,16 +43,6 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
 
   const [editForm, setEditForm] = useState({});
   const [formErrors, setFormErrors] = useState({});
-
-  const isValidUrl = (v = '') => !v || /^https?:\/\//i.test(v);
-  const validateProject = (data = {}) => {
-    const errs = {};
-    if (!data.title?.trim()) errs.title = 'Title is required';
-    if (!isValidUrl(data.image)) errs.image = 'Image must be a valid URL';
-    if (!isValidUrl(data.github_url)) errs.github_url = 'GitHub URL must be valid';
-    if (!isValidUrl(data.live_url)) errs.live_url = 'Live URL must be valid';
-    return errs;
-  };
 
   const openEdit = (project) => {
     setEditingProject(project);

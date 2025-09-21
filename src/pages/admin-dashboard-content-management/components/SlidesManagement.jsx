@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { validateSlide, isValidUrl } from '../../../utils/validation';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
@@ -22,17 +23,6 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
   });
   const [editForm, setEditForm] = useState({});
   const [formErrors, setFormErrors] = useState({});
-
-  const isValidUrl = (v = '') => !v || /^https?:\/\//i.test(v);
-  const validateSlide = (data = {}) => {
-    const errs = {};
-    if (!data.title?.trim()) errs.title = 'Title is required';
-    if (!isValidUrl(data.backgroundImage)) errs.backgroundImage = 'Background Image must be a valid URL';
-    if (data.ctaLink && !isValidUrl(data.ctaLink)) errs.ctaLink = 'CTA Link must be a valid URL';
-    if (data.duration && Number(data.duration) < 1) errs.duration = 'Duration must be at least 1 second';
-    if (data.order && Number(data.order) < 1) errs.order = 'Order must be >= 1';
-    return errs;
-  };
 
   const Modal = ({ title, onClose, onSubmit, submitText = 'Save', children }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">

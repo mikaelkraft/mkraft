@@ -24,6 +24,14 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
     setHasChanges(true);
   };
 
+  const handleUiSettingChange = (key, value) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      ui: { ...(prev.ui || {}), [key]: value }
+    }));
+    setHasChanges(true);
+  };
+
   const handleSave = () => {
     onSettingsUpdate(localSettings);
     setHasChanges(false);
@@ -86,6 +94,21 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
             onChange={(e) => handleSettingChange('adminEmail', e.target.value)}
             placeholder="admin@cyberkraft.dev"
           />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-2">Toast Duration (ms)</label>
+          <Input
+            type="number"
+            min="1000"
+            step="500"
+            value={(localSettings.ui?.toast_duration_ms ?? 3500)}
+            onChange={(e) => handleUiSettingChange('toast_duration_ms', Math.max(0, Number(e.target.value) || 0))}
+            placeholder="3500"
+          />
+          <div className="text-xs text-text-secondary font-caption mt-1">How long to show notifications. Set to 0 to require manual dismissal.</div>
         </div>
       </div>
 

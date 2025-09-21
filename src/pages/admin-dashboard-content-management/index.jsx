@@ -207,6 +207,7 @@ const AdminDashboardContentManagement = () => {
     maintenanceMode: settings.maintenance_mode,
     customCSS: settings.custom_css,
     customJS: settings.custom_js,
+    ui: settings.ui_settings || {},
   };
 
   const defaultUiSettings = {
@@ -225,6 +226,7 @@ const AdminDashboardContentManagement = () => {
     maintenanceMode: false,
     customCSS: '',
     customJS: '',
+    ui: { toast_duration_ms: 3500 },
   };
 
   const handleSectionChange = (section, action = null) => {
@@ -356,6 +358,7 @@ const AdminDashboardContentManagement = () => {
       maintenance_mode: updatedSettings.maintenanceMode,
       custom_css: updatedSettings.customCSS,
       custom_js: updatedSettings.customJS,
+      ui_settings: updatedSettings.ui,
     });
     if (res.success) {
       setSettings(res.data);

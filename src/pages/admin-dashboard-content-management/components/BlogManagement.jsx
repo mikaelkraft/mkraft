@@ -1,11 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { validateBlog } from '../../../utils/validation';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Image from '../../../components/AppImage';
 
 const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate }) => {
+  const MarkdownEditor = ({ value, onChange, placeholder = 'Write your post in Markdown...' }) => {
+    const applyWrap = (prefix, suffix = prefix) => {
+      const ta = document.getElementById('md-editor');
+      if (!ta) return onChange((value || '') + `${prefix}${suffix}`);
+      const start = ta.selectionStart ?? 0;
+      const end = ta.selectionEnd ?? 0;
+      const before = value.slice(0, start);
+      const selected = value.slice(start, end);
+      const after = value.slice(end);
+      const next = `${before}${prefix}${selected || 'text'}${suffix}${after}`;
+      onChange(next);
+      setTimeout(() => {
+        ta.focus();
+      }, 0);
+    };
+    const insertLink = () => {
+      const url = prompt('Enter URL');
+      if (url) applyWrap('[', `](${url})`);
+    };
+    const insertCodeBlock = () => {
+      const ta = document.getElementById('md-editor');
+      const lang = prompt('Language (optional)') || '';
+      if (!ta) return onChange(`${value || ''}\n\n\
+\n\n`);
+      const start = ta.selectionStart ?? 0;
+      const end = ta.selectionEnd ?? 0;
+      const before = value.slice(0, start);
+      const selected = value.slice(start, end) || 'code';
+      const after = value.slice(end);
+      const next = `${before}\n\n\
+${lang}\n${selected}\n\
+\n\n${after}`;
+      onChange(next);
+    };
+    const insertList = (ordered = false) => {
+      const ta = document.getElementById('md-editor');
+      const bullet = ordered ? '1.' : '-';
+      if (!ta) return onChange(`${value || ''}\n${bullet} item`);
+      const start = ta.selectionStart ?? 0;
+      const end = ta.selectionEnd ?? 0;
+      const before = value.slice(0, start);
+      const selected = (value.slice(start, end) || 'item').replace(/^/gm, `${bullet} `);
+      const after = value.slice(end);
+      const next = `${before}\n${selected}${after}`;
+      onChange(next);
+    };
+    return (
+      <div>
+        <div className="flex flex-wrap gap-2 mb-2">
+          <Button type="button" size="xs" variant="outline" onClick={() => applyWrap('**')}>Bold</Button>
+          <Button type="button" size="xs" variant="outline" onClick={() => applyWrap('*')}>Italic</Button>
+          <Button type="button" size="xs" variant="outline" onClick={() => applyWrap('`')}>Code</Button>
+          <Button type="button" size="xs" variant="outline" onClick={insertCodeBlock}>Code Block</Button>
+          <Button type="button" size="xs" variant="outline" onClick={() => applyWrap('> ' , '')}>Quote</Button>
+          <Button type="button" size="xs" variant="outline" onClick={() => insertList(false)}>• List</Button>
+          <Button type="button" size="xs" variant="outline" onClick={() => insertList(true)}>1. List</Button>
+          <Button type="button" size="xs" variant="outline" onClick={insertLink}>Link</Button>
+        </div>
+        <textarea
+          id="md-editor"
+          className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg min-h-[220px] font-mono text-sm"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+        />
+      </div>
+    );
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPosts, setSelectedPosts] = useState([]);
   const [editingPost, setEditingPost] = useState(null);
@@ -48,15 +117,6 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
     readTime: 5,
   });
   const [editForm, setEditForm] = useState({});
-  const isValidUrl = (v = '') => !v || /^https?:\/\//i.test(v);
-  const validateBlog = (data = {}) => {
-    const errs = {};
-    if (!data.title?.trim()) errs.title = 'Title is required';
-    if (data.status === 'published' && !data.content?.trim()) errs.content = 'Content is required to publish';
-    if (!isValidUrl(data.featuredImage)) errs.featuredImage = 'Featured Image must be a valid URL';
-    if (data.readTime && Number(data.readTime) < 1) errs.readTime = 'Read time must be at least 1 minute';
-    return errs;
-  };
 
   // Disable demo auto-seeding when a create handler is provided (wired to backend)
   useEffect(() => {
@@ -506,7 +566,7 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
                   {showCreatePreview ? 'Hide Preview' : 'Preview Markdown'}
                 </Button>
               </div>
-              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={6} value={createForm.content} onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })} />
+              <MarkdownEditor value={createForm.content} onChange={(val) => setCreateForm({ ...createForm, content: val })} />
               {formErrors.content && <p className="mt-1 text-xs text-error">{formErrors.content}</p>}
               {showCreatePreview && (
                 <div className="mt-3 p-3 border border-border-accent/20 rounded bg-background/40 prose prose-invert max-w-none">
@@ -586,7 +646,7 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
                   {showEditPreview ? 'Hide Preview' : 'Preview Markdown'}
                 </Button>
               </div>
-              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={6} value={editForm.content || ''} onChange={(e) => setEditForm({ ...editForm, content: e.target.value })} />
+              <MarkdownEditor value={editForm.content || ''} onChange={(val) => setEditForm({ ...editForm, content: val })} />
               {formErrors.content && <p className="mt-1 text-xs text-error">{formErrors.content}</p>}
               {showEditPreview && (
                 <div className="mt-3 p-3 border border-border-accent/20 rounded bg-background/40 prose prose-invert max-w-none">

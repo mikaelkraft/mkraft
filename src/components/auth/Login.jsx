@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import { LogIn, Mail, Hash, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 import { ADMIN_EMAIL } from '../../utils/authService';
 
 const Login = ({ onClose, onSuccess }) => {
@@ -14,6 +15,7 @@ const Login = ({ onClose, onSuccess }) => {
   const [error, setError] = useState('');
 
   const { requestOtp, verifyOtp } = useAuth();
+  const { show: showToast } = useToast();
   const navigate = useNavigate();
 
   const handleRequest = async (e) => {
@@ -24,12 +26,15 @@ const Login = ({ onClose, onSuccess }) => {
       const result = await requestOtp(email);
       if (result.success) {
         setStep('verify');
+        showToast('OTP code sent to your email', { type: 'success' });
       } else {
         setError(result.error || 'Failed to send code');
+        showToast(result.error || 'Failed to send code', { type: 'error' });
       }
     } catch (err) {
       setError('An unexpected error occurred');
       console.log('Request OTP error:', err);
+      showToast('An unexpected error occurred', { type: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -45,12 +50,15 @@ const Login = ({ onClose, onSuccess }) => {
         onSuccess?.();
         onClose?.();
         navigate('/admin-dashboard-content-management');
+        showToast('Login successful', { type: 'success' });
       } else {
         setError(result.error || 'Invalid code');
+        showToast(result.error || 'Invalid code', { type: 'error' });
       }
     } catch (err) {
       setError('An unexpected error occurred');
       console.log('Verify OTP error:', err);
+      showToast('An unexpected error occurred', { type: 'error' });
     } finally {
       setIsLoading(false);
     }
