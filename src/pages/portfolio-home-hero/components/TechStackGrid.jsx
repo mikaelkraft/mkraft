@@ -1,8 +1,8 @@
 import React from 'react';
 import Icon from '../../../components/AppIcon';
 
-const TechStackGrid = ({ currentTheme }) => {
-  const techStack = [
+const TechStackGrid = ({ currentTheme, items }) => {
+  const fallback = [
     {
       name: "React",
       icon: "Code",
@@ -127,6 +127,7 @@ const TechStackGrid = ({ currentTheme }) => {
   };
 
   const themeClasses = getThemeClasses();
+  const techStack = Array.isArray(items) && items.length ? items : fallback;
 
   const getCategoryColor = (category) => {
     const colors = {

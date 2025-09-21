@@ -16,6 +16,7 @@ const PortfolioHomeHero = () => {
   const [isThemeControlsOpen, setIsThemeControlsOpen] = useState(false);
   const [heroVideoUrl, setHeroVideoUrl] = useState('');
   const [videoEnabled, setVideoEnabled] = useState(true);
+  const [techStack, setTechStack] = useState([]);
 
   // Apply theme and font size to document
   useEffect(() => {
@@ -42,10 +43,11 @@ const PortfolioHomeHero = () => {
       if (!mounted || !res.success) return;
       const stg = res.data || {};
       const ui = stg.ui_settings || {};
-      if (stg.default_theme) setCurrentTheme(stg.default_theme);
-      if (stg.default_font_size) setFontSize(stg.default_font_size);
-      setVideoEnabled(stg.enable_video !== false);
-      if (ui.hero_video_url) setHeroVideoUrl(ui.hero_video_url);
+  if (stg.default_theme) setCurrentTheme(stg.default_theme);
+  if (stg.default_font_size) setFontSize(stg.default_font_size);
+  setVideoEnabled(stg.enable_video !== false);
+  if (ui.hero_video_url) setHeroVideoUrl(ui.hero_video_url);
+  if (Array.isArray(ui.tech_stack)) setTechStack(ui.tech_stack);
     })();
     return () => { mounted = false; };
   }, []);
@@ -132,7 +134,7 @@ const PortfolioHomeHero = () => {
           <ProjectCarousel currentTheme={currentTheme} />
 
           {/* Technology Stack Grid */}
-          <TechStackGrid currentTheme={currentTheme} />
+          <TechStackGrid currentTheme={currentTheme} items={techStack} />
 
           {/* Visitor Information Panel */}
           <VisitorInfoPanel currentTheme={currentTheme} />

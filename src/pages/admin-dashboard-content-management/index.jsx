@@ -455,6 +455,13 @@ const AdminDashboardContentManagement = () => {
             onSettingsUpdate={handleSettingsUpdate}
           />
         );
+      case 'tech':
+        return (
+          <SiteSettings
+            settings={normalizedSettings || defaultUiSettings}
+            onSettingsUpdate={handleSettingsUpdate}
+          />
+        );
       default:
         return (
           <DashboardOverview 

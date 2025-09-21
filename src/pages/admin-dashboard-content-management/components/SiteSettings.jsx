@@ -12,6 +12,7 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
   const tabs = [
     { id: 'general', label: 'General', icon: 'Settings' },
     { id: 'appearance', label: 'Appearance', icon: 'Palette' },
+    { id: 'tech', label: 'Tech Stack', icon: 'Cpu' },
     { id: 'social', label: 'Social Media', icon: 'Share2' },
     { id: 'seo', label: 'SEO', icon: 'Search' },
     { id: 'monetization', label: 'Monetization', icon: 'DollarSign' },
@@ -38,6 +39,14 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
     setLocalSettings(prev => ({
       ...prev,
       ads: { ...(prev.ads || {}), [key]: value }
+    }));
+    setHasChanges(true);
+  };
+
+  const handleTechStackChange = (next) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      ui: { ...(prev.ui || {}), tech_stack: next }
     }));
     setHasChanges(true);
   };
@@ -133,7 +142,7 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
         <label className="relative inline-flex items-center cursor-pointer">
           <input
             type="checkbox"
-            checked={localSettings.enableVideo}
+            checked={!!localSettings.enableVideo}
             onChange={(e) => handleSettingChange('enableVideo', e.target.checked)}
             className="sr-only peer"
           />
@@ -236,6 +245,78 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
       </div>
     </div>
   );
+
+  const renderTechStackSettings = () => {
+    const stack = (localSettings.ui?.tech_stack) || [];
+    const updateItem = (idx, patch) => {
+      const next = stack.map((t, i) => i === idx ? { ...t, ...patch } : t);
+      handleTechStackChange(next);
+    };
+    const addItem = () => {
+      const next = [...stack, { name: '', icon: 'Code', category: '', proficiency: 50, description: '' }];
+      handleTechStackChange(next);
+    };
+    const removeItem = (idx) => {
+      const next = stack.filter((_, i) => i !== idx);
+      handleTechStackChange(next);
+    };
+    const moveItem = (from, to) => {
+      if (to < 0 || to >= stack.length) return;
+      const next = [...stack];
+      const [it] = next.splice(from, 1);
+      next.splice(to, 0, it);
+      handleTechStackChange(next);
+    };
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-heading font-semibold text-text-primary">Technology Stack</h3>
+            <p className="text-sm text-text-secondary font-caption">Manage the technologies shown on the home page grid.</p>
+          </div>
+          <Button variant="primary" onClick={addItem} iconName="Plus" iconPosition="left">Add</Button>
+        </div>
+        {stack.length === 0 && (
+          <div className="text-sm text-text-secondary">No items yet. Click Add to create your first tech.</div>
+        )}
+        <div className="space-y-3">
+          {stack.map((tech, idx) => (
+            <div key={idx} className="p-4 rounded-lg border border-border-accent/20 bg-surface">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-center">
+                <div className="md:col-span-1">
+                  <label className="block text-xs text-text-secondary mb-1">Name</label>
+                  <Input value={tech.name} onChange={(e) => updateItem(idx, { name: e.target.value })} />
+                </div>
+                <div className="md:col-span-1">
+                  <label className="block text-xs text-text-secondary mb-1">Icon</label>
+                  <Input value={tech.icon} onChange={(e) => updateItem(idx, { icon: e.target.value })} placeholder="e.g., Code, Server" />
+                </div>
+                <div className="md:col-span-1">
+                  <label className="block text-xs text-text-secondary mb-1">Category</label>
+                  <Input value={tech.category} onChange={(e) => updateItem(idx, { category: e.target.value })} />
+                </div>
+                <div className="md:col-span-1">
+                  <label className="block text-xs text-text-secondary mb-1">Proficiency (%)</label>
+                  <Input type="number" min="0" max="100" value={tech.proficiency ?? 0} onChange={(e) => updateItem(idx, { proficiency: Math.max(0, Math.min(100, Number(e.target.value)||0)) })} />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs text-text-secondary mb-1">Description</label>
+                  <Input value={tech.description || ''} onChange={(e) => updateItem(idx, { description: e.target.value })} />
+                </div>
+              </div>
+              <div className="mt-3 flex items-center gap-2 justify-end">
+                <Button size="sm" variant="ghost" iconName="ArrowUp" onClick={() => moveItem(idx, idx-1)} title="Move up" />
+                <Button size="sm" variant="ghost" iconName="ArrowDown" onClick={() => moveItem(idx, idx+1)} title="Move down" />
+                <Button size="sm" variant="danger" iconName="Trash2" onClick={() => removeItem(idx)}>
+                  Remove
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const renderSocialSettings = () => (
     <div className="space-y-6">
@@ -570,6 +651,7 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
         <div className="p-6">
           {activeTab === 'general' && renderGeneralSettings()}
           {activeTab === 'appearance' && renderAppearanceSettings()}
+          {activeTab === 'tech' && renderTechStackSettings()}
           {activeTab === 'social' && renderSocialSettings()}
           {activeTab === 'seo' && renderSEOSettings()}
           {activeTab === 'monetization' && renderMonetizationSettings()}
