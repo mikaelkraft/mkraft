@@ -3,6 +3,16 @@ import supabase from './supabase';
 export const ADMIN_EMAIL = 'mikewillkraft@gmail.com';
 
 class AuthService {
+  // Detect local/dev environment (Vite)
+  isDevEnv() {
+    try {
+      const viteDev = typeof import.meta !== 'undefined' && import.meta && import.meta.env && !!import.meta.env.DEV;
+      const isLocalhost = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      return !!(viteDev || isLocalhost);
+    } catch (_) {
+      return false;
+    }
+  }
   // Sign in with email and password
   async signIn(email, password) {
     try {
@@ -68,6 +78,15 @@ class AuthService {
         return { success: false, error: error.message };
       }
 
+      // Dev-only cleanup
+      try {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem('dev_admin');
+          window.localStorage.removeItem('dev_admin_email');
+          window.localStorage.removeItem('dev_admin_code');
+        }
+      } catch (_) {}
+
       return { success: true };
     } catch (error) {
       if (error?.message?.includes('Failed to fetch') || 
@@ -87,6 +106,17 @@ class AuthService {
     try {
       if (!email || email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
         return { success: false, error: 'This email is not allowed.' };
+      }
+      // Local dev fallback: generate a code and store it locally
+      if (this.isDevEnv()) {
+        const code = String(Math.floor(100000 + Math.random() * 900000));
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem('dev_admin_email', email);
+          window.localStorage.setItem('dev_admin_code', code);
+          // Surface in console for local testing
+          console.log('[DEV ONLY] Admin OTP code:', code);
+        }
+        return { success: true, data: { dev: true } };
       }
 
       const { data, error } = await supabase.auth.signInWithOtp({
@@ -124,6 +154,20 @@ class AuthService {
         return { success: false, error: 'This email is not allowed.' };
       }
 
+      // Local dev fallback: accept local code and set dev admin flag
+      if (this.isDevEnv()) {
+        const storedEmail = typeof window !== 'undefined' ? window.localStorage.getItem('dev_admin_email') : null;
+        const storedCode = typeof window !== 'undefined' ? window.localStorage.getItem('dev_admin_code') : null;
+        if (storedEmail && storedCode && storedEmail.toLowerCase() === email.toLowerCase() && String(token) === String(storedCode)) {
+          try {
+            window.localStorage.setItem('dev_admin', 'true');
+            window.localStorage.removeItem('dev_admin_code');
+          } catch (_) {}
+          return { success: true, data: { dev: true } };
+        }
+        return { success: false, error: 'Invalid code (dev)' };
+      }
+
       const { data, error } = await supabase.auth.verifyOtp({
         email,
         token,
@@ -150,6 +194,15 @@ class AuthService {
           error:
             'Cannot connect to authentication service. Your Supabase project may be paused or inactive. Please check your Supabase dashboard and resume your project if needed.',
         };
+
+        // Clear dev admin flag
+        try {
+          if (typeof window !== 'undefined') {
+            window.localStorage.removeItem('dev_admin');
+            window.localStorage.removeItem('dev_admin_email');
+            window.localStorage.removeItem('dev_admin_code');
+          }
+        } catch (_) {}
       }
       return { success: false, error: 'Invalid or expired OTP' };
     }
@@ -295,6 +348,13 @@ class AuthService {
   // Check if user is admin
   async isAdmin() {
     try {
+      // Local dev admin shortcut
+      try {
+        if (typeof window !== 'undefined' && window.localStorage.getItem('dev_admin') === 'true') {
+          return true;
+        }
+      } catch (_) {}
+
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {

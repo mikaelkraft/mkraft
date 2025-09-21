@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Helmet } from 'react-helmet';
 import { useAuth } from '../../contexts/AuthContext';
 import HeaderNavigation from '../../components/ui/HeaderNavigation';
 import SearchHeader from './components/SearchHeader';
@@ -259,6 +260,19 @@ const BlogContentHub = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Mikael Kraft — Blog</title>
+        <meta name="description" content="Read articles by Mikael Kraft on software engineering, web development, and technology insights." />
+        <meta property="og:title" content="Mikael Kraft — Blog" />
+        <meta property="og:description" content="Latest posts on full‑stack engineering, security, and practical tech write‑ups." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://mikaelkraft.dev/blog" />
+        <meta property="og:image" content="/assets/images/no_image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@mikael_kraft" />
+        <meta name="twitter:creator" content="@mikael_kraft" />
+        <link rel="canonical" href="https://mikaelkraft.dev/blog" />
+      </Helmet>
       {/* Header Navigation */}
       <HeaderNavigation />
 

@@ -10,6 +10,7 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
   const location = useLocation();
   const { userProfile, signOut } = useAuth();
   const isAdmin = userProfile?.role === 'admin';
+  const isDevAdmin = typeof window !== 'undefined' && window.localStorage.getItem('dev_admin') === 'true';
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const navigationItems = [
@@ -78,9 +79,7 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
     };
   }, [isMobileMenuOpen]);
 
-  const filteredNavItems = navigationItems.filter(item => 
-    !item.adminOnly || (item.adminOnly && isAdmin)
-  );
+  const filteredNavItems = navigationItems; // always show
 
   return (
     <>
@@ -115,6 +114,12 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
                 <Link
                   key={item.path}
                   to={item.path}
+                  onClick={(e) => {
+                    if (item.adminOnly && !isAdmin) {
+                      e.preventDefault();
+                      setAuthModalOpen(true);
+                    }
+                  }}
                   className={`
                     relative px-4 py-2 rounded-lg font-medium text-sm transition-all duration-fast
                     flex items-center space-x-2 min-h-[44px]
@@ -168,6 +173,11 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
                 >
                   Admin Login
                 </Button>
+              )}
+              {isDevAdmin && (
+                <span className="ml-2 text-xs px-2 py-1 rounded-full border border-yellow-400/40 text-yellow-300 bg-yellow-500/10">
+                  Dev OTP
+                </span>
               )}
             </div>
 
@@ -238,7 +248,14 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
                 <Link
                   key={item.path}
                   to={item.path}
-                  onClick={closeMobileMenu}
+                  onClick={(e) => {
+                    if (item.adminOnly && !isAdmin) {
+                      e.preventDefault();
+                      setAuthModalOpen(true);
+                      return;
+                    }
+                    closeMobileMenu();
+                  }}
                   className={`
                     flex items-center space-x-3 px-4 py-3 rounded-lg font-medium
                     transition-all duration-fast min-h-[48px]
@@ -279,6 +296,17 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
 
       {/* Auth Modal */}
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} defaultMode="login" />
+
+      {/* Floating Admin badge */}
+      {!isAdmin && (
+        <button
+          onClick={() => setAuthModalOpen(true)}
+          className="fixed bottom-6 left-6 z-50 px-3 py-1.5 rounded-full bg-surface border border-border-accent/40 text-xs text-text-secondary hover:text-text-primary hover:border-primary/60 shadow backdrop-blur-sm"
+          title="Admin? Click to login"
+        >
+          Admin?
+        </button>
+      )}
     </>
   );
 };

@@ -272,9 +272,18 @@ const ProjectsPortfolioGrid = () => {
   return (
     <>
       <Helmet>
-  <title>Projects Portfolio - WisdomInTech</title>
+        <title>Mikael Kraft — Projects</title>
         <meta name="description" content="Explore Mikael Kraft's complete portfolio of web development, blockchain, and machine learning projects. View live demos, source code, and technical details." />
         <meta name="keywords" content="portfolio, projects, web development, React, blockchain, machine learning, cyberpunk" />
+        <meta property="og:title" content="Mikael Kraft — Projects" />
+        <meta property="og:description" content="A curated portfolio of software engineering projects by Mikael Kraft." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://mikaelkraft.dev/projects" />
+        <meta property="og:image" content="/assets/images/no_image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@mikael_kraft" />
+        <meta name="twitter:creator" content="@mikael_kraft" />
+        <link rel="canonical" href="https://mikaelkraft.dev/projects" />
       </Helmet>
 
       <div className="min-h-screen bg-background pt-20 pb-16">
