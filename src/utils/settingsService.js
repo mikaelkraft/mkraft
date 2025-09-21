@@ -1,9 +1,15 @@
 import supabase from './supabase';
+import { api } from './api/client';
+const USE_API = import.meta.env.VITE_USE_API === 'true';
 
 class SettingsService {
   // Get site settings (public access)
   async getSettings() {
     try {
+      if (USE_API) {
+        const data = await api.get('/settings');
+        return { success: true, data: data || {} };
+      }
       const { data, error } = await supabase
         .from('site_settings')
         .select('*')

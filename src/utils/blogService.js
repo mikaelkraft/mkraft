@@ -1,9 +1,15 @@
 import supabase from './supabase';
+import { api } from './api/client';
+const USE_API = import.meta.env.VITE_USE_API === 'true';
 
 class BlogService {
   // Get all published blog posts (public access)
   async getPublishedPosts(options = {}) {
     try {
+      if (USE_API) {
+        const data = await api.get('/blog', { published: true, search: options.search, category: options.category, tag: options.tag, limit: options.limit });
+        return { success: true, data: data || [] };
+      }
       let query = supabase
         .from('blog_posts')
         .select(`
@@ -54,7 +60,7 @@ class BlogService {
         query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
       }
 
-      const { data, error } = await query;
+  const { data, error } = await query;
 
       if (error) {
         return { success: false, error: error.message };
@@ -106,6 +112,10 @@ class BlogService {
   // Get featured blog posts
   async getFeaturedPosts() {
     try {
+      if (USE_API) {
+        const data = await api.get('/blog', { published: true, featured: true });
+        return { success: true, data: data || [] };
+      }
       const { data, error } = await supabase
         .from('blog_posts')
         .select(`
@@ -137,6 +147,10 @@ class BlogService {
   // Get single blog post by slug with comments
   async getPostBySlug(slug) {
     try {
+      if (USE_API) {
+        const data = await api.get('/blog/by-slug', { slug });
+        return { success: true, data };
+      }
       const { data, error } = await supabase.rpc('get_blog_post_with_comments', {
         post_slug: slug
       });

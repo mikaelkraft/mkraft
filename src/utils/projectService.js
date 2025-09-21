@@ -1,23 +1,31 @@
 import supabase from './supabase';
+import { api } from './api/client';
+
+const USE_API = import.meta.env.VITE_USE_API === 'true';
 
 class ProjectService {
   // Get all published projects (public access)
   async getPublishedProjects() {
     try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          author:user_profiles(full_name, email)
-        `)
-        .eq('status', 'published')
-        .order('created_at', { ascending: false });
+      if (USE_API) {
+        const data = await api.get('/projects', { published: true });
+        return { success: true, data: data || [] };
+      } else {
+        const { data, error } = await supabase
+          .from('projects')
+          .select(`
+            *,
+            author:user_profiles(full_name, email)
+          `)
+          .eq('status', 'published')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        return { success: false, error: error.message };
+        if (error) {
+          return { success: false, error: error.message };
+        }
+
+        return { success: true, data: data || [] };
       }
-
-      return { success: true, data: data || [] };
     } catch (error) {
       if (error?.message?.includes('Failed to fetch') || 
           error?.message?.includes('NetworkError') ||
@@ -63,21 +71,26 @@ class ProjectService {
   // Get featured projects
   async getFeaturedProjects() {
     try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          author:user_profiles(full_name, email)
-        `)
-        .eq('status', 'published')
-        .eq('featured', true)
-        .order('created_at', { ascending: false });
+      if (USE_API) {
+        const data = await api.get('/projects', { published: true, featured: true });
+        return { success: true, data: data || [] };
+      } else {
+        const { data, error } = await supabase
+          .from('projects')
+          .select(`
+            *,
+            author:user_profiles(full_name, email)
+          `)
+          .eq('status', 'published')
+          .eq('featured', true)
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        return { success: false, error: error.message };
+        if (error) {
+          return { success: false, error: error.message };
+        }
+
+        return { success: true, data: data || [] };
       }
-
-      return { success: true, data: data || [] };
     } catch (error) {
       if (error?.message?.includes('Failed to fetch') || 
           error?.message?.includes('NetworkError') ||
@@ -94,23 +107,28 @@ class ProjectService {
   // Get single project by ID
   async getProject(projectId) {
     try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          author:user_profiles(full_name, email)
-        `)
-        .eq('id', projectId)
-        .single();
+      if (USE_API) {
+        const data = await api.get('/projects/by-id', { id: projectId });
+        return { success: true, data };
+      } else {
+        const { data, error } = await supabase
+          .from('projects')
+          .select(`
+            *,
+            author:user_profiles(full_name, email)
+          `)
+          .eq('id', projectId)
+          .single();
 
-      if (error) {
-        return { success: false, error: error.message };
+        if (error) {
+          return { success: false, error: error.message };
+        }
+
+        // Increment view count
+        await this.incrementViewCount(projectId);
+
+        return { success: true, data };
       }
-
-      // Increment view count
-      await this.incrementViewCount(projectId);
-
-      return { success: true, data };
     } catch (error) {
       if (error?.message?.includes('Failed to fetch') || 
           error?.message?.includes('NetworkError') ||
