@@ -149,6 +149,10 @@ class BlogService {
     try {
       if (USE_API) {
         const data = await api.get('/blog/by-slug', { slug });
+        // Increment view count via API
+        if (data?.post_id) {
+          try { await this.incrementViewCount(data.post_id); } catch {}
+        }
         return { success: true, data };
       }
       const { data, error } = await supabase.rpc('get_blog_post_with_comments', {
@@ -215,12 +219,8 @@ class BlogService {
   // Create new blog post (admin only)
   async createPost(postData) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        return { success: false, error: 'Authentication required' };
-      }
-
+      const { data: { user }, error: authErr } = await supabase.auth.getUser();
+      if (!user || authErr) return { success: false, error: 'Authentication required' };
       // Generate slug from title
       const slug = (postData.slug && postData.slug.trim()) ? postData.slug.trim().toLowerCase()
         .replace(/[^a-z0-9-]+/g, '-')
@@ -228,7 +228,17 @@ class BlogService {
         : postData.title.toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
-
+      if (USE_API) {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        const res = await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/blog', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({ ...postData, slug })
+        });
+        if (!res.ok) return { success: false, error: await res.text() };
+        const data = await res.json();
+        return { success: true, data };
+      }
       const { data, error } = await supabase
         .from('blog_posts')
         .insert({
@@ -264,6 +274,8 @@ class BlogService {
   // Update blog post (admin only)
   async updatePost(postId, updates) {
     try {
+      const { data: { user }, error: authErr } = await supabase.auth.getUser();
+      if (!user || authErr) return { success: false, error: 'Authentication required' };
       const updateData = {
         ...updates,
         updated_at: new Date().toISOString()
@@ -287,6 +299,15 @@ class BlogService {
         updateData.published_at = new Date().toISOString();
       }
 
+      if (USE_API) {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        const url = new URL((import.meta.env.VITE_API_BASE_URL || '/api') + '/blog', window.location.origin);
+        url.searchParams.set('id', postId);
+        const res = await fetch(url.toString(), { method: 'PUT', headers: { 'content-type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(updateData) });
+        if (!res.ok) return { success: false, error: await res.text() };
+        const data = await res.json();
+        return { success: true, data };
+      }
       const { data, error } = await supabase
         .from('blog_posts')
         .update(updateData)
@@ -318,6 +339,16 @@ class BlogService {
   // Delete blog post (admin only)
   async deletePost(postId) {
     try {
+      const { data: { user }, error: authErr } = await supabase.auth.getUser();
+      if (!user || authErr) return { success: false, error: 'Authentication required' };
+      if (USE_API) {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        const url = new URL((import.meta.env.VITE_API_BASE_URL || '/api') + '/blog', window.location.origin);
+        url.searchParams.set('id', postId);
+        const res = await fetch(url.toString(), { method: 'DELETE', headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) } });
+        if (!res.ok) return { success: false, error: await res.text() };
+        return { success: true };
+      }
       const { error } = await supabase
         .from('blog_posts')
         .delete()
@@ -344,10 +375,11 @@ class BlogService {
   // Increment view count
   async incrementViewCount(postId) {
     try {
-      await supabase.rpc('increment_view_count', {
-        content_type: 'blog_post',
-        content_id: postId
-      });
+      if (USE_API) {
+        await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/views/increment', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ content_type: 'blog_post', content_id: postId }) });
+        return;
+      }
+      await supabase.rpc('increment_view_count', { content_type: 'blog_post', content_id: postId });
     } catch (error) {
       // Silently fail view count increment
       console.log('Failed to increment view count:', error);
@@ -357,17 +389,14 @@ class BlogService {
   // Toggle like for blog post
   async toggleLike(postId, visitorIp, userAgent = '') {
     try {
-      const { data, error } = await supabase.rpc('toggle_like', {
-        content_type: 'blog_post',
-        content_id: postId,
-        visitor_ip_addr: visitorIp,
-        user_agent_str: userAgent
-      });
-
-      if (error) {
-        return { success: false, error: error.message };
+      if (USE_API) {
+        const res = await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/likes/toggle', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ content_type: 'blog_post', content_id: postId, visitor_ip: visitorIp, user_agent: userAgent }) });
+        if (!res.ok) return { success: false, error: await res.text() };
+        const data = await res.json();
+        return { success: true, liked: !!data.liked };
       }
-
+      const { data, error } = await supabase.rpc('toggle_like', { content_type: 'blog_post', content_id: postId, visitor_ip_addr: visitorIp, user_agent_str: userAgent });
+      if (error) return { success: false, error: error.message };
       return { success: true, liked: data };
     } catch (error) {
       if (error?.message?.includes('Failed to fetch') || 

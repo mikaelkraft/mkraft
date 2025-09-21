@@ -93,6 +93,14 @@ class SlideService {
   // Create new slide (admin only)
   async createSlide(slideData) {
     try {
+      if (USE_API) {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        if (!token) return { success: false, error: 'Authentication required' };
+        const res = await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/slides', { method: 'POST', headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(slideData) });
+        if (!res.ok) return { success: false, error: await res.text() };
+        const data = await res.json();
+        return { success: true, data };
+      }
       // Get the next display order
       const { data: maxOrderData } = await supabase
         .from('hero_slides')
@@ -132,6 +140,16 @@ class SlideService {
   // Update slide (admin only)
   async updateSlide(slideId, updates) {
     try {
+      if (USE_API) {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        if (!token) return { success: false, error: 'Authentication required' };
+        const url = new URL((import.meta.env.VITE_API_BASE_URL || '/api') + '/slides', window.location.origin);
+        url.searchParams.set('id', slideId);
+        const res = await fetch(url.toString(), { method: 'PUT', headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(updates) });
+        if (!res.ok) return { success: false, error: await res.text() };
+        const data = await res.json();
+        return { success: true, data };
+      }
       const { data, error } = await supabase
         .from('hero_slides')
         .update({
@@ -163,6 +181,16 @@ class SlideService {
   // Delete slide (admin only)
   async deleteSlide(slideId) {
     try {
+      if (USE_API) {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        if (!token) return { success: false, error: 'Authentication required' };
+        const url = new URL((import.meta.env.VITE_API_BASE_URL || '/api') + '/slides', window.location.origin);
+        url.searchParams.set('id', slideId);
+        const res = await fetch(url.toString(), { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) return { success: false, error: await res.text() };
+        // Reorder not necessary server-side returns new order; client can ignore
+        return { success: true };
+      }
       const { error } = await supabase
         .from('hero_slides')
         .delete()
@@ -276,10 +304,11 @@ class SlideService {
   // Increment view count
   async incrementViewCount(slideId) {
     try {
-      await supabase.rpc('increment_view_count', {
-        content_type: 'hero_slide',
-        content_id: slideId
-      });
+      if (USE_API) {
+        await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/views/increment', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ content_type: 'hero_slide', content_id: slideId }) });
+        return;
+      }
+      await supabase.rpc('increment_view_count', { content_type: 'hero_slide', content_id: slideId });
     } catch (error) {
       // Silently fail view count increment
       console.log('Failed to increment view count:', error);

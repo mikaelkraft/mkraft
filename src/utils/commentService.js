@@ -200,17 +200,16 @@ class CommentService {
   // Toggle like for comment
   async toggleLike(commentId, visitorIp, userAgent = '') {
     try {
-      const { data, error } = await supabase.rpc('toggle_like', {
-        content_type: 'comment',
-        content_id: commentId,
-        visitor_ip_addr: visitorIp,
-        user_agent_str: userAgent
-      });
-
+      if (USE_API) {
+        const res = await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/likes/toggle', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ content_type: 'comment', content_id: commentId, visitor_ip: visitorIp, user_agent: userAgent }) });
+        if (!res.ok) return { success: false, error: await res.text() };
+        const data = await res.json();
+        return { success: true, liked: !!data.liked };
+      }
+      const { data, error } = await supabase.rpc('toggle_like', { content_type: 'comment', content_id: commentId, visitor_ip_addr: visitorIp, user_agent_str: userAgent });
       if (error) {
         return { success: false, error: error.message };
       }
-
       return { success: true, liked: data };
     } catch (error) {
       if (error?.message?.includes('Failed to fetch') || 

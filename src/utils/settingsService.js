@@ -36,6 +36,18 @@ class SettingsService {
   // Update site settings (admin only)
   async updateSettings(settingsData) {
     try {
+      if (USE_API) {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        if (!token) return { success: false, error: 'Authentication required' };
+        const res = await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/settings', {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify(settingsData)
+        });
+        if (!res.ok) return { success: false, error: await res.text() };
+        const data = await res.json();
+        return { success: true, data };
+      }
       // Check if settings exist
       const { data: existingSettings } = await supabase
         .from('site_settings')
@@ -88,6 +100,9 @@ class SettingsService {
   // Update specific setting field (admin only)
   async updateSetting(field, value) {
     try {
+      if (USE_API) {
+        return await this.updateSettings({ [field]: value });
+      }
       const { data: existingSettings } = await supabase
         .from('site_settings')
         .select('id')
@@ -185,6 +200,11 @@ class SettingsService {
   // Get specific setting value
   async getSetting(field) {
     try {
+      if (USE_API) {
+        const res = await this.getSettings();
+        if (!res.success) return res;
+        return { success: true, data: res.data?.[field] };
+      }
       const { data, error } = await supabase
         .from('site_settings')
         .select(field)

@@ -109,6 +109,8 @@ class ProjectService {
     try {
       if (USE_API) {
         const data = await api.get('/projects/by-id', { id: projectId });
+        // Increment view count
+        try { await this.incrementViewCount(projectId); } catch {}
         return { success: true, data };
       } else {
         const { data, error } = await supabase
