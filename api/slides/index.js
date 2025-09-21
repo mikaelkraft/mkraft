@@ -1,7 +1,7 @@
-import { json, error, getUrl } from '../_lib/respond.js';
-import { query } from '../_lib/db.js';
+const { json, error, getUrl } = require('../_lib/respond.js');
+const { query } = require('../_lib/db.js');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
     const url = getUrl(req);
     const published = url.searchParams.get('published');

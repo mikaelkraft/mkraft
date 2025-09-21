@@ -1,9 +1,15 @@
 import supabase from './supabase';
+import { api } from './api/client';
+const USE_API = import.meta.env.VITE_USE_API === 'true';
 
 class CommentService {
   // Get comments for a blog post
   async getComments(blogPostId) {
     try {
+      if (USE_API) {
+        const data = await api.get('/comments', { postId: blogPostId });
+        return { success: true, data: data || [] };
+      }
       const { data, error } = await supabase
         .from('comments')
         .select('*')
@@ -72,6 +78,20 @@ class CommentService {
   // Create new comment (public access - no auth required)
   async createComment(commentData) {
     try {
+      if (USE_API) {
+        // API reads IP/user agent from headers
+        const res = await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/comments', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(commentData)
+        });
+        if (!res.ok) {
+          const msg = await res.text();
+          return { success: false, error: msg || 'Failed to create comment' };
+        }
+        const data = await res.json();
+        return { success: true, data };
+      }
       // Get visitor IP and user agent for tracking
       const visitorIp = await this.getVisitorIp();
       const userAgent = navigator.userAgent || '';

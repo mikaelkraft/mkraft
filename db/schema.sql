@@ -84,11 +84,16 @@ CREATE TABLE IF NOT EXISTS blog_posts (
 CREATE TABLE IF NOT EXISTS comments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   blog_post_id uuid REFERENCES blog_posts(id) ON DELETE CASCADE,
+  parent_comment_id uuid REFERENCES comments(id) ON DELETE CASCADE,
   author_name text,
   author_email text,
   content text NOT NULL,
-  status text DEFAULT 'approved', -- approved|pending|rejected
-  created_at timestamptz DEFAULT now()
+  is_approved boolean DEFAULT true,
+  like_count integer DEFAULT 0,
+  visitor_ip inet,
+  user_agent text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
 -- Hero slides
@@ -113,6 +118,7 @@ CREATE TABLE IF NOT EXISTS likes (
   project_id uuid,
   blog_post_id uuid,
   slide_id uuid,
+  comment_id uuid,
   visitor_ip inet,
   user_agent text,
   created_at timestamptz DEFAULT now()
@@ -153,7 +159,8 @@ DO $$ BEGIN
       ADD CONSTRAINT likes_content_check CHECK (
         (content_type = 'project' AND project_id IS NOT NULL) OR
         (content_type = 'blog_post' AND blog_post_id IS NOT NULL) OR
-        (content_type = 'hero_slide' AND slide_id IS NOT NULL)
+        (content_type = 'hero_slide' AND slide_id IS NOT NULL) OR
+        (content_type = 'comment' AND comment_id IS NOT NULL)
       );
   END IF;
 END $$;
