@@ -221,10 +221,11 @@ const AdminDashboardContentManagement = () => {
     customCSS: settings.custom_css,
     customJS: settings.custom_js,
     ui: settings.ui_settings || {},
+    ads: settings.ads_settings || { enabled: false, provider: 'adsense', publisher_id: null, auto_ads: true, grid_interval: 6, ad_slot: null },
   };
 
   const defaultUiSettings = {
-    siteTitle: 'CyberKraft Portfolio',
+  siteTitle: 'WisdomInTech',
     siteTagline: 'Neo-Cyberpunk Experience',
     siteDescription: '',
     contactEmail: '',
@@ -240,6 +241,7 @@ const AdminDashboardContentManagement = () => {
     customCSS: '',
     customJS: '',
     ui: { toast_duration_ms: 3500 },
+    ads: { enabled: false, provider: 'adsense', publisher_id: '', auto_ads: true, grid_interval: 6, ad_slot: '' },
   };
 
   const handleSectionChange = (section, action = null) => {
@@ -372,6 +374,7 @@ const AdminDashboardContentManagement = () => {
       custom_css: updatedSettings.customCSS,
       custom_js: updatedSettings.customJS,
       ui_settings: updatedSettings.ui,
+      ads_settings: updatedSettings.ads,
     });
     if (res.success) {
       setSettings(res.data);

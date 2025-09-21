@@ -8,6 +8,8 @@ import ShareModal from './components/ShareModal';
 import Button from '../../components/ui/Button';
 import Icon from '../../components/AppIcon';
 import blogService from '../../utils/blogService';
+import settingsService from '../../utils/settingsService';
+import { ensureAdSenseLoaded } from '../../utils/adsense';
 
 const BlogContentHub = () => {
   const { user, userProfile } = useAuth();
@@ -20,6 +22,7 @@ const BlogContentHub = () => {
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
+  const [adsConfig, setAdsConfig] = useState({ enabled: false });
 
   const isAdmin = userProfile?.role === 'admin';
 
@@ -54,6 +57,30 @@ const BlogContentHub = () => {
   // Initial load
   useEffect(() => {
     loadPosts();
+    // Load ads settings
+    (async () => {
+      const res = await settingsService.getSettings();
+      if (res.success) {
+        const ads = res.data?.ads_settings || {};
+        setAdsConfig({
+          enabled: !!ads.enabled,
+          provider: ads.provider || 'adsense',
+          publisher_id: ads.publisher_id || '',
+          auto_ads: ads.auto_ads !== false,
+          grid_interval: Number(ads.grid_interval) || 6,
+          ad_slot: ads.ad_slot || '',
+          // yllix/custom
+          yllix_publisher_id: ads.yllix_publisher_id || '',
+          yllix_script_url: ads.yllix_script_url || '',
+          yllix_unit_code: ads.yllix_unit_code || '',
+          custom_script_url: ads.custom_script_url || '',
+          custom_ad_html: ads.custom_ad_html || ''
+        });
+        if (ads.enabled && (ads.provider || 'adsense') === 'adsense' && ads.publisher_id) {
+          await ensureAdSenseLoaded(ads.publisher_id);
+        }
+      }
+    })();
   }, [loadPosts]);
 
   // Reload when search or sort changes
@@ -317,6 +344,7 @@ const BlogContentHub = () => {
           onEdit={handleEdit}
           onDelete={handleDelete}
           loading={loading}
+          adsConfig={adsConfig}
         />
 
         {/* Load More Button (if needed for pagination) */}
@@ -434,7 +462,7 @@ const BlogContentHub = () => {
             <div className="flex items-center justify-center space-x-2 mb-4">
               <Icon name="Zap" size={20} className="text-primary" />
               <span className="font-heading font-bold text-lg text-primary">
-                CyberKraft
+                WisdomInTech
               </span>
             </div>
             <p className="text-text-secondary text-sm font-caption">

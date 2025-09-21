@@ -1,8 +1,10 @@
 import React from 'react';
 import BlogCard from './BlogCard';
 import Icon from '../../../components/AppIcon';
+import AdUnit from './AdUnit';
+import CustomAdUnit from './CustomAdUnit';
 
-const BlogGrid = ({ posts, onLike, onShare, onPostClick, isAdmin, onEdit, onDelete, loading }) => {
+const BlogGrid = ({ posts, onLike, onShare, onPostClick, isAdmin, onEdit, onDelete, loading, adsConfig }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -52,20 +54,64 @@ const BlogGrid = ({ posts, onLike, onShare, onPostClick, isAdmin, onEdit, onDele
     );
   }
 
+  const provider = adsConfig?.provider || 'adsense';
+  const showManualAds = adsConfig?.enabled && (
+    (provider === 'adsense' && adsConfig?.publisher_id && adsConfig?.ad_slot) ||
+    (provider === 'yllix' && (adsConfig?.yllix_unit_code || adsConfig?.custom_ad_html)) ||
+    (provider === 'custom' && (adsConfig?.custom_script_url || adsConfig?.custom_ad_html))
+  );
+  const interval = Math.max(1, Number(adsConfig?.grid_interval) || 6);
+
+  const items = [];
+  posts.forEach((post, idx) => {
+    items.push(
+      <BlogCard
+        key={post.id}
+        post={post}
+        onLike={onLike}
+        onShare={onShare}
+        onPostClick={onPostClick}
+        isAdmin={isAdmin}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
+    );
+
+    if (showManualAds && (idx + 1) % interval === 0) {
+      if (provider === 'adsense') {
+        items.push(
+          <AdUnit
+            key={`ad-${post.id}-${idx}`}
+            publisherId={adsConfig.publisher_id}
+            slotId={adsConfig.ad_slot}
+            className="col-span-1 md:col-span-2 lg:col-span-3"
+          />
+        );
+      } else if (provider === 'yllix') {
+        items.push(
+          <CustomAdUnit
+            key={`ad-${post.id}-${idx}`}
+            scriptUrl={adsConfig.yllix_script_url}
+            html={adsConfig.yllix_unit_code}
+            className="col-span-1 md:col-span-2 lg:col-span-3"
+          />
+        );
+      } else if (provider === 'custom') {
+        items.push(
+          <CustomAdUnit
+            key={`ad-${post.id}-${idx}`}
+            scriptUrl={adsConfig.custom_script_url}
+            html={adsConfig.custom_ad_html}
+            className="col-span-1 md:col-span-2 lg:col-span-3"
+          />
+        );
+      }
+    }
+  });
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {posts.map((post) => (
-        <BlogCard
-          key={post.id}
-          post={post}
-          onLike={onLike}
-          onShare={onShare}
-          onPostClick={onPostClick}
-          isAdmin={isAdmin}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ))}
+      {items}
     </div>
   );
 };

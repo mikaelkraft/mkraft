@@ -86,7 +86,7 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
             <Link 
               to="/portfolio-home-hero" 
               className="flex items-center space-x-3 group"
-              aria-label="CyberKraft Portfolio Home"
+              aria-label="WisdomInTech Home"
             >
               <div className="relative">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center group-hover:shadow-glow-primary transition-all duration-fast">
@@ -96,7 +96,7 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
               </div>
               <div className="hidden sm:block">
                 <span className="font-heading font-bold text-lg text-primary group-hover:text-secondary transition-colors duration-fast">
-                  CyberKraft
+                  WisdomInTech
                 </span>
                 <div className="text-xs text-text-secondary font-caption">
                   Portfolio
@@ -238,7 +238,7 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
           <div className="border-t border-border-accent/20 p-6">
             <div className="text-center">
               <div className="text-sm text-text-secondary font-caption">
-                CyberKraft Portfolio
+                WisdomInTech
               </div>
               <div className="text-xs text-text-secondary/60 mt-1">
                 Neo-Cyberpunk Experience

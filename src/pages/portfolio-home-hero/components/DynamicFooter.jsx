@@ -96,7 +96,7 @@ const DynamicFooter = ({ currentTheme }) => {
               </div>
               <div>
                 <div className={`font-heading font-bold text-xl ${themeClasses.text}`}>
-                  CyberKraft
+                  WisdomInTech
                 </div>
                 <div className={`text-sm ${themeClasses.secondary}`}>
                   Portfolio
@@ -201,7 +201,7 @@ const DynamicFooter = ({ currentTheme }) => {
             {/* Copyright */}
             <div className={`text-sm ${themeClasses.secondary} text-center lg:text-left`}>
               <p>
-                © {currentYear} CyberKraft Portfolio. Built with love ❤️ by{' '}
+                © {currentYear} WisdomInTech. Built with love ❤️ by{' '}
                 <span className={`font-medium ${themeClasses.accent}`}>
                   Mikael Kraft
                 </span>
