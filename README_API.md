@@ -1,3 +1,50 @@
+API + Postgres quick start
+
+1) Configure environment
+
+Create a .env file with at least:
+
+- POSTGRES_URL=postgres://user:pass@host:5432/dbname
+- POSTGRES_SSL=true   # if your provider requires SSL
+- ADMIN_EMAIL=admin@example.com
+- SUPABASE_URL=...    # for admin verification via Supabase auth
+- SUPABASE_ANON_KEY=...
+- VITE_USE_API=true
+- VITE_API_BASE_URL=/api
+
+2) Initialize database
+
+Run the portable schema against your Postgres:
+
+  npm run migrate
+
+This creates the wisdomintech schema and required tables/functions.
+
+3) Start API locally
+
+In one terminal:
+
+  npm run dev:api
+
+This starts Express on http://localhost:5000 and mounts all /api endpoints.
+
+4) Start client
+
+In another terminal:
+
+  npm run dev:client
+
+Vite runs on http://localhost:4028. With VITE_USE_API=true and VITE_API_BASE_URL=/api, the client will call the local API.
+
+5) Production
+
+Build the client:
+
+  npm run build
+
+Run Express in production mode to serve /api and the built frontend (optional):
+
+  NODE_ENV=production PORT=5000 node server.js
 API and Postgres alternative (No Supabase custom domain)
 
 Overview

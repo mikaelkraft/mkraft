@@ -17,7 +17,10 @@
     "jose": "^5.9.3",
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.484.0",
-    "pg": "^8.11.5",
+  "pg": "^8.11.5",
+  "express": "^4.19.2",
+  "npm-run-all": "^4.1.5",
+  "cross-env": "^7.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
@@ -35,6 +38,11 @@
     "start": "vite",
     "build": "vite build --sourcemap",
     "serve": "vite preview",
+    "api": "node server.js",
+    "migrate": "node scripts/migrate.js",
+    "dev": "run-p dev:*",
+    "dev:client": "vite",
+  "dev:api": "cross-env NODE_ENV=development API_PORT=5000 node server.js",
     "test": "vitest run"
   },
   "eslintConfig": {
