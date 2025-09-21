@@ -12,6 +12,13 @@ const ThemeControls = ({ isOpen, onClose, currentTheme, onThemeChange, fontSize,
       colors: ['#00FFFF', '#FF0080', '#39FF14']
     },
     {
+      id: 'dark',
+      name: 'Dark',
+      icon: 'Moon',
+      description: 'Classic dark mode',
+      colors: ['#111827', '#1F2937', '#374151']
+    },
+    {
       id: 'neural',
       name: 'Neural',
       icon: 'Brain',
@@ -80,6 +87,14 @@ const ThemeControls = ({ isOpen, onClose, currentTheme, onThemeChange, fontSize,
 
   const getThemeClasses = () => {
     switch(currentTheme) {
+      case 'dark':
+        return {
+          panel: 'bg-gray-900/20 border-gray-700/30',
+          text: 'text-gray-100',
+          secondary: 'text-gray-300',
+          accent: 'text-gray-400',
+          button: 'bg-gray-900/30 hover:bg-gray-900/50 border-gray-700/30'
+        };
       case 'neural':
         return {
           panel: 'bg-purple-900/20 border-purple-500/30',
@@ -157,44 +172,49 @@ const ThemeControls = ({ isOpen, onClose, currentTheme, onThemeChange, fontSize,
                 </span>
               </div>
               
-              <div className="grid grid-cols-2 gap-3">
-                {themes.map((theme) => (
-                  <button
-                    key={theme.id}
-                    onClick={() => handleThemeChange(theme.id)}
-                    className={`
-                      ${themeClasses.button} rounded-lg border p-4 transition-all duration-fast
-                      ${currentTheme === theme.id 
-                        ? (currentTheme === 'light' ? 'ring-2 ring-blue-500' : 'ring-2 ring-primary') 
-                        : ''
-                      }
-                      hover:scale-105 group min-h-[80px]
-                    `}
-                    title={theme.description}
-                  >
-                    <div className="flex flex-col items-center space-y-2">
-                      <div className="flex items-center space-x-1">
-                        <Icon 
-                          name={theme.icon} 
-                          size={20} 
-                          className={currentTheme === theme.id ? themeClasses.accent : themeClasses.secondary} 
-                        />
-                      </div>
-                      <span className={`text-sm font-medium ${currentTheme === theme.id ? themeClasses.text : themeClasses.secondary}`}>
-                        {theme.name}
-                      </span>
-                      <div className="flex space-x-1">
-                        {theme.colors.map((color, index) => (
-                          <div
-                            key={index}
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: color }}
-                          ></div>
-                        ))}
-                      </div>
-                    </div>
-                  </button>
-                ))}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                {/* Horizontal scroll wrapper for mobile */}
+                <div className="col-span-2 md:col-span-3 -mx-2 overflow-x-auto hide-scrollbar">
+                  <div className="px-2 inline-flex gap-3 md:grid md:grid-cols-3 md:gap-3 w-max md:w-auto">
+                    {themes.map((theme) => (
+                      <button
+                        key={theme.id}
+                        onClick={() => handleThemeChange(theme.id)}
+                        className={`
+                          ${themeClasses.button} rounded-lg border p-4 transition-all duration-fast
+                          ${currentTheme === theme.id 
+                            ? (currentTheme === 'light' ? 'ring-2 ring-blue-500' : 'ring-2 ring-primary') 
+                            : ''
+                          }
+                          hover:scale-105 group min-h-[80px] min-w-[140px]
+                        `}
+                        title={theme.description}
+                      >
+                        <div className="flex flex-col items-center space-y-2">
+                          <div className="flex items-center space-x-1">
+                            <Icon 
+                              name={theme.icon} 
+                              size={20} 
+                              className={currentTheme === theme.id ? themeClasses.accent : themeClasses.secondary} 
+                            />
+                          </div>
+                          <span className={`text-sm font-medium ${currentTheme === theme.id ? themeClasses.text : themeClasses.secondary}`}>
+                            {theme.name}
+                          </span>
+                          <div className="flex space-x-1">
+                            {theme.colors.map((color, index) => (
+                              <div
+                                key={index}
+                                className="w-2 h-2 rounded-full"
+                                style={{ backgroundColor: color }}
+                              ></div>
+                            ))}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 

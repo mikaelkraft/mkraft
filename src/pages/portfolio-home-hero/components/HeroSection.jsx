@@ -84,7 +84,7 @@ const HeroSection = ({ currentTheme }) => {
 
       <div className="max-w-6xl mx-auto text-center relative z-10">
         {/* Profile Image */}
-        <div className="mb-8 flex justify-center">
+  <div className="mt-8 md:mt-16 mb-8 flex justify-center">
           <div className={`relative w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 ${currentTheme === 'light' ? 'border-blue-200' : 'border-primary/50'} hover-glow-primary transition-all duration-normal`}>
             <Image 
               src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"

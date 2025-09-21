@@ -68,6 +68,8 @@ const PortfolioHomeHero = () => {
 
   const getBackgroundClass = () => {
     switch(currentTheme) {
+      case 'dark':
+        return 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800';
       case 'neural':
         return 'bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900';
       case 'futuristic':
