@@ -1,6 +1,7 @@
 // Shared validation helpers
 
 export const isValidUrl = (v = '') => !v || /^https?:\/\//i.test(v);
+export const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const validateProject = (data = {}) => {
   const errs = {};
@@ -27,6 +28,9 @@ export const validateBlog = (data = {}) => {
   if (data.status === 'published' && !data.content?.trim()) errs.content = 'Content is required to publish';
   if (!isValidUrl(data.featuredImage)) errs.featuredImage = 'Featured Image must be a valid URL';
   if (data.readTime !== undefined && data.readTime !== null && Number(data.readTime) < 1) errs.readTime = 'Read time must be at least 1 minute';
+  if (data.slug && !SLUG_REGEX.test(String(data.slug))) errs.slug = 'Slug can only contain lowercase letters, numbers and dashes';
+  if ((data.metaTitle || '').length > 70) errs.metaTitle = 'Meta title should be 70 characters or less';
+  if ((data.metaDescription || '').length > 160) errs.metaDescription = 'Meta description should be 160 characters or less';
   return errs;
 };
 
@@ -35,4 +39,5 @@ export default {
   validateProject,
   validateSlide,
   validateBlog,
+  SLUG_REGEX,
 };

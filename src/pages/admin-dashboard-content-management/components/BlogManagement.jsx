@@ -7,9 +7,9 @@ import Input from '../../../components/ui/Input';
 import Image from '../../../components/AppImage';
 
 const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate }) => {
-  const MarkdownEditor = ({ value, onChange, placeholder = 'Write your post in Markdown...' }) => {
+  const MarkdownEditor = ({ id = 'md-editor', value, onChange, placeholder = 'Write your post in Markdown...' }) => {
     const applyWrap = (prefix, suffix = prefix) => {
-      const ta = document.getElementById('md-editor');
+      const ta = document.getElementById(id);
       if (!ta) return onChange((value || '') + `${prefix}${suffix}`);
       const start = ta.selectionStart ?? 0;
       const end = ta.selectionEnd ?? 0;
@@ -27,7 +27,7 @@ const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate })
       if (url) applyWrap('[', `](${url})`);
     };
     const insertCodeBlock = () => {
-      const ta = document.getElementById('md-editor');
+      const ta = document.getElementById(id);
       const lang = prompt('Language (optional)') || '';
       if (!ta) return onChange(`${value || ''}\n\n\
 \n\n`);
@@ -42,7 +42,7 @@ ${lang}\n${selected}\n\
       onChange(next);
     };
     const insertList = (ordered = false) => {
-      const ta = document.getElementById('md-editor');
+      const ta = document.getElementById(id);
       const bullet = ordered ? '1.' : '-';
       if (!ta) return onChange(`${value || ''}\n${bullet} item`);
       const start = ta.selectionStart ?? 0;
@@ -56,17 +56,17 @@ ${lang}\n${selected}\n\
     return (
       <div>
         <div className="flex flex-wrap gap-2 mb-2">
-          <Button type="button" size="xs" variant="outline" onClick={() => applyWrap('**')}>Bold</Button>
-          <Button type="button" size="xs" variant="outline" onClick={() => applyWrap('*')}>Italic</Button>
-          <Button type="button" size="xs" variant="outline" onClick={() => applyWrap('`')}>Code</Button>
-          <Button type="button" size="xs" variant="outline" onClick={insertCodeBlock}>Code Block</Button>
-          <Button type="button" size="xs" variant="outline" onClick={() => applyWrap('> ' , '')}>Quote</Button>
-          <Button type="button" size="xs" variant="outline" onClick={() => insertList(false)}>• List</Button>
-          <Button type="button" size="xs" variant="outline" onClick={() => insertList(true)}>1. List</Button>
-          <Button type="button" size="xs" variant="outline" onClick={insertLink}>Link</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => applyWrap('**')}>Bold</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => applyWrap('*')}>Italic</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => applyWrap('`')}>Code</Button>
+          <Button type="button" size="sm" variant="outline" onClick={insertCodeBlock}>Code Block</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => applyWrap('> ' , '')}>Quote</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => insertList(false)}>• List</Button>
+          <Button type="button" size="sm" variant="outline" onClick={() => insertList(true)}>1. List</Button>
+          <Button type="button" size="sm" variant="outline" onClick={insertLink}>Link</Button>
         </div>
         <textarea
-          id="md-editor"
+          id={id}
           className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg min-h-[220px] font-mono text-sm"
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -115,6 +115,11 @@ ${lang}\n${selected}\n\
     featuredImage: '',
     status: 'draft',
     readTime: 5,
+    slug: '',
+    featured: false,
+    metaTitle: '',
+    metaDescription: '',
+    publishedAt: '',
   });
   const [editForm, setEditForm] = useState({});
 
@@ -202,6 +207,11 @@ ${lang}\n${selected}\n\
       featuredImage: post?.featuredImage || '',
       status: post?.status || 'draft',
       readTime: post?.readTime || 5,
+      slug: post?.slug || '',
+      featured: !!post?.featured,
+      metaTitle: post?.metaTitle || '',
+      metaDescription: post?.metaDescription || '',
+      publishedAt: post?.publishedAt || '',
     });
     setEditingPost(post);
   };
@@ -215,6 +225,16 @@ ${lang}\n${selected}\n\
       .split(',')
       .map((t) => t.trim())
       .filter(Boolean);
+    // auto-generate slug if empty
+    const slug = (createForm.slug || createForm.title || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    // naive read-time estimation: ~200 wpm
+    const words = (createForm.content || '').trim().split(/\s+/).filter(Boolean).length;
+    const estRead = Math.max(1, Math.ceil(words / 200));
+
     await onPostCreate({
       title: createForm.title,
       excerpt: createForm.excerpt,
@@ -223,8 +243,12 @@ ${lang}\n${selected}\n\
       tags,
       featuredImage: createForm.featuredImage || undefined,
       status: createForm.status,
-      readTime: Number(createForm.readTime) || 5,
-      publishDate: new Date().toISOString(),
+      readTime: Number(createForm.readTime || estRead) || estRead,
+      slug,
+      featured: !!createForm.featured,
+      metaTitle: createForm.metaTitle || undefined,
+      metaDescription: createForm.metaDescription || undefined,
+      publishDate: createForm.publishedAt || (createForm.status === 'published' ? new Date().toISOString() : null),
     });
     setShowCreateModal(false);
     setShowCreatePreview(false);
@@ -549,11 +573,20 @@ ${lang}\n${selected}\n\
               <Input value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} required />
             </div>
             <div>
+              <label className="block text-sm text-text-secondary mb-1">Slug</label>
+              <Input value={createForm.slug} onChange={(e) => setCreateForm({ ...createForm, slug: e.target.value })} placeholder="auto-generated from title" />
+              {formErrors.slug && <p className="mt-1 text-xs text-error">{formErrors.slug}</p>}
+            </div>
+            <div>
               <label className="block text-sm text-text-secondary mb-1">Status</label>
               <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}>
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
               </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <input id="create-featured" type="checkbox" className="w-4 h-4" checked={!!createForm.featured} onChange={(e) => setCreateForm({ ...createForm, featured: e.target.checked })} />
+              <label htmlFor="create-featured" className="text-sm text-text-secondary">Featured</label>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm text-text-secondary mb-1">Excerpt</label>
@@ -566,7 +599,7 @@ ${lang}\n${selected}\n\
                   {showCreatePreview ? 'Hide Preview' : 'Preview Markdown'}
                 </Button>
               </div>
-              <MarkdownEditor value={createForm.content} onChange={(val) => setCreateForm({ ...createForm, content: val })} />
+              <MarkdownEditor id="md-editor-create" value={createForm.content} onChange={(val) => setCreateForm({ ...createForm, content: val })} />
               {formErrors.content && <p className="mt-1 text-xs text-error">{formErrors.content}</p>}
               {showCreatePreview && (
                 <div className="mt-3 p-3 border border-border-accent/20 rounded bg-background/40 prose prose-invert max-w-none">
@@ -593,6 +626,20 @@ ${lang}\n${selected}\n\
               <label className="block text-sm text-text-secondary mb-1">Read Time (minutes)</label>
               <Input type="number" min="1" value={createForm.readTime} onChange={(e) => setCreateForm({ ...createForm, readTime: e.target.value })} />
             </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Publish Date</label>
+              <Input type="datetime-local" value={createForm.publishedAt} onChange={(e) => setCreateForm({ ...createForm, publishedAt: e.target.value })} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Meta Title</label>
+              <Input value={createForm.metaTitle} onChange={(e) => setCreateForm({ ...createForm, metaTitle: e.target.value })} />
+              {formErrors.metaTitle && <p className="mt-1 text-xs text-error">{formErrors.metaTitle}</p>}
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Meta Description</label>
+              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={3} value={createForm.metaDescription} onChange={(e) => setCreateForm({ ...createForm, metaDescription: e.target.value })} />
+              {formErrors.metaDescription && <p className="mt-1 text-xs text-error">{formErrors.metaDescription}</p>}
+            </div>
           </div>
         </Modal>
       )}
@@ -608,6 +655,14 @@ ${lang}\n${selected}\n\
             .split(',')
             .map((t) => t.trim())
             .filter(Boolean);
+          // auto-generate slug if empty or changed
+          const slug = (editForm.slug || editForm.title || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9-]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+          // recompute read time if content changed and readTime not provided
+          const words = (editForm.content || '').trim().split(/\s+/).filter(Boolean).length;
+          const estRead = Math.max(1, Math.ceil(words / 200));
           await onPostUpdate(editingPost.id, {
             title: editForm.title,
             excerpt: editForm.excerpt,
@@ -616,8 +671,12 @@ ${lang}\n${selected}\n\
             tags,
             featuredImage: editForm.featuredImage || undefined,
             status: editForm.status,
-            readTime: Number(editForm.readTime) || 5,
-            publishDate: editingPost.publishDate || new Date().toISOString(),
+            readTime: Number(editForm.readTime || estRead) || estRead,
+            slug,
+            featured: !!editForm.featured,
+            metaTitle: editForm.metaTitle || undefined,
+            metaDescription: editForm.metaDescription || undefined,
+            publishDate: editForm.publishedAt || (editForm.status === 'published' ? (editingPost.publishDate || new Date().toISOString()) : null),
           });
           setEditingPost(null);
           setShowEditPreview(false);
@@ -629,11 +688,20 @@ ${lang}\n${selected}\n\
               {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
             </div>
             <div>
+              <label className="block text-sm text-text-secondary mb-1">Slug</label>
+              <Input value={editForm.slug || ''} onChange={(e) => setEditForm({ ...editForm, slug: e.target.value })} />
+              {formErrors.slug && <p className="mt-1 text-xs text-error">{formErrors.slug}</p>}
+            </div>
+            <div>
               <label className="block text-sm text-text-secondary mb-1">Status</label>
               <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={editForm.status || 'draft'} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
               </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <input id="edit-featured" type="checkbox" className="w-4 h-4" checked={!!editForm.featured} onChange={(e) => setEditForm({ ...editForm, featured: e.target.checked })} />
+              <label htmlFor="edit-featured" className="text-sm text-text-secondary">Featured</label>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm text-text-secondary mb-1">Excerpt</label>
@@ -646,7 +714,7 @@ ${lang}\n${selected}\n\
                   {showEditPreview ? 'Hide Preview' : 'Preview Markdown'}
                 </Button>
               </div>
-              <MarkdownEditor value={editForm.content || ''} onChange={(val) => setEditForm({ ...editForm, content: val })} />
+              <MarkdownEditor id="md-editor-edit" value={editForm.content || ''} onChange={(val) => setEditForm({ ...editForm, content: val })} />
               {formErrors.content && <p className="mt-1 text-xs text-error">{formErrors.content}</p>}
               {showEditPreview && (
                 <div className="mt-3 p-3 border border-border-accent/20 rounded bg-background/40 prose prose-invert max-w-none">
@@ -671,6 +739,20 @@ ${lang}\n${selected}\n\
               <label className="block text-sm text-text-secondary mb-1">Read Time (minutes)</label>
               <Input type="number" min="1" value={editForm.readTime || 5} onChange={(e) => setEditForm({ ...editForm, readTime: e.target.value })} />
               {formErrors.readTime && <p className="mt-1 text-xs text-error">{formErrors.readTime}</p>}
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Publish Date</label>
+              <Input type="datetime-local" value={editForm.publishedAt || ''} onChange={(e) => setEditForm({ ...editForm, publishedAt: e.target.value })} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Meta Title</label>
+              <Input value={editForm.metaTitle || ''} onChange={(e) => setEditForm({ ...editForm, metaTitle: e.target.value })} />
+              {formErrors.metaTitle && <p className="mt-1 text-xs text-error">{formErrors.metaTitle}</p>}
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-text-secondary mb-1">Meta Description</label>
+              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={3} value={editForm.metaDescription || ''} onChange={(e) => setEditForm({ ...editForm, metaDescription: e.target.value })} />
+              {formErrors.metaDescription && <p className="mt-1 text-xs text-error">{formErrors.metaDescription}</p>}
             </div>
           </div>
         </Modal>

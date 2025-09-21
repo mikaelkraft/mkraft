@@ -43,13 +43,22 @@ const AdminDashboardContentManagement = () => {
       publishDate,
       views, comments, likes, readTime,
       id, // ignore client-provided id
+      slug,
+      featured,
+      metaTitle,
+      metaDescription,
+      publishedAt,
       ...rest
     } = data || {};
     return {
       ...rest,
       featured_image: featuredImage,
-      published_at: publishDate,
+      published_at: publishedAt ?? publishDate,
       read_time: readTime,
+      slug,
+      featured,
+      meta_title: metaTitle,
+      meta_description: metaDescription,
       // counters managed by DB
     };
   };
@@ -171,11 +180,15 @@ const AdminDashboardContentManagement = () => {
     tags: p.tags || [],
     status: p.status,
     publishDate: p.published_at,
+    publishedAt: p.published_at,
     readTime: p.read_time,
     views: p.view_count,
     comments: p.comment_count,
     likes: p.like_count,
     slug: p.slug,
+    featured: p.featured,
+    metaTitle: p.meta_title,
+    metaDescription: p.meta_description,
   }));
 
   const normalizedSlides = slides.map((s) => ({

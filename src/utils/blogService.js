@@ -208,7 +208,10 @@ class BlogService {
       }
 
       // Generate slug from title
-      const slug = postData.title.toLowerCase()
+      const slug = (postData.slug && postData.slug.trim()) ? postData.slug.trim().toLowerCase()
+        .replace(/[^a-z0-9-]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+        : postData.title.toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
 
@@ -218,7 +221,7 @@ class BlogService {
           ...postData,
           slug,
           author_id: user.id,
-          published_at: postData.status === 'published' ? new Date().toISOString() : null
+          published_at: postData.published_at ?? (postData.status === 'published' ? new Date().toISOString() : null)
         })
         .select(`
           *,
@@ -253,14 +256,20 @@ class BlogService {
       };
 
       // Update slug if title changed
-      if (updates.title) {
+      if (typeof updates.slug === 'string') {
+        updateData.slug = updates.slug.trim().toLowerCase()
+          .replace(/[^a-z0-9-]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+      } else if (updates.title) {
         updateData.slug = updates.title.toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
       }
 
       // Set published_at if status changed to published
-      if (updates.status === 'published' && !updates.published_at) {
+      if (typeof updates.published_at !== 'undefined') {
+        updateData.published_at = updates.published_at;
+      } else if (updates.status === 'published' && !updates.published_at) {
         updateData.published_at = new Date().toISOString();
       }
 

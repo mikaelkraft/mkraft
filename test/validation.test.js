@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isValidUrl, validateProject, validateSlide, validateBlog } from '../src/utils/validation/index.js';
+import { isValidUrl, validateProject, validateSlide, validateBlog, SLUG_REGEX } from '../src/utils/validation/index.js';
 
 describe('validation helpers', () => {
   it('isValidUrl accepts http/https or empty', () => {
@@ -48,5 +48,18 @@ describe('validation helpers', () => {
 
     const errs4 = validateBlog({ title: 'T', status: 'draft', content: 'x', featuredImage: 'https://ok', readTime: 3 });
     expect(Object.keys(errs4).length).toBe(0);
+  });
+
+  it('validateBlog slug and meta', () => {
+    expect(SLUG_REGEX.test('valid-slug-123')).toBe(true);
+    expect(SLUG_REGEX.test('Invalid Slug')).toBe(false);
+    let errs = validateBlog({ title: 'T', slug: 'Invalid Slug' });
+    expect(errs.slug).toBeTruthy();
+    const longTitle = 'x'.repeat(71);
+    errs = validateBlog({ title: 'T', metaTitle: longTitle });
+    expect(errs.metaTitle).toBeTruthy();
+    const longDesc = 'x'.repeat(161);
+    errs = validateBlog({ title: 'T', metaDescription: longDesc });
+    expect(errs.metaDescription).toBeTruthy();
   });
 });
