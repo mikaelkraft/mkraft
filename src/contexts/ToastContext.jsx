@@ -42,7 +42,7 @@ export const useToast = () => {
 export const ToastContainer = () => {
   const { toasts, remove } = useToast();
   return (
-    <div className="fixed top-4 right-4 z-[100] space-y-2">
+    <div className="fixed right-4 top-20 sm:top-24 z-40 space-y-2 pointer-events-none">
       {toasts.map((t) => (
         <div
           key={t.id}
@@ -54,6 +54,7 @@ export const ToastContainer = () => {
              t.type === 'warning' ? 'bg-warning/15 border-warning/30 text-warning' :
              'bg-surface border-border-accent/30 text-text-primary')
           }
+          style={{ pointerEvents: 'auto' }}
         >
           <div className="flex items-start gap-3">
             <span className="flex-1">{t.message}</span>

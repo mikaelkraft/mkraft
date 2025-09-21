@@ -7,6 +7,7 @@ import ProjectFilters from './components/ProjectFilters';
 import ProjectModal from './components/ProjectModal';
 import ProjectForm from './components/ProjectForm';
 import ProjectSkeleton from './components/ProjectSkeleton';
+import projectService from '../../utils/projectService';
 
 const ProjectsPortfolioGrid = () => {
   const [projects, setProjects] = useState([]);
@@ -21,162 +22,43 @@ const ProjectsPortfolioGrid = () => {
   const [editingProject, setEditingProject] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Mock projects data
-  const mockProjects = [
-    {
-      id: "1",
-  title: "WisdomInTech",
-      description: "A futuristic cyberpunk-themed portfolio website built with React and modern web technologies. Features dynamic theming, admin CRUD operations, and responsive design.",
-      fullDescription: `A comprehensive portfolio and blog management system designed with a cyberpunk aesthetic. This project showcases advanced React patterns, state management, and modern UI/UX principles.\n\nThe application features a complete admin dashboard for content management, dynamic theming system, and responsive design that works seamlessly across all devices.`,
-      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop",
-      technologies: ["React", "JavaScript", "Tailwind CSS", "Vite", "React Router"],
-      status: "completed",
-      featured: true,
-  liveUrl: "#",
-  githubUrl: "#",
-      completedDate: "2024-01-15",
-      duration: "2 months",
-      client: "Personal",
-      features: [
-        "Dynamic theme switching with 4 distinct themes",
-        "Complete CRUD operations for content management",
-        "Responsive design optimized for all devices",
-        "Advanced search and filtering capabilities",
-        "Real-time visitor analytics display",
-        "Cyberpunk-themed animations and effects"
-      ],
-      challenges: `The main challenge was creating a cohesive cyberpunk design system that remained accessible and functional across different themes. Implementing the dynamic theming system required careful CSS variable management and ensuring consistent contrast ratios.\n\nAnother significant challenge was optimizing the admin CRUD operations while maintaining a smooth user experience for visitors.`
-    },
-    {
-      id: "2",
-      title: "Blockchain Analytics Dashboard",
-      description: "Real-time cryptocurrency analytics platform with advanced charting, portfolio tracking, and market sentiment analysis using React and D3.js.",
-      fullDescription: `A comprehensive blockchain analytics platform that provides real-time insights into cryptocurrency markets. Built with React and integrated with multiple blockchain APIs for accurate data visualization.\n\nThe dashboard features advanced charting capabilities, portfolio management tools, and sentiment analysis to help users make informed trading decisions.`,
-      image: "https://images.pexels.com/photos/730547/pexels-photo-730547.jpeg?w=800&h=600&fit=crop",
-      technologies: ["React", "D3.js", "Node.js", "WebSocket", "Blockchain APIs", "TypeScript"],
-      status: "completed",
-      featured: true,
-      liveUrl: "https://crypto-analytics-pro.com",
-      githubUrl: "https://github.com/mikaelkraft/crypto-analytics",
-      completedDate: "2023-11-20",
-      duration: "4 months",
-      client: "CryptoTech Solutions",
-      features: [
-        "Real-time cryptocurrency price tracking",
-        "Advanced technical analysis charts",
-        "Portfolio performance analytics",
-        "Market sentiment indicators",
-        "Custom alert system",
-        "Multi-exchange data aggregation"
-      ],
-      challenges: `Managing real-time data streams from multiple blockchain networks while maintaining optimal performance was the primary challenge. Implementing efficient WebSocket connections and data caching strategies was crucial for delivering a smooth user experience.`
-    },
-    {
-      id: "3",
-      title: "Neural Network Visualizer",
-      description: "Interactive web application for visualizing and understanding neural network architectures with real-time training visualization and educational content.",
-      fullDescription: `An educational tool designed to help students and professionals understand neural network concepts through interactive visualizations. The application demonstrates various network architectures and training processes in real-time.\n\nBuilt with React and TensorFlow.js, it provides hands-on learning experiences for machine learning concepts.`,
-      image: "https://images.pixabay.com/photo/2019/11/07/20/24/check-4609540_1280.jpg?w=800&h=600&fit=crop",
-      technologies: ["React", "TensorFlow.js", "Python", "D3.js", "WebGL", "Machine Learning"],
-      status: "in-progress",
-      featured: false,
-      liveUrl: "https://neural-viz.edu",
-      githubUrl: "https://github.com/mikaelkraft/neural-visualizer",
-      completedDate: "2024-03-01",
-      duration: "3 months",
-      client: "University Research Lab",
-      features: [
-        "Interactive neural network diagrams",
-        "Real-time training visualization",
-        "Multiple architecture support",
-        "Educational tutorials and guides",
-        "Performance metrics dashboard",
-        "Export functionality for research"
-      ],
-      challenges: `Rendering complex neural network visualizations in the browser while maintaining 60fps performance required extensive optimization. Implementing WebGL shaders for efficient graphics rendering was essential for handling large networks.`
-    },
-    {
-      id: "4",
-      title: "E-Commerce Platform",
-      description: "Full-stack e-commerce solution with React frontend, Node.js backend, payment integration, and comprehensive admin dashboard for inventory management.",
-      fullDescription: `A complete e-commerce platform built from the ground up with modern web technologies. Features include user authentication, product catalog, shopping cart, payment processing, and order management.\n\nThe admin dashboard provides comprehensive tools for inventory management, order processing, and customer relationship management.`,
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop",
-      technologies: ["React", "Node.js", "MongoDB", "Express", "Stripe API", "JWT"],
-      status: "completed",
-      featured: false,
-      liveUrl: "https://techstore-pro.com",
-      githubUrl: "https://github.com/mikaelkraft/ecommerce-platform",
-      completedDate: "2023-09-15",
-      duration: "5 months",
-      client: "TechStore Inc.",
-      features: [
-        "User authentication and profiles",
-        "Product catalog with search and filters",
-        "Shopping cart and wishlist",
-        "Secure payment processing",
-        "Order tracking and history",
-        "Admin dashboard for management"
-      ],
-      challenges: `Implementing secure payment processing while ensuring PCI compliance was the most critical challenge. Additionally, optimizing database queries for the product catalog to handle thousands of items required careful indexing and caching strategies.`
-    },
-    {
-      id: "5",
-      title: "IoT Monitoring System",
-      description: "Real-time IoT device monitoring dashboard with sensor data visualization, alert management, and predictive maintenance capabilities.",
-      fullDescription: `A comprehensive IoT monitoring solution that tracks multiple sensor types across industrial environments. The system provides real-time data visualization, automated alerting, and predictive maintenance recommendations.\n\nBuilt with React for the frontend and Python for data processing, it handles thousands of sensor readings per minute.`,
-      image: "https://images.pexels.com/photos/442150/pexels-photo-442150.jpeg?w=800&h=600&fit=crop",
-      technologies: ["React", "Python", "InfluxDB", "MQTT", "Docker", "Kubernetes"],
-      status: "completed",
-      featured: false,
-      liveUrl: "https://iot-monitor-pro.com",
-      githubUrl: "https://github.com/mikaelkraft/iot-monitoring",
-      completedDate: "2023-12-10",
-      duration: "6 months",
-      client: "Industrial Solutions Corp",
-      features: [
-        "Real-time sensor data visualization",
-        "Automated alert system",
-        "Predictive maintenance algorithms",
-        "Historical data analysis",
-        "Device management interface",
-        "Custom dashboard creation"
-      ],
-      challenges: `Handling high-frequency sensor data while maintaining real-time visualization performance required implementing efficient data streaming and aggregation techniques. The system needed to process thousands of data points per second without overwhelming the user interface.`
-    },
-    {
-      id: "6",
-      title: "Social Media Analytics Tool",
-      description: "Comprehensive social media analytics platform with sentiment analysis, engagement tracking, and automated reporting for multiple social platforms.",
-      fullDescription: `A powerful analytics tool that aggregates data from multiple social media platforms to provide comprehensive insights into brand performance and audience engagement.\n\nThe platform uses advanced natural language processing for sentiment analysis and provides automated reporting capabilities for marketing teams.`,
-      image: "https://images.pixabay.com/photo/2017/06/26/19/03/social-media-2444884_1280.jpg?w=800&h=600&fit=crop",
-      technologies: ["React", "Python", "NLP", "APIs", "PostgreSQL", "Redis"],
-      status: "planning",
-      featured: false,
-      liveUrl: "",
-      githubUrl: "https://github.com/mikaelkraft/social-analytics",
-      completedDate: "",
-      duration: "4 months",
-      client: "Marketing Agency Pro",
-      features: [
-        "Multi-platform data aggregation",
-        "Sentiment analysis and mood tracking",
-        "Engagement metrics dashboard",
-        "Automated report generation",
-        "Competitor analysis tools",
-        "Custom KPI tracking"
-      ],
-      challenges: `Integrating with multiple social media APIs while handling rate limits and data consistency across platforms presents ongoing challenges. Implementing accurate sentiment analysis for different languages and contexts requires continuous model refinement.`
-    }
-  ];
-
-  // Simulate loading and set mock data
+  // Load projects from Supabase
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setProjects(mockProjects);
-      setLoading(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await projectService.getPublishedProjects();
+        if (!mounted) return;
+        if (res.success) {
+          const normalized = (res.data || []).map((p) => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            fullDescription: p.content || p.description,
+            image: p.featured_image || '/assets/images/no_image.png',
+            technologies: p.technologies || [],
+            status: p.status === 'published' ? 'completed' : p.status,
+            featured: !!p.featured,
+            liveUrl: p.live_url || '',
+            githubUrl: p.github_url || '',
+            completedDate: (p.updated_at || p.created_at || '').slice(0, 10),
+            duration: '',
+            client: 'Personal',
+            features: [],
+            challenges: ''
+          }));
+          setProjects(normalized);
+        } else {
+          setProjects([]);
+        }
+      } catch (e) {
+        setProjects([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
   }, []);
 
   // Check admin status (mock implementation)

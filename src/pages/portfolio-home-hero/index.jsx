@@ -8,11 +8,14 @@ import VisitorInfoPanel from './components/VisitorInfoPanel';
 import SocialMediaGrid from './components/SocialMediaGrid';
 import ThemeControls from './components/ThemeControls';
 import DynamicFooter from './components/DynamicFooter';
+import settingsService from '../../utils/settingsService';
 
 const PortfolioHomeHero = () => {
   const [currentTheme, setCurrentTheme] = useState('cyberpunk');
   const [fontSize, setFontSize] = useState('medium');
   const [isThemeControlsOpen, setIsThemeControlsOpen] = useState(false);
+  const [heroVideoUrl, setHeroVideoUrl] = useState('');
+  const [videoEnabled, setVideoEnabled] = useState(true);
 
   // Apply theme and font size to document
   useEffect(() => {
@@ -30,6 +33,22 @@ const PortfolioHomeHero = () => {
     };
     root.style.fontSize = fontSizeMap[fontSize];
   }, [currentTheme, fontSize]);
+
+  // Load settings (theme defaults and hero video)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const res = await settingsService.getSettings();
+      if (!mounted || !res.success) return;
+      const stg = res.data || {};
+      const ui = stg.ui_settings || {};
+      if (stg.default_theme) setCurrentTheme(stg.default_theme);
+      if (stg.default_font_size) setFontSize(stg.default_font_size);
+      setVideoEnabled(stg.enable_video !== false);
+      if (ui.hero_video_url) setHeroVideoUrl(ui.hero_video_url);
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const handleThemeChange = (theme) => {
     setCurrentTheme(theme);
@@ -78,6 +97,17 @@ const PortfolioHomeHero = () => {
       </Helmet>
 
       <div className={`min-h-screen ${getBackgroundClass()} relative overflow-x-hidden`}>
+        {/* Optional Hero Background Video */}
+        {videoEnabled && heroVideoUrl && (
+          <video
+            className="pointer-events-none fixed inset-0 w-full h-full object-cover opacity-25"
+            src={heroVideoUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        )}
         {/* Header Navigation */}
         <HeaderNavigation onThemeControlsToggle={handleThemeControlsToggle} />
 

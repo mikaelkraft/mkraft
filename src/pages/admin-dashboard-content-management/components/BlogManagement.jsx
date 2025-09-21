@@ -5,8 +5,9 @@ import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Image from '../../../components/AppImage';
+import FileUpload from '../../../components/ui/FileUpload';
 
-const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate }) => {
+const BlogManagement = ({ blogPosts, onPostUpdate, onPostDelete, onPostCreate, onOpenEditor }) => {
   const MarkdownEditor = ({ id = 'md-editor', value, onChange, placeholder = 'Write your post in Markdown...' }) => {
     const applyWrap = (prefix, suffix = prefix) => {
       const ta = document.getElementById(id);
@@ -192,11 +193,13 @@ ${lang}\n${selected}\n\
   };
 
   const openCreate = () => {
+    if (onOpenEditor) return onOpenEditor({ mode: 'create' });
     setCreateForm({ title: '', excerpt: '', content: '', category: '', tags: '', featuredImage: '', status: 'draft', readTime: 5 });
     setShowCreateModal(true);
   };
 
   const openEdit = (post) => {
+    if (onOpenEditor) return onOpenEditor({ mode: 'edit', post });
     // Initialize edit form from the selected post
     setEditForm({
       title: post?.title || '',
@@ -617,9 +620,16 @@ ${lang}\n${selected}\n\
               <Input value={createForm.tags} onChange={(e) => setCreateForm({ ...createForm, tags: e.target.value })} />
             </div>
             {formErrors.featuredImage && <p className="mt-1 text-xs text-error">{formErrors.featuredImage}</p>}
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Featured Image URL</label>
-              <Input type="url" value={createForm.featuredImage} onChange={(e) => setCreateForm({ ...createForm, featuredImage: e.target.value })} />
+            <div className="md:col-span-2">
+              <FileUpload
+                label="Featured Image"
+                value={createForm.featuredImage}
+                onChange={(url) => setCreateForm({ ...createForm, featuredImage: url })}
+                bucket="media"
+                pathPrefix="blog/featured"
+                accept="image"
+                helperText="Select or drop an image to upload."
+              />
             </div>
             {formErrors.readTime && <p className="mt-1 text-xs text-error">{formErrors.readTime}</p>}
             <div>
@@ -730,9 +740,16 @@ ${lang}\n${selected}\n\
               <label className="block text-sm text-text-secondary mb-1">Tags (comma-separated)</label>
               <Input value={editForm.tags || ''} onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })} />
             </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Featured Image URL</label>
-              <Input type="url" value={editForm.featuredImage || ''} onChange={(e) => setEditForm({ ...editForm, featuredImage: e.target.value })} />
+            <div className="md:col-span-2">
+              <FileUpload
+                label="Featured Image"
+                value={editForm.featuredImage || ''}
+                onChange={(url) => setEditForm({ ...editForm, featuredImage: url })}
+                bucket="media"
+                pathPrefix="blog/featured"
+                accept="image"
+                helperText="Select or drop an image to upload."
+              />
               {formErrors.featuredImage && <p className="mt-1 text-xs text-error">{formErrors.featuredImage}</p>}
             </div>
             <div>

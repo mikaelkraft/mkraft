@@ -13,7 +13,9 @@ const DevOtpBanner = () => {
         setVisible(true);
         setCode(window.localStorage.getItem('dev_admin_code') || '');
       }
-    } catch (_) {}
+    } catch (error) {
+      console.error('Error in useEffect:', error);
+    }
   }, []);
 
   if (!visible) return null;
@@ -23,7 +25,10 @@ const DevOtpBanner = () => {
       const value = window.localStorage.getItem('dev_admin_code') || code || '';
       if (!value) return;
       await navigator.clipboard.writeText(value);
-    } catch (_) {}
+      console.log('Copied dev OTP code to clipboard');
+    } catch (error) {
+      console.error('Error copying OTP code:', error);
+    }
   };
 
   const handleHide = () => setVisible(false);
@@ -32,7 +37,9 @@ const DevOtpBanner = () => {
     try {
       window.localStorage.removeItem('dev_admin_code');
       setCode('');
-    } catch (_) {}
+    } catch (error) {
+      console.error('Error clearing OTP code:', error);
+    }
   };
 
   return (

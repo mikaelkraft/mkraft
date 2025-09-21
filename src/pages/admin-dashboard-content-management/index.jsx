@@ -4,6 +4,7 @@ import DashboardSidebar from './components/DashboardSidebar';
 import DashboardOverview from './components/DashboardOverview';
 import ProjectsManagement from './components/ProjectsManagement';
 import BlogManagement from './components/BlogManagement';
+import BlogEditor from './components/BlogEditor';
 import SlidesManagement from './components/SlidesManagement';
 import SiteSettings from './components/SiteSettings';
 import projectService from '../../utils/projectService';
@@ -22,6 +23,7 @@ const AdminDashboardContentManagement = () => {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [blogEditorState, setBlogEditorState] = useState({ open: false, mode: 'create', post: null });
 
   // Helper mappers (UI shape -> DB shape)
   const toDbProject = (data = {}) => {
@@ -291,6 +293,7 @@ const AdminDashboardContentManagement = () => {
     if (res.success) {
       setBlogPosts((prev) => prev.map((b) => (b.id === postId ? res.data : b)));
       show('Post updated', { type: 'success' });
+      setBlogEditorState({ open: false, mode: 'create', post: null });
     } else {
       show(res.error || 'Failed to update post', { type: 'error' });
     }
@@ -311,6 +314,7 @@ const AdminDashboardContentManagement = () => {
     if (res.success) {
       setBlogPosts((prev) => [res.data, ...prev]);
       show('Post created', { type: 'success' });
+      setBlogEditorState({ open: false, mode: 'create', post: null });
     } else {
       show(res.error || 'Failed to create post', { type: 'error' });
     }
@@ -412,12 +416,27 @@ const AdminDashboardContentManagement = () => {
         );
       case 'blog':
         return (
-          <BlogManagement
-            blogPosts={normalizedPosts}
-            onPostUpdate={handlePostUpdate}
-            onPostDelete={handlePostDelete}
-            onPostCreate={handlePostCreate}
-          />
+          <div className="h-full flex flex-col">
+            {!blogEditorState.open && (
+              <BlogManagement
+                blogPosts={normalizedPosts}
+                onPostUpdate={handlePostUpdate}
+                onPostDelete={handlePostDelete}
+                onPostCreate={handlePostCreate}
+                onOpenEditor={({ mode, post }) => setBlogEditorState({ open: true, mode: mode || 'create', post: post || null })}
+              />
+            )}
+            {blogEditorState.open && (
+              <div className="flex-1 min-h-[60vh]">
+                <BlogEditor
+                  mode={blogEditorState.mode}
+                  initialData={blogEditorState.mode === 'edit' && blogEditorState.post ? blogEditorState.post : {}}
+                  onCancel={() => setBlogEditorState({ open: false, mode: 'create', post: null })}
+                  onSave={(data) => blogEditorState.mode === 'edit' && blogEditorState.post ? handlePostUpdate(blogEditorState.post.id, data) : handlePostCreate(data)}
+                />
+              </div>
+            )}
+          </div>
         );
       case 'slides':
         return (

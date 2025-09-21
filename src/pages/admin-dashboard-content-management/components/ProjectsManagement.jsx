@@ -4,6 +4,7 @@ import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Image from '../../../components/AppImage';
+import FileUpload from '../../../components/ui/FileUpload';
 
 const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProjectCreate }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -405,9 +406,16 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
               <label className="block text-sm text-text-secondary mb-1">Description</label>
               <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={4} value={createForm.description} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })} />
             </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Image URL</label>
-              <Input type="url" value={createForm.image} onChange={(e) => setCreateForm({ ...createForm, image: e.target.value })} />
+            <div className="md:col-span-2">
+              <FileUpload
+                label="Project Image"
+                value={createForm.image}
+                onChange={(url) => setCreateForm({ ...createForm, image: url })}
+                bucket="media"
+                pathPrefix="projects"
+                accept="image"
+                helperText="Upload a representative image for this project."
+              />
               {formErrors.image && <p className="mt-1 text-xs text-error">{formErrors.image}</p>}
             </div>
             <div>
@@ -448,9 +456,16 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
               <label className="block text-sm text-text-secondary mb-1">Description</label>
               <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={4} value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
             </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Image URL</label>
-              <Input type="url" value={editForm.image} onChange={(e) => setEditForm({ ...editForm, image: e.target.value })} />
+            <div className="md:col-span-2">
+              <FileUpload
+                label="Project Image"
+                value={editForm.image}
+                onChange={(url) => setEditForm({ ...editForm, image: url })}
+                bucket="media"
+                pathPrefix="projects"
+                accept="image"
+                helperText="Upload a representative image for this project."
+              />
               {formErrors.image && <p className="mt-1 text-xs text-error">{formErrors.image}</p>}
             </div>
             <div>

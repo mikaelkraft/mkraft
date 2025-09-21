@@ -7,6 +7,10 @@ import Input from '../../../components/ui/Input';
 import Image from '../../../components/AppImage';
 import commentService from '../../../utils/commentService';
 
+// Environment configuration (Vite)
+const SITE_URL = (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SITE_URL) || 'https://mikaelkraft.dev';
+const TWITTER_HANDLE = (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_TWITTER_HANDLE) || '@mikael_kraft';
+
 const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
   const { user, userProfile } = useAuth();
   const [formData, setFormData] = useState({
@@ -248,19 +252,11 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
             <meta name="description" content={formData.meta_description || post.excerpt || ''} />
             <meta property="og:title" content={formData.meta_title || post.title} />
             <meta property="og:description" content={formData.meta_description || post.excerpt || ''} />
-            <meta property="og:type" content="article" />
-            {post.slug && (
-              <>
-                <meta property="og:url" content={`https://mikaelkraft.dev/blog/${post.slug}`} />
-                <link rel="canonical" href={`https://mikaelkraft.dev/blog/${post.slug}`} />
-              </>
-            )}
-            {formData.featured_image && (
-              <meta property="og:image" content={formData.featured_image} />
-            )}
+            <meta property="og:url" content={`${SITE_URL}/blog/${post.slug}`} />
+            <link rel="canonical" href={`${SITE_URL}/blog/${post.slug}`} />
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:site" content="@mikael_kraft" />
-            <meta name="twitter:creator" content="@mikael_kraft" />
+            <meta name="twitter:site" content={TWITTER_HANDLE} />
+            <meta name="twitter:creator" content={TWITTER_HANDLE} />
           </Helmet>
         )}
         {/* Backdrop */}

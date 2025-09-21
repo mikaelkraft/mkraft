@@ -4,6 +4,7 @@ import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Image from '../../../components/AppImage';
+import FileUpload from '../../../components/ui/FileUpload';
 
 const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate, onSlideReorder }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -381,8 +382,15 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
               <Input value={createForm.subtitle} onChange={(e) => setCreateForm({ ...createForm, subtitle: e.target.value })} />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-text-secondary mb-1">Background Image URL</label>
-              <Input type="url" value={createForm.backgroundImage} onChange={(e) => setCreateForm({ ...createForm, backgroundImage: e.target.value })} />
+              <FileUpload
+                label="Background Image"
+                value={createForm.backgroundImage}
+                onChange={(url) => setCreateForm({ ...createForm, backgroundImage: url })}
+                bucket="media"
+                pathPrefix="slides"
+                accept="image"
+                helperText="Upload a background image for this slide."
+              />
               {formErrors.backgroundImage && <p className="mt-1 text-xs text-error">{formErrors.backgroundImage}</p>}
             </div>
             <div>
@@ -429,8 +437,15 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
               <Input value={editForm.subtitle} onChange={(e) => setEditForm({ ...editForm, subtitle: e.target.value })} />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-text-secondary mb-1">Background Image URL</label>
-              <Input type="url" value={editForm.backgroundImage} onChange={(e) => setEditForm({ ...editForm, backgroundImage: e.target.value })} />
+              <FileUpload
+                label="Background Image"
+                value={editForm.backgroundImage}
+                onChange={(url) => setEditForm({ ...editForm, backgroundImage: url })}
+                bucket="media"
+                pathPrefix="slides"
+                accept="image"
+                helperText="Upload a background image for this slide."
+              />
               {formErrors.backgroundImage && <p className="mt-1 text-xs text-error">{formErrors.backgroundImage}</p>}
             </div>
             <div>

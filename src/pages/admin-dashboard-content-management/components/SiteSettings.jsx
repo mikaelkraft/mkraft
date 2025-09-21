@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
+import FileUpload from '../../../components/ui/FileUpload';
 
 const SiteSettings = ({ settings, onSettingsUpdate }) => {
   const [activeTab, setActiveTab] = useState('general');
@@ -192,23 +193,46 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">Logo URL</label>
-          <Input
-            type="url"
+          <FileUpload
+            label="Logo"
             value={localSettings.logoUrl}
-            onChange={(e) => handleSettingChange('logoUrl', e.target.value)}
-            placeholder="https://example.com/logo.png"
+            onChange={(url) => handleSettingChange('logoUrl', url)}
+            bucket="logos"
+            pathPrefix="logos"
+            accept="image"
+            helperText="Upload a PNG/SVG logo."
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">Favicon URL</label>
-          <Input
-            type="url"
+          <FileUpload
+            label="Favicon"
             value={localSettings.faviconUrl}
-            onChange={(e) => handleSettingChange('faviconUrl', e.target.value)}
-            placeholder="https://example.com/favicon.ico"
+            onChange={(url) => handleSettingChange('faviconUrl', url)}
+            bucket="logos"
+            pathPrefix="favicons"
+            accept="icon"
+            helperText="Upload a .ico or PNG square icon."
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-text-primary mb-2 flex items-center gap-2">
+          <Icon name="Video" size={16} className="text-primary" />
+          Hero Background Video (optional)
+        </label>
+        <div className="text-xs text-text-secondary font-caption mb-2">
+          Provide a short, muted background video for the hero section. MP4/WebM recommended. Keep under ~10MB for performance.
+        </div>
+        <FileUpload
+          label=""
+          value={(localSettings.ui?.hero_video_url) || ''}
+          onChange={(url) => handleUiSettingChange('hero_video_url', url)}
+          bucket="media"
+          pathPrefix="videos"
+          accept="video"
+          helperText="Accepted: mp4, webm, ogg. Autoplay is muted."
+        />
       </div>
     </div>
   );
