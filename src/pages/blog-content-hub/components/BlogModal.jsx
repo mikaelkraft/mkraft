@@ -6,6 +6,7 @@ import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Image from '../../../components/AppImage';
 import commentService from '../../../utils/commentService';
+import newsletterService from '../../../utils/newsletterService';
 
 // Environment configuration (Vite)
 const SITE_URL = (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SITE_URL) || 'https://mikaelkraft.dev';
@@ -142,8 +143,16 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
 
         // Handle newsletter signup
         if (newsletterSignup && newComment.author_email) {
-          // TODO: Implement newsletter signup API call
-          console.log('Newsletter signup for:', newComment.author_email);
+          try {
+            const result = await newsletterService.subscribe(newComment.author_email, newComment.author_name);
+            if (result.success) {
+              console.log('Successfully subscribed to newsletter:', newComment.author_email);
+            } else {
+              console.log('Newsletter signup error:', result.error);
+            }
+          } catch (error) {
+            console.log('Newsletter signup failed:', error);
+          }
         }
         setNewsletterSignup(false);
       }

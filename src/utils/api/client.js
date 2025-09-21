@@ -17,5 +17,31 @@ export const api = {
       });
     }
     return handle(await fetch(url.toString(), { headers: { 'accept': 'application/json' } }));
+  },
+
+  async post(path, body, headers = {}) {
+    const url = new URL((API_BASE + path).replace(/\/$/, ''), window.location.origin);
+    return handle(await fetch(url.toString(), {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'accept': 'application/json',
+        ...headers
+      },
+      body: JSON.stringify(body)
+    }));
+  },
+
+  async delete(path, params) {
+    const url = new URL((API_BASE + path).replace(/\/$/, ''), window.location.origin);
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
+      });
+    }
+    return handle(await fetch(url.toString(), {
+      method: 'DELETE',
+      headers: { 'accept': 'application/json' }
+    }));
   }
 };

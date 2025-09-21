@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isValidUrl, validateProject, validateSlide, validateBlog, SLUG_REGEX } from '../src/utils/validation/index.js';
+import { isValidUrl, isValidEmail, validateProject, validateSlide, validateBlog, validateNewsletter, SLUG_REGEX } from '../src/utils/validation/index.js';
 
 describe('validation helpers', () => {
   it('isValidUrl accepts http/https or empty', () => {
@@ -61,5 +61,29 @@ describe('validation helpers', () => {
     const longDesc = 'x'.repeat(161);
     errs = validateBlog({ title: 'T', metaDescription: longDesc });
     expect(errs.metaDescription).toBeTruthy();
+  });
+
+  it('validateNewsletter validates email and name', () => {
+    const errs1 = validateNewsletter({});
+    expect(errs1.email).toBeTruthy();
+
+    const errs2 = validateNewsletter({ email: 'invalid-email' });
+    expect(errs2.email).toBeTruthy();
+
+    const errs3 = validateNewsletter({ email: 'valid@example.com' });
+    expect(Object.keys(errs3).length).toBe(0);
+
+    const longName = 'x'.repeat(101);
+    const errs4 = validateNewsletter({ email: 'valid@example.com', name: longName });
+    expect(errs4.name).toBeTruthy();
+  });
+
+  it('isValidEmail validates email format', () => {
+    expect(isValidEmail('valid@example.com')).toBe(true);
+    expect(isValidEmail('user.name+tag@domain.co.uk')).toBe(true);
+    expect(isValidEmail('invalid-email')).toBe(false);
+    expect(isValidEmail('email@')).toBe(false);
+    expect(isValidEmail('@domain.com')).toBe(false);
+    expect(isValidEmail('')).toBe(false);
   });
 });

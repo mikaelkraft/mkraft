@@ -1,6 +1,7 @@
 // Shared validation helpers
 
 export const isValidUrl = (v = '') => !v || /^https?:\/\//i.test(v);
+export const isValidEmail = (email = '') => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 export const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const validateProject = (data = {}) => {
@@ -34,10 +35,20 @@ export const validateBlog = (data = {}) => {
   return errs;
 };
 
+export const validateNewsletter = (data = {}) => {
+  const errs = {};
+  if (!data.email?.trim()) errs.email = 'Email is required';
+  if (data.email && !isValidEmail(data.email)) errs.email = 'Email must be a valid email address';
+  if ((data.name || '').length > 100) errs.name = 'Name should be 100 characters or less';
+  return errs;
+};
+
 export default {
   isValidUrl,
+  isValidEmail,
   validateProject,
   validateSlide,
   validateBlog,
+  validateNewsletter,
   SLUG_REGEX,
 };
