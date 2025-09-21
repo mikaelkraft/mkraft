@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import { useAuth } from '../../../contexts/AuthContext';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
@@ -241,6 +242,27 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        {!isAdmin && (
+          <Helmet>
+            <title>{formData.meta_title || post.title}</title>
+            <meta name="description" content={formData.meta_description || post.excerpt || ''} />
+            <meta property="og:title" content={formData.meta_title || post.title} />
+            <meta property="og:description" content={formData.meta_description || post.excerpt || ''} />
+            <meta property="og:type" content="article" />
+            {post.slug && (
+              <>
+                <meta property="og:url" content={`https://mikaelkraft.dev/blog/${post.slug}`} />
+                <link rel="canonical" href={`https://mikaelkraft.dev/blog/${post.slug}`} />
+              </>
+            )}
+            {formData.featured_image && (
+              <meta property="og:image" content={formData.featured_image} />
+            )}
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:site" content="@mikael_kraft" />
+            <meta name="twitter:creator" content="@mikael_kraft" />
+          </Helmet>
+        )}
         {/* Backdrop */}
         <div 
           className="fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity"
