@@ -5,7 +5,7 @@ API + Postgres quick start
 Create a .env file with at least:
 
 - POSTGRES_URL=postgres://user:pass@host:5432/dbname
-- POSTGRES_SSL=true   # if your provider requires SSL
+- POSTGRES_SSL=true   # most managed providers require SSL
 - ADMIN_EMAIL=admin@example.com
 - SUPABASE_URL=...    # for admin verification via Supabase auth
 - SUPABASE_ANON_KEY=...
@@ -88,3 +88,25 @@ Notes
 - Current code only uses API for public GETs. Admin writes still use Supabase. You can migrate writes later by adding POST/PUT/DELETE endpoints that verify Supabase JWT in Authorization header (see api/_lib/auth.js).
 - Storage: Image/video uploads are still going to Supabase Storage per earlier wiring. You can keep that or swap to S3-compatible storage later.
 - If you keep everything read-only via API, you do not need JWT verification yet.
+
+Neon + Supabase recommended setup
+- Neon (or Railway/Render) hosts your Postgres for all content, reachable from anywhere.
+- Supabase is used for Auth (login) and Storage (media uploads) only.
+
+Environment variables
+- POSTGRES_URL: your Neon connection string
+- POSTGRES_SSL: true
+- VITE_USE_API: true
+- VITE_API_BASE_URL: /api (or your deployed API URL)
+- VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY: for Supabase Auth/Storage
+- ADMIN_EMAIL: account allowed to perform admin API writes
+
+Setup flow
+1) Create Neon project and copy the connection string.
+2) Create Supabase project; copy URL and ANON key; create storage buckets (e.g., media, logos) in Storage.
+3) Add env vars to local .env and your hosting provider.
+4) Run: npm run migrate (applies db/wisdomintech_schema.sql to Neon)
+5) Optional: npm run seed
+6) Start API: npm run dev:api (or deploy to Vercel)
+7) Start client: npm run dev:client
+
