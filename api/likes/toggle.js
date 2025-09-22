@@ -11,32 +11,20 @@ module.exports = async function handler(req, res) {
     const { content_type, content_id, visitor_ip, user_agent } = data;
     if (!content_type || !content_id) return error(res, 'content_type and content_id are required');
 
-    let cols = { project: 'projects', blog_post: 'blog_posts', hero_slide: 'hero_slides', comment: 'comments' };
+    // Supported content types
+    const cols = { project: 'projects', blog_post: 'blog_posts', comment: 'comments' };
     if (!cols[content_type]) return error(res, 'invalid content_type', 400);
 
-    // Check if liked
-    const checkSql = `SELECT id FROM wisdomintech.likes WHERE content_type=$1 AND ${content_type === 'project' ? 'project_id' : content_type === 'blog_post' ? 'blog_post_id' : content_type === 'hero_slide' ? 'slide_id' : 'comment_id'} = $2 AND visitor_ip = $3::inet`;
-    const likeCol = content_type === 'project' ? 'project_id' : content_type === 'blog_post' ? 'blog_post_id' : content_type === 'hero_slide' ? 'slide_id' : 'comment_id';
-    const { rows: existing } = await query(checkSql, [content_type, content_id, visitor_ip || null]);
+    // Use helper function from schema to toggle like and update counts
+    const { rows } = await query('SELECT wisdomintech.toggle_like($1::text, $2::uuid, $3::text, $4::text) AS liked', [content_type, content_id, visitor_ip || null, user_agent || '']);
+    const liked = rows?.[0]?.liked === true;
 
-    let liked;
-    if (existing.length) {
-      await query(`DELETE FROM wisdomintech.likes WHERE id = $1`, [existing[0].id]);
-      liked = false;
-    } else {
-      await query(`INSERT INTO wisdomintech.likes (content_type, ${likeCol}, visitor_ip, user_agent) VALUES ($1,$2,$3::inet,$4)`, [content_type, content_id, visitor_ip || null, user_agent || '']);
-      liked = true;
-    }
-
-    // Update aggregate like_count if column exists
-    let table = cols[content_type];
-    const aggSql = content_type === 'hero_slide' ?
-      `UPDATE wisdomintech.${table} SET view_count = view_count WHERE id = $1` :
-      `UPDATE wisdomintech.${table} SET like_count = (
-        SELECT COUNT(1) FROM wisdomintech.likes WHERE content_type = $2 AND ${likeCol} = $1
-      ) WHERE id = $1`;
-    const params = content_type === 'hero_slide' ? [content_id] : [content_id, content_type];
-    await query(aggSql, params);
+    // Sync aggregate like_count on the target table
+    const table = cols[content_type];
+    const likeCol = content_type === 'project' ? 'project_id' : content_type === 'blog_post' ? 'blog_post_id' : 'comment_id';
+    await query(`UPDATE wisdomintech.${table} SET like_count = (
+      SELECT COUNT(1) FROM wisdomintech.likes WHERE ${likeCol} = $1
+    ) WHERE id = $1`, [content_id]);
 
     return json(res, { liked });
   } catch (e) {

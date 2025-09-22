@@ -56,7 +56,7 @@ module.exports = async function handler(req, res) {
 
       const insertSql = `
         INSERT INTO wisdomintech.comments (blog_post_id, parent_comment_id, author_name, author_email, content, is_approved, visitor_ip, user_agent)
-        VALUES ($1, $2, $3, $4, $5, true, $6::inet, $7)
+        VALUES ($1, $2, $3, $4, $5, true, $6, $7)
         RETURNING *
       `;
       const { rows } = await query(insertSql, [blog_post_id, parent_comment_id, author_name, author_email || null, content, ip, userAgent]);

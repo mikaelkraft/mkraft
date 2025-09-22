@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
               'content', c.content,
               'created_at', c.created_at
             ) ORDER BY c.created_at DESC)
-            FROM wisdomintech.comments c WHERE c.blog_post_id = bp.id AND c.status = 'approved'
+            FROM wisdomintech.comments c WHERE c.blog_post_id = bp.id AND c.is_approved = true
           ), '[]'::json
         ) AS comments
       FROM wisdomintech.blog_posts bp
