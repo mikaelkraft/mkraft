@@ -111,6 +111,19 @@ CREATE TABLE IF NOT EXISTS hero_slides (
   updated_at timestamptz DEFAULT now()
 );
 
+-- Newsletter subscribers
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text UNIQUE NOT NULL,
+  name text,
+  is_active boolean DEFAULT true,
+  subscribed_at timestamptz,
+  unsubscribed_at timestamptz,
+  reactivated_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
 -- Likes table (generic)
 CREATE TABLE IF NOT EXISTS likes (
   id bigserial PRIMARY KEY,
