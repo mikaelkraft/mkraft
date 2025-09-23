@@ -9,7 +9,7 @@ import commentService from '../../../utils/commentService';
 import newsletterService from '../../../utils/newsletterService';
 
 // Environment configuration (Vite)
-const SITE_URL = (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SITE_URL) || 'https://mikaelkraft.dev';
+const SITE_URL = (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SITE_URL) || 'https://mkraft.tech';
 const TWITTER_HANDLE = (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_TWITTER_HANDLE) || '@mikael_kraft';
 
 const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {

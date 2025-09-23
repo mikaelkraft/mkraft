@@ -569,7 +569,7 @@ BEGIN
          'A futuristic portfolio showcasing cutting-edge development work and innovative solutions for the digital future.',
          'mikewillkraft@gmail.com', 'mikewillkraft@gmail.com',
          '{"twitter": "mikael_kraft", "linkedin": "in/mikael-kraft", "github": "mikaelkraft", "email": "mikewillkraft@gmail.com"}'::jsonb,
-         '{"keywords": "portfolio, developer, cyberpunk, react, javascript, web development", "ogImage": "https://mikaelkraft.dev/og-image.jpg"}'::jsonb);
+         '{"keywords": "portfolio, developer, cyberpunk, react, javascript, web development", "ogImage": "https://mkraft.tech/og-image.jpg"}'::jsonb);
 
 EXCEPTION
     WHEN foreign_key_violation THEN
@@ -592,7 +592,7 @@ BEGIN
     -- Get auth user IDs first
     SELECT ARRAY_AGG(id) INTO auth_user_ids_to_delete
     FROM auth.users
-    WHERE email LIKE '%@mikaelkraft.dev' OR email LIKE '%@gmail.com' OR email LIKE '%@example.com';
+    WHERE email LIKE '%@mkraft.tech' OR email LIKE '%@gmail.com' OR email LIKE '%@example.com';
 
     -- Delete in dependency order (children first, then auth.users last)
     DELETE FROM public.likes WHERE blog_post_id IN (SELECT id FROM public.blog_posts WHERE author_id = ANY(auth_user_ids_to_delete));

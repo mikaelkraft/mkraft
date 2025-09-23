@@ -94,10 +94,10 @@ const PortfolioHomeHero = () => {
         <meta property="og:description" content="Full Stack Developer & Cybersecurity Expert crafting digital experiences at the intersection of innovation and security." />
     <meta property="og:image" content="/assets/images/no_image.png" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://mikaelkraft.dev" />
+        <meta property="og:url" content="https://mkraft.tech" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:creator" content="@mikael_kraft" />
-        <link rel="canonical" href="https://mikaelkraft.dev/portfolio-home-hero" />
+        <link rel="canonical" href="https://mkraft.tech/portfolio-home-hero" />
       </Helmet>
 
       <div className={`min-h-screen ${getBackgroundClass()} relative overflow-x-hidden`}>

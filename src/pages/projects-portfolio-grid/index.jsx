@@ -160,12 +160,12 @@ const ProjectsPortfolioGrid = () => {
         <meta property="og:title" content="Mikael Kraft — Projects" />
         <meta property="og:description" content="A curated portfolio of software engineering projects by Mikael Kraft." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://mikaelkraft.dev/projects" />
+        <meta property="og:url" content="https://mkraft.tech/projects" />
         <meta property="og:image" content="/assets/images/no_image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@mikael_kraft" />
         <meta name="twitter:creator" content="@mikael_kraft" />
-        <link rel="canonical" href="https://mikaelkraft.dev/projects" />
+        <link rel="canonical" href="https://mkraft.tech/projects" />
       </Helmet>
 
       <div className="min-h-screen bg-background pt-20 pb-16">

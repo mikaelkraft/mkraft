@@ -266,12 +266,12 @@ const BlogContentHub = () => {
         <meta property="og:title" content="Mikael Kraft — Blog" />
         <meta property="og:description" content="Latest posts on full‑stack engineering, security, and practical tech write‑ups." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://mikaelkraft.dev/blog" />
+        <meta property="og:url" content="https://mkraft.tech/blog" />
         <meta property="og:image" content="/assets/images/no_image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@mikael_kraft" />
         <meta name="twitter:creator" content="@mikael_kraft" />
-        <link rel="canonical" href="https://mikaelkraft.dev/blog" />
+        <link rel="canonical" href="https://mkraft.tech/blog" />
       </Helmet>
       {/* Header Navigation */}
       <HeaderNavigation />
