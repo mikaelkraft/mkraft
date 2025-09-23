@@ -26,40 +26,163 @@ A modern, full-stack portfolio website showcasing projects, blog posts, and prof
 - PostgreSQL database (Neon, Railway, Render, or Supabase)
 - Optional: Supabase account for auth and storage
 
-## 🛠️ Installation
+## 🛠️ Installation Guide
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/mikaelkraft/mkraft.git
-   cd mkraft
-   ```
+### For Personal Use (Fork and Customize)
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+This guide will help you fork this portfolio and customize it for your own use.
 
-3. Set up environment variables:
+#### Step 1: Fork and Clone
+```bash
+# Fork the repository on GitHub, then clone your fork
+git clone https://github.com/YOUR_USERNAME/mkraft.git
+cd mkraft
+
+# Install dependencies
+npm install
+```
+
+#### Step 2: Choose Your Setup Method
+
+**Option A: Simple Setup with Supabase (Recommended for beginners)**
+
+1. **Create a Supabase Project**
+   - Go to [supabase.com](https://supabase.com) and create a free account
+   - Create a new project
+   - Go to Settings > API to get your credentials
+
+2. **Set up environment variables**
    ```bash
    cp .env.example .env
-   # Edit .env with your database and Supabase credentials
+   ```
+   
+   Edit `.env` and add your Supabase credentials:
+   ```bash
+   # Basic setup - Supabase only
+   VITE_USE_API=false
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your_anon_key_here
+   VITE_ADMIN_EMAIL=your.email@example.com
    ```
 
-4. Initialize database (if using custom PostgreSQL):
+3. **Apply database schema**
+   - In Supabase dashboard, go to SQL Editor
+   - Copy and run the SQL from `supabase/migrations/20241216120000_cyberkraft_portfolio_schema.sql`
+
+4. **Start development**
+   ```bash
+   npm start
+   ```
+   Visit http://localhost:4028
+
+**Option B: Advanced Setup with Custom PostgreSQL**
+
+1. **Set up PostgreSQL Database**
+   - Create account on [Neon](https://neon.tech), [Railway](https://railway.app), or [Render](https://render.com)
+   - Create a new PostgreSQL database
+   - Get your connection string
+
+2. **Create Supabase project** (for auth only)
+   - Follow Supabase setup from Option A above
+   - Create storage buckets: `media`, `logos` in Storage section
+
+3. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` with full configuration:
+   ```bash
+   # Database
+   POSTGRES_URL=postgres://user:pass@host:5432/dbname
+   POSTGRES_SSL=true
+   
+   # API Mode
+   VITE_USE_API=true
+   VITE_API_BASE_URL=/api
+   
+   # Supabase (for auth and storage)
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your_anon_key_here
+   VITE_ADMIN_EMAIL=your.email@example.com
+   
+   # API Server
+   API_PORT=5000
+   ADMIN_EMAIL=your.email@example.com
+   ```
+
+4. **Initialize database**
    ```bash
    npm run migrate
-   npm run seed  # Optional: add sample data
+   npm run seed  # Optional: adds sample data
    ```
 
-5. Start the development servers:
+5. **Start development servers**
    ```bash
-   # Start both client and API
-   npm run dev
-   
-   # Or start separately:
-   npm run dev:client  # Frontend on http://localhost:4028
-   npm run dev:api     # API on http://localhost:5000
+   npm run dev  # Starts both client and API
    ```
+   - Frontend: http://localhost:4028
+   - API: http://localhost:5000
+
+#### Step 3: Customize for Your Portfolio
+
+1. **Update personal information**
+   - Edit the content in admin dashboard at `/admin-dashboard-content-management`
+   - Or directly modify database entries
+   - Update social media links and personal details
+
+2. **Add your projects**
+   - Access admin dashboard
+   - Use Projects tab to add your work
+   - Include GitHub links, live demos, and screenshots
+
+3. **Customize styling**
+   - Edit theme files in `src/styles/`
+   - Modify `tailwind.config.js` for custom colors
+   - Update logos and images in `public/` folder
+
+4. **Set up authentication**
+   - Use the admin email you configured to log in
+   - Access admin features at `/admin-dashboard-content-management`
+
+#### Step 4: Deploy Your Portfolio
+
+**Vercel Deployment (Recommended)**
+1. Connect your GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically with each commit
+
+**Other Hosting Options**
+```bash
+# Build for production
+npm run build
+
+# Deploy the build/ folder to your hosting provider
+# (Netlify, GitHub Pages, etc.)
+```
+
+### Common Issues and Solutions
+
+**Build Errors**
+- Make sure all environment variables are set
+- Check that database connection is working
+- Verify Node.js version (14.x or higher)
+
+**Database Connection Issues**
+- Ensure POSTGRES_SSL=true for managed databases
+- Check firewall settings
+- Verify connection string format
+
+**Authentication Problems**
+- Confirm VITE_ADMIN_EMAIL matches your login email
+- Check Supabase project settings
+- Verify environment variables are loaded
+
+### Need Help?
+
+- Check `README_API.md` for detailed API documentation
+- Review the `.env.example` file for all configuration options
+- Ensure all prerequisites are installed before starting
 
 ## 📁 Project Structure
 
@@ -218,22 +341,30 @@ npm run build
    NODE_ENV=production PORT=5000 node server.js
    ```
 
-## 🚀 Getting Started
+## 🚀 Quick Reference
 
-### Quick Start (Supabase)
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Create Supabase project and apply migrations
-4. Configure `.env` with Supabase credentials
-5. Start development: `npm start`
+### Development Commands
+```bash
+npm start          # Start development server (frontend only)
+npm run dev        # Start both frontend and API servers
+npm run dev:client # Start frontend server only
+npm run dev:api    # Start API server only
+npm run build      # Build for production
+npm run migrate    # Apply database schema
+npm run seed       # Add sample data
+```
 
-### Advanced Setup (Custom API)
-1. Set up PostgreSQL database (Neon, Railway, etc.)
-2. Configure `.env` with `VITE_USE_API=true`
-3. Run migrations: `npm run migrate`
-4. Start both servers: `npm run dev`
+### Project URLs (Development)
+- **Frontend**: http://localhost:4028
+- **API Server**: http://localhost:5000  
+- **Admin Dashboard**: http://localhost:4028/admin-dashboard-content-management
 
-For detailed setup instructions, see `README_API.md`.
+### Key Files to Customize
+- `.env` - Environment configuration
+- `src/pages/` - Page components and content
+- `src/styles/` - Themes and styling
+- `public/` - Static assets (logos, images)
+- `supabase/migrations/` - Database schema
 
 ## 🧩 Adding Content
 
