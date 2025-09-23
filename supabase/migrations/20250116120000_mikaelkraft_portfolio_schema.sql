@@ -542,7 +542,7 @@ BEGIN
 
     -- Insert sample hero slides
     INSERT INTO public.hero_slides (id, title, subtitle, background_image, cta_text, cta_link, display_order, duration, status, view_count) VALUES
-        (slide1_id, 'Welcome to CyberKraft', 'Innovative solutions for the digital future', 
+        (slide1_id, 'Welcome to the Mikael Kraft Portfolio', 'Innovative solutions for the digital future', 
          'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1200&h=600&fit=crop', 
          'Explore Projects', '/projects-portfolio-grid', 1, 5, 'published'::public.content_status, 5600),
         
@@ -565,11 +565,11 @@ BEGIN
 
     -- Insert site settings
     INSERT INTO public.site_settings (site_title, site_tagline, site_description, contact_email, admin_email, social_media, seo_settings) VALUES
-        ('CyberKraft Portfolio', 'Neo-Cyberpunk Experience', 
+        ('Mikael Kraft Portfolio', 'Neo-Cyberpunk Experience', 
          'A futuristic portfolio showcasing cutting-edge development work and innovative solutions for the digital future.',
-         'contact@cyberkraft.dev', 'admin@cyberkraft.dev',
-         '{"twitter": "mikael_kraft", "linkedin": "in/mikael-kraft", "github": "mikaelkraft", "email": "contact@cyberkraft.dev"}'::jsonb,
-         '{"keywords": "portfolio, developer, cyberpunk, react, javascript, web development", "ogImage": "https://cyberkraft.dev/og-image.jpg"}'::jsonb);
+         'contact@mikaelkraft.dev', 'admin@mikaelkraft.dev',
+         '{"twitter": "mikael_kraft", "linkedin": "in/mikael-kraft", "github": "mikaelkraft", "email": "contact@mikaelkraft.dev"}'::jsonb,
+         '{"keywords": "portfolio, developer, cyberpunk, react, javascript, web development", "ogImage": "https://mikaelkraft.dev/og-image.jpg"}'::jsonb);
 
 EXCEPTION
     WHEN foreign_key_violation THEN
@@ -592,7 +592,7 @@ BEGIN
     -- Get auth user IDs first
     SELECT ARRAY_AGG(id) INTO auth_user_ids_to_delete
     FROM auth.users
-    WHERE email LIKE '%@cyberkraft.dev' OR email LIKE '%@example.com';
+    WHERE email LIKE '%@mikaelkraft.dev' OR email LIKE '%@example.com';
 
     -- Delete in dependency order (children first, then auth.users last)
     DELETE FROM public.likes WHERE blog_post_id IN (SELECT id FROM public.blog_posts WHERE author_id = ANY(auth_user_ids_to_delete));
