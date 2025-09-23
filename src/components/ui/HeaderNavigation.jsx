@@ -93,8 +93,8 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
               aria-label="WisdomInTech Portfolio Home"
             >
               <div className="relative">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center group-hover:shadow-glow-primary transition-all duration-fast">
-                  <Icon name="Code" size={20} className="text-background" />
+                <div className="w-8 h-8 bg-gray-800 border border-gray-300 rounded-lg flex items-center justify-center group-hover:shadow-glow-primary transition-all duration-fast">
+                  <Icon name="Code" size={20} className="text-white" />
                 </div>
                 <div className="absolute -inset-1 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-fast -z-10"></div>
               </div>
