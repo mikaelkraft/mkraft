@@ -90,17 +90,17 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
             <Link 
               to="/portfolio-home-hero" 
               className="flex items-center space-x-3 group"
-              aria-label="WisdomInTech Home"
+              aria-label="Mikael Kraft Portfolio Home"
             >
               <div className="relative">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center group-hover:shadow-glow-primary transition-all duration-fast">
-                  <Icon name="Zap" size={20} className="text-background" />
+                  <Icon name="Code" size={20} className="text-background" />
                 </div>
                 <div className="absolute -inset-1 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-fast -z-10"></div>
               </div>
               <div className="hidden sm:block">
                 <span className="font-heading font-bold text-lg text-primary group-hover:text-secondary transition-colors duration-fast">
-                  WisdomInTech
+                  Mikael Kraft
                 </span>
                 <div className="text-xs text-text-secondary font-caption">
                   Portfolio

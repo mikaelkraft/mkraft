@@ -59,7 +59,7 @@ const DynamicFooter = ({ currentTheme }) => {
         { name: "X (Twitter)", href: "https://x.com/mikael_kraft", external: true },
         { name: "LinkedIn", href: "https://linkedin.com/in/mikael-kraft", external: true },
         { name: "GitHub", href: "https://github.com/mikaelkraft", external: true },
-        { name: "Email", href: "mailto:contact@mikaelkraft.dev", external: true }
+        { name: "Email", href: "mailto:mikewillkraft@gmail.com", external: true }
       ]
     },
     {
