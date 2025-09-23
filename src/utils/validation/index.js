@@ -1,7 +1,8 @@
 // Shared validation helpers
 
 export const isValidUrl = (v = '') => !v || /^https?:\/\//i.test(v);
-export const isValidEmail = (email = '') => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const isValidEmail = (email = '') => EMAIL_REGEX.test(email);
 export const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const validateProject = (data = {}) => {
