@@ -369,7 +369,7 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
             type="email"
             value={localSettings.socialMedia.email}
             onChange={(e) => handleSettingChange('socialMedia', { ...localSettings.socialMedia, email: e.target.value })}
-            placeholder="contact@wisdomintech.dev"
+            placeholder="mikewillkraft@gmail.com"
           />
         </div>
       </div>

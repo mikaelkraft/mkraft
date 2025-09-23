@@ -8,11 +8,11 @@ const HeroSection = ({ currentTheme }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const phrases = [
-    "Full-Stack Developer",
-    "Blockchain Enthusiast", 
-    "Data Scientist",
-    "Cybersecurity Expert",
-    "Tech Innovator"
+    "React Developer",
+    "Node.js Developer", 
+    "Full-Stack Engineer",
+    "JavaScript Expert",
+    "React Specialist"
   ];
 
   useEffect(() => {
@@ -114,13 +114,13 @@ const HeroSection = ({ currentTheme }) => {
         {/* Description */}
         <div className={`max-w-4xl mx-auto mb-12 space-y-4 ${textColors.secondary}`}>
           <p className="text-lg lg:text-xl leading-relaxed">
-            Crafting digital experiences at the intersection of innovation and security. 
-            I build robust applications, explore blockchain frontiers, and decode data patterns 
-            to create solutions that matter.
+            Crafting exceptional web applications with React and Node.js.
+            I focus on building scalable, performant solutions that deliver 
+            outstanding user experiences through modern JavaScript technologies.
           </p>
           <p className="text-base lg:text-lg">
-            From full-stack development to cybersecurity research, I thrive in the digital realm 
-            where code meets creativity and security meets scalability.
+            From interactive React frontends to robust Node.js backends, I create 
+            full-stack applications that seamlessly connect users with technology.
           </p>
         </div>
 

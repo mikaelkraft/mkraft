@@ -86,6 +86,34 @@ const TechStackGrid = ({ currentTheme, items }) => {
       category: "Cybersecurity",
       proficiency: 87,
       description: "Application security and penetration testing"
+    },
+    {
+      name: "Flutter",
+      icon: "Smartphone",
+      category: "Mobile",
+      proficiency: 82,
+      description: "Cross-platform mobile app development"
+    },
+    {
+      name: "Figma",
+      icon: "Figma",
+      category: "Design",
+      proficiency: 85,
+      description: "UI/UX design and prototyping"
+    },
+    {
+      name: "Adobe CC",
+      icon: "Image",
+      category: "Graphics",
+      proficiency: 80,
+      description: "Photoshop, Illustrator, and creative tools"
+    },
+    {
+      name: "Premiere Pro",
+      icon: "Video",
+      category: "Video",
+      proficiency: 75,
+      description: "Video editing and post-production"
     }
   ];
 

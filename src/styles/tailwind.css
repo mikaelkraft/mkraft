@@ -54,6 +54,63 @@
     --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Theme-specific color schemes */
+  .theme-cyberpunk {
+    /* Cyberpunk - Neon cyan/magenta */
+    --color-primary: #00FFFF; /* electric cyan */
+    --color-secondary: #FF0080; /* vibrant magenta */
+    --color-accent: #39FF14; /* matrix green */
+    --shadow-primary: 0 0 8px rgba(0, 255, 255, 0.2);
+    --shadow-secondary: 0 0 8px rgba(255, 0, 128, 0.2);
+    --shadow-accent: 0 0 8px rgba(57, 255, 20, 0.2);
+  }
+
+  .theme-dark {
+    /* Dark - Deep blue/slate tones */
+    --color-primary: #3B82F6; /* blue-500 */
+    --color-secondary: #1E40AF; /* blue-800 */
+    --color-accent: #60A5FA; /* blue-400 */
+    --shadow-primary: 0 0 8px rgba(59, 130, 246, 0.2);
+    --shadow-secondary: 0 0 8px rgba(30, 64, 175, 0.2);
+    --shadow-accent: 0 0 8px rgba(96, 165, 250, 0.2);
+  }
+
+  .theme-neural {
+    /* Neural - Purple/violet tones */
+    --color-primary: #8B5CF6; /* violet-500 */
+    --color-secondary: #A855F7; /* purple-500 */
+    --color-accent: #C084FC; /* purple-400 */
+    --shadow-primary: 0 0 8px rgba(139, 92, 246, 0.2);
+    --shadow-secondary: 0 0 8px rgba(168, 85, 247, 0.2);
+    --shadow-accent: 0 0 8px rgba(192, 132, 252, 0.2);
+  }
+
+  .theme-futuristic {
+    /* Futuristic - Metallic blue/slate */
+    --color-primary: #0EA5E9; /* sky-500 */
+    --color-secondary: #0284C7; /* sky-600 */
+    --color-accent: #38BDF8; /* sky-400 */
+    --shadow-primary: 0 0 8px rgba(14, 165, 233, 0.2);
+    --shadow-secondary: 0 0 8px rgba(2, 132, 199, 0.2);
+    --shadow-accent: 0 0 8px rgba(56, 189, 248, 0.2);
+  }
+
+  .theme-light {
+    /* Light - Professional grays with blue accent */
+    --color-primary: #1F2937; /* gray-800 */
+    --color-secondary: #374151; /* gray-700 */
+    --color-accent: #3B82F6; /* blue-500 */
+    --color-background: #F9FAFB; /* gray-50 */
+    --color-surface: #FFFFFF; /* white */
+    --color-text-primary: #1F2937; /* gray-800 */
+    --color-text-secondary: #6B7280; /* gray-500 */
+    --color-border: #E5E7EB; /* gray-200 */
+    --color-border-accent: #3B82F6; /* blue-500 */
+    --shadow-primary: 0 0 8px rgba(31, 41, 55, 0.1);
+    --shadow-secondary: 0 0 8px rgba(55, 65, 81, 0.1);
+    --shadow-accent: 0 0 8px rgba(59, 130, 246, 0.1);
+  }
+
   * {
     border-color: var(--color-border);
   }

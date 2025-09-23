@@ -235,7 +235,7 @@ class SettingsService {
   site_title: 'WisdomInTech',
         site_tagline: 'Neo-Cyberpunk Experience',
         site_description: 'A futuristic portfolio showcasing cutting-edge development work and innovative solutions for the digital future.',
-  contact_email: 'contact@wisdomintech.dev',
+  contact_email: 'mikewillkraft@gmail.com',
   admin_email: 'admin@wisdomintech.dev',
         enable_video: true,
         default_theme: 'cyberpunk',
@@ -246,7 +246,7 @@ class SettingsService {
           twitter: 'mikael_kraft',
           linkedin: 'in/mikael-kraft',
           github: 'mikaelkraft',
-          email: 'contact@wisdomintech.dev'
+          email: 'mikewillkraft@gmail.com'
         },
         seo_settings: {
           keywords: 'portfolio, developer, cyberpunk, react, javascript, web development',

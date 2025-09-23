@@ -16,7 +16,7 @@ const ThemeControls = ({ isOpen, onClose, currentTheme, onThemeChange, fontSize,
       name: 'Dark',
       icon: 'Moon',
       description: 'Classic dark mode',
-      colors: ['#111827', '#1F2937', '#374151']
+      colors: ['#3B82F6', '#1E40AF', '#60A5FA']
     },
     {
       id: 'neural',
@@ -30,14 +30,14 @@ const ThemeControls = ({ isOpen, onClose, currentTheme, onThemeChange, fontSize,
       name: 'Futuristic',
       icon: 'Rocket',
       description: 'Sleek metallic elements',
-      colors: ['#3B82F6', '#60A5FA', '#93C5FD']
+      colors: ['#0EA5E9', '#0284C7', '#38BDF8']
     },
     {
       id: 'light',
       name: 'Light',
       icon: 'Sun',
       description: 'Clean professional look',
-      colors: ['#374151', '#6B7280', '#9CA3AF']
+      colors: ['#1F2937', '#374151', '#3B82F6']
     }
   ];
 

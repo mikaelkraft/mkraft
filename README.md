@@ -67,7 +67,7 @@ npm install
 
 3. **Apply database schema**
    - In Supabase dashboard, go to SQL Editor
-   - Copy and run the SQL from `supabase/migrations/20241216120000_cyberkraft_portfolio_schema.sql`
+   - Copy and run the SQL from `supabase/migrations/20250116120000_mikaelkraft_portfolio_schema.sql`
 
 4. **Start development**
    ```bash
