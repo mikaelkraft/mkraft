@@ -90,7 +90,7 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
             <Link 
               to="/portfolio-home-hero" 
               className="flex items-center space-x-3 group"
-              aria-label="Mikael Kraft Portfolio Home"
+              aria-label="WisdomInTech Portfolio Home"
             >
               <div className="relative">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center group-hover:shadow-glow-primary transition-all duration-fast">
@@ -100,7 +100,7 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
               </div>
               <div className="hidden sm:block">
                 <span className="font-heading font-bold text-lg text-primary group-hover:text-secondary transition-colors duration-fast">
-                  Mikael Kraft
+                  WisdomInTech
                 </span>
                 <div className="text-xs text-text-secondary font-caption">
                   Portfolio
