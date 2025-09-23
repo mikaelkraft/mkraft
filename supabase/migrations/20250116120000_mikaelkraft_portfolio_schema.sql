@@ -1,5 +1,5 @@
--- Location: supabase/migrations/20241216120000_cyberkraft_portfolio_schema.sql
--- CyberKraft Portfolio Database Schema with Authentication
+-- Location: supabase/migrations/20250116120000_mikaelkraft_portfolio_schema.sql
+-- MikaelKraft Portfolio Database Schema with Authentication
 
 -- 1. Types and Core Tables
 CREATE TYPE public.content_status AS ENUM ('draft', 'published', 'archived');
@@ -114,8 +114,8 @@ CREATE TABLE public.likes (
 -- Site settings table
 CREATE TABLE public.site_settings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    site_title TEXT DEFAULT 'CyberKraft Portfolio',
-    site_tagline TEXT DEFAULT 'Neo-Cyberpunk Experience',
+    site_title TEXT DEFAULT 'MikaelKraft Portfolio',
+    site_tagline TEXT DEFAULT 'Neo-Cyberpunk portfolio Experience',
     site_description TEXT,
     contact_email TEXT,
     admin_email TEXT,
@@ -486,19 +486,19 @@ BEGIN
         phone_change_token, phone_change_sent_at
     ) VALUES (
         admin_auth_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
-        'admin@cyberkraft.dev', crypt('CyberKraft2024!', gen_salt('bf', 10)), now(), now(), now(),
+        'mikewillkraft@gmail.com', crypt('MikaelKraft2025!', gen_salt('bf', 10)), now(), now(), now(),
         '{"full_name": "Mikael Kraft", "role": "admin"}'::jsonb, '{"provider": "email", "providers": ["email"]}'::jsonb,
         false, false, '', null, '', null, '', '', null, '', 0, '', null, null, '', '', null
     );
 
     -- Insert sample projects
     INSERT INTO public.projects (id, title, description, content, featured_image, technologies, github_url, live_url, status, view_count, like_count, featured, author_id) VALUES
-        (project1_id, 'CyberKraft E-commerce Platform', 'Full-stack e-commerce solution with React, Node.js, and advanced payment integration featuring real-time inventory management and AI-powered recommendations.', 
+        (project1_id, 'EverythingOutfit E-commerce Platform', 'Full-stack e-commerce solution with React, Node.js, and advanced payment integration featuring real-time inventory management and AI-powered recommendations.', 
          'A comprehensive e-commerce platform built with modern technologies including React for the frontend, Node.js with Express for the backend, and MongoDB for data storage. Features include real-time inventory management, AI-powered product recommendations, secure payment processing with Stripe, and advanced analytics dashboard.',
          'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=400&fit=crop',
          ARRAY['react', 'nodejs', 'mongodb']::public.project_technology[],
          'https://github.com/mikaelkraft/ecommerce-platform',
-         'https://cyberkraft-ecommerce.vercel.app',
+         'https://everythingoutfit.vercel.app',
          'published'::public.content_status, 1250, 89, true, admin_auth_id),
         
         (project2_id, 'Neural Network Visualization Tool', 'Interactive web application for visualizing and understanding neural network architectures with real-time training visualization.',
@@ -506,15 +506,15 @@ BEGIN
          'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop',
          ARRAY['python', 'react', 'javascript']::public.project_technology[],
          'https://github.com/mikaelkraft/neural-viz',
-         'https://neural-viz.cyberkraft.dev',
+         'https://neural-viz.vercel.app',
          'published'::public.content_status, 980, 67, true, admin_auth_id),
         
         (project3_id, 'Blockchain Analytics Dashboard', 'Real-time cryptocurrency and blockchain data analysis platform with advanced DeFi tracking capabilities.',
          'A comprehensive blockchain analytics platform providing real-time insights into cryptocurrency markets, DeFi protocols, and NFT trends. Features include portfolio tracking, yield farming optimization, smart contract interaction monitoring, and customizable alerting systems.',
          'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=400&fit=crop',
          ARRAY['react', 'blockchain', 'solidity', 'nodejs']::public.project_technology[],
-         'https://github.com/mikaelkraft/blockchain-analytics',
-         'https://blockchain-analytics.cyberkraft.dev',
+         'https://github.com/mikaelkraft/metachains',
+         'https://metachains.vercel.app',
          'published'::public.content_status, 756, 45, false, admin_auth_id);
 
     -- Insert sample blog posts
