@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isValidUrl, isValidEmail, validateProject, validateSlide, validateBlog, validateNewsletter, SLUG_REGEX } from '../src/utils/validation/index.js';
+import { isValidUrl, isValidEmail, validateProject, validateSlide, validateBlog, validateNewsletter, SLUG_REGEX, EMAIL_REGEX, URL_REGEX } from '../src/utils/validation/index.js';
 
 describe('validation helpers', () => {
   it('isValidUrl accepts http/https or empty', () => {

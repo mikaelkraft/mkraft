@@ -4,12 +4,32 @@ import { api } from './api/client';
 const USE_API = import.meta.env.VITE_USE_API === 'true';
 
 class NewsletterService {
+  // Helper method to handle common error cases
+  _handleError(error, defaultMessage) {
+    if (error?.message?.includes('Failed to fetch') || 
+        error?.message?.includes('NetworkError') ||
+        error?.name === 'TypeError' && error?.message?.includes('fetch')) {
+      return { 
+        success: false, 
+        error: 'Cannot connect to database. Your Supabase project may be paused or deleted. Please visit your Supabase dashboard to check project status.' 
+      };
+    }
+    return { success: false, error: defaultMessage };
+  }
+
+  // Helper method to validate email
+  _validateEmail(email) {
+    if (!email || !this.isValidEmail(email)) {
+      return { success: false, error: 'Valid email is required' };
+    }
+    return null;
+  }
+
   // Subscribe to newsletter
   async subscribe(email, name = '') {
     try {
-      if (!email || !this.isValidEmail(email)) {
-        return { success: false, error: 'Valid email is required' };
-      }
+      const validation = this._validateEmail(email);
+      if (validation) return validation;
 
       if (USE_API) {
         const token = (await supabase.auth.getSession()).data.session?.access_token;
@@ -39,24 +59,15 @@ class NewsletterService {
         return { success: true, data };
       }
     } catch (error) {
-      if (error?.message?.includes('Failed to fetch') || 
-          error?.message?.includes('NetworkError') ||
-          error?.name === 'TypeError' && error?.message?.includes('fetch')) {
-        return { 
-          success: false, 
-          error: 'Cannot connect to database. Your Supabase project may be paused or deleted. Please visit your Supabase dashboard to check project status.' 
-        };
-      }
-      return { success: false, error: 'Failed to subscribe to newsletter' };
+      return this._handleError(error, 'Failed to subscribe to newsletter');
     }
   }
 
   // Unsubscribe from newsletter
   async unsubscribe(email) {
     try {
-      if (!email || !this.isValidEmail(email)) {
-        return { success: false, error: 'Valid email is required' };
-      }
+      const validation = this._validateEmail(email);
+      if (validation) return validation;
 
       if (USE_API) {
         const data = await api.delete('/newsletter', { email });
@@ -80,24 +91,15 @@ class NewsletterService {
         return { success: true, data };
       }
     } catch (error) {
-      if (error?.message?.includes('Failed to fetch') || 
-          error?.message?.includes('NetworkError') ||
-          error?.name === 'TypeError' && error?.message?.includes('fetch')) {
-        return { 
-          success: false, 
-          error: 'Cannot connect to database. Your Supabase project may be paused or deleted. Please visit your Supabase dashboard to check project status.' 
-        };
-      }
-      return { success: false, error: 'Failed to unsubscribe from newsletter' };
+      return this._handleError(error, 'Failed to unsubscribe from newsletter');
     }
   }
 
   // Check if email is already subscribed
   async checkSubscription(email) {
     try {
-      if (!email || !this.isValidEmail(email)) {
-        return { success: false, error: 'Valid email is required' };
-      }
+      const validation = this._validateEmail(email);
+      if (validation) return validation;
 
       if (USE_API) {
         const data = await api.get('/newsletter', { email });
@@ -121,15 +123,7 @@ class NewsletterService {
         return { success: true, data: { subscribed: true, email: data.email } };
       }
     } catch (error) {
-      if (error?.message?.includes('Failed to fetch') || 
-          error?.message?.includes('NetworkError') ||
-          error?.name === 'TypeError' && error?.message?.includes('fetch')) {
-        return { 
-          success: false, 
-          error: 'Cannot connect to database. Your Supabase project may be paused or deleted. Please visit your Supabase dashboard to check project status.' 
-        };
-      }
-      return { success: false, error: 'Failed to check subscription status' };
+      return this._handleError(error, 'Failed to check subscription status');
     }
   }
 
