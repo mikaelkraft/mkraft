@@ -1,4 +1,4 @@
-# React
+# WisdomInTech
 
 My Portfolio website...
 
