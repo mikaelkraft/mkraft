@@ -561,6 +561,40 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
           <div className="text-xs text-text-secondary font-caption mt-1">Insert an ad after this many posts (requires Ad Slot ID).</div>
         </div>
       </div>
+
+      {/* Header Code Injection */}
+      <div className="space-y-4">
+        <h4 className="text-lg font-heading font-semibold text-text-primary flex items-center gap-2">
+          <Icon name="Code" size={20} className="text-primary" />
+          Code Injection
+        </h4>
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-2">Header Code (HTML/JS)</label>
+          <textarea
+            className="w-full px-4 py-3 bg-surface border border-border-accent/20 rounded-lg text-text-primary font-mono text-sm resize-y"
+            rows={6}
+            placeholder="<!-- Analytics, ads, or custom scripts -->"
+            value={localSettings.ads?.header_code || ''}
+            onChange={(e) => handleAdsSettingChange('header_code', e.target.value)}
+          />
+          <div className="text-xs text-text-secondary font-caption mt-1">
+            Code injected in the &lt;head&gt; tag. Use for analytics, ads, or custom scripts.
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-2">Footer Code (HTML/JS)</label>
+          <textarea
+            className="w-full px-4 py-3 bg-surface border border-border-accent/20 rounded-lg text-text-primary font-mono text-sm resize-y"
+            rows={4}
+            placeholder="<!-- Footer scripts -->"
+            value={localSettings.ads?.footer_code || ''}
+            onChange={(e) => handleAdsSettingChange('footer_code', e.target.value)}
+          />
+          <div className="text-xs text-text-secondary font-caption mt-1">
+            Code injected before the closing &lt;/body&gt; tag.
+          </div>
+        </div>
+      </div>
     </div>
   );
 
