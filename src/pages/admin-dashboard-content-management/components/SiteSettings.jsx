@@ -226,6 +226,18 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
       </div>
 
       <div>
+        <FileUpload
+          label="Resume/CV"
+          value={localSettings.resumeUrl}
+          onChange={(url) => handleSettingChange('resumeUrl', url)}
+          bucket="media"
+          pathPrefix="documents"
+          accept="document"
+          helperText="Upload your resume/CV as PDF, DOC, or DOCX."
+        />
+      </div>
+
+      <div>
         <label className="block text-sm font-medium text-text-primary mb-2 flex items-center gap-2">
           <Icon name="Video" size={16} className="text-primary" />
           Hero Background Video (optional)

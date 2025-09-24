@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 
 const DynamicFooter = ({ currentTheme }) => {
@@ -65,8 +66,8 @@ const DynamicFooter = ({ currentTheme }) => {
     {
       title: "Resources",
       links: [
-        { name: "Documentation", href: "#" },
-        { name: "API Reference", href: "#" },
+        { name: "Documentation", href: "/documentation" },
+        { name: "API Reference", href: "/documentation#api" },
         { name: "Privacy Policy", href: "#" },
         { name: "Terms of Service", href: "#" }
       ]
@@ -136,20 +137,30 @@ const DynamicFooter = ({ currentTheme }) => {
               <ul className="space-y-3">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    <a
-                      href={link.href}
-                      target={link.external ? "_blank" : "_self"}
-                      rel={link.external ? "noopener noreferrer" : ""}
-                      className={`
-                        ${themeClasses.link} text-sm transition-colors duration-fast
-                        hover:underline flex items-center space-x-2
-                      `}
-                    >
-                      <span>{link.name}</span>
-                      {link.external && (
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`
+                          ${themeClasses.link} text-sm transition-colors duration-fast
+                          hover:underline flex items-center space-x-2
+                        `}
+                      >
+                        <span>{link.name}</span>
                         <Icon name="ExternalLink" size={12} />
-                      )}
-                    </a>
+                      </a>
+                    ) : (
+                      <Link
+                        to={link.href}
+                        className={`
+                          ${themeClasses.link} text-sm transition-colors duration-fast
+                          hover:underline
+                        `}
+                      >
+                        {link.name}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

@@ -1,11 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
+import settingsService from '../../../utils/settingsService';
 
 const HeroSection = ({ currentTheme }) => {
   const [typedText, setTypedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [settings, setSettings] = useState({});
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await settingsService.getSettings();
+        if (res.success) {
+          setSettings(res.data);
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleDownloadResume = () => {
+    if (settings.resumeUrl) {
+      // Create a temporary link element to trigger download
+      const link = document.createElement('a');
+      link.href = settings.resumeUrl;
+      link.download = 'Mikael_Kraft_Resume.pdf';
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   const phrases = [
     "React Developer",
@@ -135,12 +164,17 @@ const HeroSection = ({ currentTheme }) => {
             <Icon name="FolderOpen" size={20} className="inline mr-2" />
             View Projects
           </button>
-          <button className={`
-            px-8 py-4 rounded-lg font-medium text-lg transition-all duration-fast border-2
-            ${currentTheme === 'light' ?'border-blue-600 text-blue-600 hover:bg-blue-50' :'border-primary text-primary hover:bg-primary/10'
-            }
-            min-h-[48px] min-w-[160px]
-          `}>
+          <button 
+            onClick={handleDownloadResume}
+            disabled={!settings.resumeUrl}
+            className={`
+              px-8 py-4 rounded-lg font-medium text-lg transition-all duration-fast border-2
+              ${!settings.resumeUrl ? 'opacity-50 cursor-not-allowed' : ''}
+              ${currentTheme === 'light' ?'border-blue-600 text-blue-600 hover:bg-blue-50' :'border-primary text-primary hover:bg-primary/10'
+              }
+              min-h-[48px] min-w-[160px]
+            `}
+          >
             <Icon name="Download" size={20} className="inline mr-2" />
             Download CV
           </button>

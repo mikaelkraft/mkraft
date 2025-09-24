@@ -1,22 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Image from '../../../components/AppImage';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
 const ProjectCard = ({ project, isAdmin, onEdit, onDelete, onViewDetails }) => {
-  const handleCardClick = (e) => {
-    // Prevent card click when clicking on action buttons
-    if (e.target.closest('.action-button')) {
-      return;
-    }
-    onViewDetails(project);
-  };
-
   return (
-    <div 
-      className="group relative bg-surface border border-border-accent/20 rounded-lg overflow-hidden hover:border-primary/40 transition-all duration-normal cursor-pointer hover-glow-primary"
-      onClick={handleCardClick}
-    >
+    <div className="group relative bg-surface border border-border-accent/20 rounded-lg overflow-hidden hover:border-primary/40 transition-all duration-normal hover-glow-primary">
+      <Link to={`/project/${project.id}`} className="block cursor-pointer">
       {/* Project Image */}
       <div className="relative h-48 overflow-hidden">
         <Image
@@ -112,6 +103,7 @@ const ProjectCard = ({ project, isAdmin, onEdit, onDelete, onViewDetails }) => {
               size="xs"
               iconName="Edit"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 onEdit(project);
               }}
@@ -124,6 +116,7 @@ const ProjectCard = ({ project, isAdmin, onEdit, onDelete, onViewDetails }) => {
               size="xs"
               iconName="Trash2"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 onDelete(project);
               }}
@@ -133,7 +126,7 @@ const ProjectCard = ({ project, isAdmin, onEdit, onDelete, onViewDetails }) => {
             </Button>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Hover Overlay */}
       <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-normal pointer-events-none"></div>
