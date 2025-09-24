@@ -63,11 +63,11 @@ module.exports = async function handler(req, res) {
       const publishedAt = body.published_at ? new Date(body.published_at) : (body.status === 'published' ? new Date() : null);
       const insertSql = `
         INSERT INTO wisdomintech.blog_posts (
-          slug, title, excerpt, content, featured_image, tags, category, status, featured, author_id, published_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+          slug, title, excerpt, content, featured_image, source_url, tags, category, status, featured, author_id, published_at
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
         RETURNING *
       `;
-      const params = [slug, body.title || '', body.excerpt || null, body.content || null, body.featured_image || null, body.tags || null, body.category || null, body.status || 'draft', !!body.featured, user.id, publishedAt];
+      const params = [slug, body.title || '', body.excerpt || null, body.content || null, body.featured_image || null, body.source_url || null, body.tags || null, body.category || null, body.status || 'draft', !!body.featured, user.id, publishedAt];
       const { rows } = await query(insertSql, params);
       return json(res, rows[0], 201);
     }
@@ -94,6 +94,7 @@ module.exports = async function handler(req, res) {
       if ('excerpt' in body) setField('excerpt', body.excerpt);
       if ('content' in body) setField('content', body.content);
       if ('featured_image' in body) setField('featured_image', body.featured_image);
+      if ('source_url' in body) setField('source_url', body.source_url);
       if ('tags' in body) setField('tags', body.tags);
       if ('category' in body) setField('category', body.category);
       if ('status' in body) setField('status', body.status);

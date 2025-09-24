@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   excerpt text,
   content text,
   featured_image text,
+  source_url text,
   tags text[],
   category text,
   status text DEFAULT 'draft',

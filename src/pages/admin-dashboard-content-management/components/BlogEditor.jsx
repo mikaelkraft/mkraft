@@ -103,6 +103,7 @@ const BlogEditor = ({ mode = 'create', initialData = {}, onCancel, onSave }) => 
     readTime: 5,
     slug: '',
     featured: false,
+    sourceUrl: '',
     metaTitle: '',
     metaDescription: '',
     publishedAt: '',
@@ -140,6 +141,7 @@ const BlogEditor = ({ mode = 'create', initialData = {}, onCancel, onSave }) => 
       readTime: Number(form.readTime || estRead) || estRead,
       slug,
       featured: !!form.featured,
+      sourceUrl: form.sourceUrl || undefined,
       metaTitle: form.metaTitle || undefined,
       metaDescription: form.metaDescription || undefined,
       publishDate: form.publishedAt || (form.status === 'published' ? new Date().toISOString() : null),
@@ -230,6 +232,16 @@ const BlogEditor = ({ mode = 'create', initialData = {}, onCancel, onSave }) => 
                 helperText="Select or drop an image to upload."
               />
               {errors.featuredImage && <p className="mt-1 text-xs text-error">{errors.featuredImage}</p>}
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Source URL (optional)</label>
+              <Input 
+                type="url" 
+                value={form.sourceUrl || ''} 
+                onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })}
+                placeholder="https://example.com/original-source"
+                helperText="Reference link if content is based on or inspired by another source"
+              />
             </div>
             <div>
               <label className="block text-sm text-text-secondary mb-1">Read Time (minutes)</label>
