@@ -23,12 +23,26 @@ const HeroSection = ({ currentTheme }) => {
     loadSettings();
   }, []);
 
+  // Utility to extract filename from URL
+  const getFilenameFromUrl = (url) => {
+    try {
+      const urlObj = new URL(url, window.location.origin);
+      const pathname = urlObj.pathname;
+      const filename = pathname.substring(pathname.lastIndexOf('/') + 1) || 'resume.pdf';
+      return filename;
+    } catch (e) {
+      return 'resume.pdf';
+    }
+  };
+
   const handleDownloadResume = () => {
     if (settings.resumeUrl) {
+      // Determine filename: use settings.resumeFilename if available, else derive from URL
+      const filename = settings.resumeFilename || getFilenameFromUrl(settings.resumeUrl);
       // Create a temporary link element to trigger download
       const link = document.createElement('a');
       link.href = settings.resumeUrl;
-      link.download = 'Mikael_Kraft_Resume.pdf';
+      link.download = filename;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
