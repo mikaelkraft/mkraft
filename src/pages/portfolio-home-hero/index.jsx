@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet';
 import HeaderNavigation from '../../components/ui/HeaderNavigation';
 import HeroSection from './components/HeroSection';
 import ProjectCarousel from './components/ProjectCarousel';
+import ProjectShowcase from './components/ProjectShowcase';
 import TechStackGrid from './components/TechStackGrid';
 import VisitorInfoPanel from './components/VisitorInfoPanel';
 import SocialMediaGrid from './components/SocialMediaGrid';
@@ -134,6 +135,9 @@ const PortfolioHomeHero = () => {
 
           {/* Project Carousel */}
           <ProjectCarousel currentTheme={currentTheme} />
+
+          {/* Project Showcase - Video/Image/Logo Projects */}
+          <ProjectShowcase currentTheme={currentTheme} />
 
           {/* Technology Stack Grid */}
           <TechStackGrid currentTheme={currentTheme} items={techStack} />
