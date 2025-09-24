@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS site_settings (
   maintenance_mode boolean DEFAULT false,
   custom_css text,
   custom_js text,
+  resume_url text,
+  hero_image_url text,
   ui jsonb,
   ads jsonb,
   created_at timestamptz DEFAULT now(),

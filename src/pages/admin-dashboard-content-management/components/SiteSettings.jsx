@@ -12,6 +12,7 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
   const tabs = [
     { id: 'general', label: 'General', icon: 'Settings' },
     { id: 'appearance', label: 'Appearance', icon: 'Palette' },
+    { id: 'content', label: 'Content', icon: 'FileText' },
     { id: 'tech', label: 'Tech Stack', icon: 'Cpu' },
     { id: 'social', label: 'Social Media', icon: 'Share2' },
     { id: 'seo', label: 'SEO', icon: 'Search' },
@@ -47,6 +48,14 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
     setLocalSettings(prev => ({
       ...prev,
       ui: { ...(prev.ui || {}), tech_stack: next }
+    }));
+    setHasChanges(true);
+  };
+
+  const handleDemoProjectsChange = (next) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      ui: { ...(prev.ui || {}), demo_projects: next }
     }));
     setHasChanges(true);
   };
@@ -257,6 +266,228 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
       </div>
     </div>
   );
+
+  const renderContentSettings = () => (
+    <div className="space-y-8">
+      {/* Hero Section Settings */}
+      <div>
+        <h3 className="text-lg font-heading font-semibold text-text-primary mb-4">Hero Section</h3>
+        
+        {/* Hero Profile Image */}
+        <div className="mb-6">
+          <FileUpload
+            label="Hero Profile Image"
+            value={localSettings.hero_image_url || ''}
+            onChange={(url) => handleSettingChange('hero_image_url', url)}
+            bucket="media"
+            pathPrefix="hero"
+            accept="image"
+            helperText="Upload your profile image for the hero section. Recommended: 400x400px."
+          />
+        </div>
+
+        {/* Hero Video Background */}
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-2 flex items-center gap-2">
+            <Icon name="Video" size={16} className="text-primary" />
+            Hero Background Video (optional)
+          </label>
+          <div className="text-xs text-text-secondary font-caption mb-2">
+            Provide a short, muted background video for the hero section. MP4/WebM recommended. Keep under ~10MB for performance.
+          </div>
+          <FileUpload
+            label=""
+            value={(localSettings.ui?.hero_video_url) || ''}
+            onChange={(url) => handleUiSettingChange('hero_video_url', url)}
+            bucket="media"
+            pathPrefix="videos"
+            accept="video"
+            helperText="Accepted: mp4, webm, ogg. Autoplay is muted."
+          />
+        </div>
+      </div>
+
+      {/* Demo Projects Settings */}
+      <div>
+        <h3 className="text-lg font-heading font-semibold text-text-primary mb-4">Demo Projects</h3>
+        <p className="text-sm text-text-secondary font-caption mb-4">
+          Manage the demo projects shown in the homepage carousel. These are showcase projects for visitors.
+        </p>
+        {renderDemoProjectsSettings()}
+      </div>
+    </div>
+  );
+
+  const renderDemoProjectsSettings = () => {
+    const projects = (localSettings.ui?.demo_projects) || [];
+    const updateProject = (idx, patch) => {
+      const next = projects.map((p, i) => i === idx ? { ...p, ...patch } : p);
+      handleDemoProjectsChange(next);
+    };
+    const addProject = () => {
+      const next = [...projects, { 
+        title: '', 
+        description: '', 
+        image: '',
+        tech: [],
+        status: 'Live',
+        category: '',
+        liveUrl: '',
+        githubUrl: ''
+      }];
+      handleDemoProjectsChange(next);
+    };
+    const removeProject = (idx) => {
+      const next = projects.filter((_, i) => i !== idx);
+      handleDemoProjectsChange(next);
+    };
+    const moveProject = (from, to) => {
+      if (to < 0 || to >= projects.length) return;
+      const next = [...projects];
+      const [project] = next.splice(from, 1);
+      next.splice(to, 0, project);
+      handleDemoProjectsChange(next);
+    };
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-md font-semibold text-text-primary">Projects Showcase</h4>
+            <p className="text-sm text-text-secondary">Add and manage demo projects for the homepage carousel.</p>
+          </div>
+          <Button variant="primary" onClick={addProject} iconName="Plus" iconPosition="left">Add Project</Button>
+        </div>
+
+        {projects.length === 0 && (
+          <div className="text-center py-8 border border-border-accent/20 rounded-lg bg-surface/30">
+            <Icon name="FolderOpen" size={48} className="mx-auto text-text-secondary mb-4" />
+            <h4 className="text-lg font-semibold text-text-primary mb-2">No Demo Projects</h4>
+            <p className="text-text-secondary mb-4">Add demo projects to showcase your work on the homepage.</p>
+            <Button variant="primary" onClick={addProject} iconName="Plus" iconPosition="left">Add Your First Project</Button>
+          </div>
+        )}
+
+        <div className="space-y-6">
+          {projects.map((project, idx) => (
+            <div key={idx} className="p-6 rounded-lg border border-border-accent/20 bg-surface/30">
+              <div className="flex items-start justify-between mb-4">
+                <h4 className="text-lg font-semibold text-text-primary">Project #{idx + 1}</h4>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    iconName="ArrowUp"
+                    onClick={() => moveProject(idx, idx - 1)}
+                    disabled={idx === 0}
+                  />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    iconName="ArrowDown"
+                    onClick={() => moveProject(idx, idx + 1)}
+                    disabled={idx === projects.length - 1}
+                  />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    iconName="Trash2"
+                    onClick={() => removeProject(idx)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-xs text-text-secondary mb-1">Title *</label>
+                  <Input 
+                    value={project.title} 
+                    onChange={(e) => updateProject(idx, { title: e.target.value })}
+                    placeholder="Project title"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-text-secondary mb-1">Category</label>
+                  <Input 
+                    value={project.category} 
+                    onChange={(e) => updateProject(idx, { category: e.target.value })}
+                    placeholder="e.g., FinTech, AI/ML, Security"
+                  />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-xs text-text-secondary mb-1">Description</label>
+                <textarea
+                  value={project.description}
+                  onChange={(e) => updateProject(idx, { description: e.target.value })}
+                  placeholder="Brief description of the project..."
+                  className="w-full px-3 py-2 border border-border-accent/20 rounded-lg bg-background/50 text-text-primary resize-none"
+                  rows={3}
+                />
+              </div>
+
+              <div className="mb-4">
+                <FileUpload
+                  label="Project Image"
+                  value={project.image}
+                  onChange={(url) => updateProject(idx, { image: url })}
+                  bucket="media"
+                  pathPrefix="projects"
+                  accept="image"
+                  helperText="Upload project screenshot or demo image."
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-xs text-text-secondary mb-1">Status</label>
+                  <select
+                    value={project.status}
+                    onChange={(e) => updateProject(idx, { status: e.target.value })}
+                    className="w-full px-3 py-2 border border-border-accent/20 rounded-lg bg-background/50 text-text-primary"
+                  >
+                    <option value="Live">Live</option>
+                    <option value="Development">Development</option>
+                    <option value="Beta">Beta</option>
+                    <option value="Research">Research</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-text-secondary mb-1">Live URL (optional)</label>
+                  <Input 
+                    value={project.liveUrl || ''} 
+                    onChange={(e) => updateProject(idx, { liveUrl: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-text-secondary mb-1">GitHub URL (optional)</label>
+                  <Input 
+                    value={project.githubUrl || ''} 
+                    onChange={(e) => updateProject(idx, { githubUrl: e.target.value })}
+                    placeholder="https://github.com/..."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">Technologies (comma-separated)</label>
+                <Input 
+                  value={Array.isArray(project.tech) ? project.tech.join(', ') : ''} 
+                  onChange={(e) => updateProject(idx, { 
+                    tech: e.target.value.split(',').map(t => t.trim()).filter(t => t) 
+                  })}
+                  placeholder="React, Node.js, PostgreSQL, Docker"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const renderTechStackSettings = () => {
     const stack = (localSettings.ui?.tech_stack) || [];
@@ -697,6 +928,7 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
         <div className="p-6">
           {activeTab === 'general' && renderGeneralSettings()}
           {activeTab === 'appearance' && renderAppearanceSettings()}
+          {activeTab === 'content' && renderContentSettings()}
           {activeTab === 'tech' && renderTechStackSettings()}
           {activeTab === 'social' && renderSocialSettings()}
           {activeTab === 'seo' && renderSEOSettings()}
