@@ -7,6 +7,7 @@ import TechStackGrid from './components/TechStackGrid';
 import VisitorInfoPanel from './components/VisitorInfoPanel';
 import SocialMediaGrid from './components/SocialMediaGrid';
 import FeaturedBlogPosts from './components/FeaturedBlogPosts';
+import NewsletterSubscription from './components/NewsletterSubscription';
 import ThemeControls from './components/ThemeControls';
 import DynamicFooter from './components/DynamicFooter';
 import settingsService from '../../utils/settingsService';
@@ -139,6 +140,9 @@ const PortfolioHomeHero = () => {
 
           {/* Featured Blog Posts */}
           <FeaturedBlogPosts currentTheme={currentTheme} />
+
+          {/* Newsletter Subscription */}
+          <NewsletterSubscription currentTheme={currentTheme} />
 
           {/* Visitor Information Panel */}
           <VisitorInfoPanel currentTheme={currentTheme} />

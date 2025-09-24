@@ -89,7 +89,7 @@ const DynamicFooter = ({ currentTheme }) => {
             <div className="flex items-center space-x-3 mb-6">
               <div className="relative">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${currentTheme === 'light' ? 'bg-blue-600' : 'bg-gradient-to-br from-primary to-secondary'}`}>
-                  <Icon name="Zap" size={24} className={currentTheme === 'light' ? 'text-white' : 'text-background'} />
+                  <Icon name="Code" size={24} className={currentTheme === 'light' ? 'text-white' : 'text-background'} />
                 </div>
                 {currentTheme !== 'light' && (
                   <div className="absolute -inset-1 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg blur opacity-75 -z-10"></div>

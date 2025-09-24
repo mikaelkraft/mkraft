@@ -88,7 +88,45 @@ const FeaturedBlogPosts = ({ currentTheme }) => {
   }
 
   if (!featuredPosts.length) {
-    return null; // Don't show section if no featured posts
+    return (
+      <section className={`py-20 ${themeClasses.bg} border-t ${themeClasses.border}`}>
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Section Header */}
+          <div className="text-center mb-12">
+            <h2 className={`text-4xl font-heading font-bold ${themeClasses.text} mb-4`}>
+              Featured Insights
+            </h2>
+            <p className={`text-lg ${themeClasses.text} opacity-80 max-w-2xl mx-auto`}>
+              Latest thoughts on technology, development, and cybersecurity from the blog
+            </p>
+          </div>
+
+          {/* No Featured Posts Message */}
+          <div className="text-center py-12">
+            <div className={`w-24 h-24 mx-auto mb-6 rounded-full ${themeClasses.cardBg} border flex items-center justify-center`}>
+              <Icon name="BookOpen" size={32} className={themeClasses.accent} />
+            </div>
+            <h3 className={`font-heading font-semibold text-xl ${themeClasses.text} mb-4`}>
+              No Featured Posts Yet
+            </h3>
+            <p className={`${themeClasses.text} opacity-70 mb-6 max-w-md mx-auto`}>
+              Featured blog posts will appear here once you publish and feature blog posts in the admin dashboard.
+            </p>
+            <Link
+              to="/blog-content-hub"
+              className={`inline-flex items-center px-6 py-3 ${themeClasses.cardBg} border rounded-lg font-medium transition-all duration-fast hover:scale-105 hover-glow-primary group`}
+            >
+              <span className={themeClasses.text}>Visit Blog</span>
+              <Icon
+                name="ArrowRight"
+                size={16}
+                className={`ml-2 ${themeClasses.accent} group-hover:translate-x-1 transition-transform duration-fast`}
+              />
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
