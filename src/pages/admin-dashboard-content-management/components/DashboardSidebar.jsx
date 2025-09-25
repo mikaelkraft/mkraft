@@ -31,6 +31,12 @@ const DashboardSidebar = ({ activeSection, onSectionChange, stats }) => {
       count: stats.blogPosts
     },
     {
+      id: 'moderation',
+      label: 'Moderation',
+      icon: 'ShieldCheck',
+      description: 'Comments review'
+    },
+    {
       id: 'slides',
       label: 'Hero Slides',
       icon: 'Image',

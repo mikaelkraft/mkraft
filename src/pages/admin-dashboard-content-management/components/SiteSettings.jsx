@@ -166,24 +166,58 @@ const SiteSettings = ({ settings, onSettingsUpdate }) => {
       <div>
         <label className="block text-sm font-medium text-text-primary mb-4">Default Theme</label>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {['cyberpunk', 'neural', 'futuristic', 'light'].map((theme) => (
-            <button
-              key={theme}
-              onClick={() => handleSettingChange('defaultTheme', theme)}
-              className={`p-4 rounded-lg border-2 transition-all duration-fast ${
-                localSettings.defaultTheme === theme
-                  ? 'border-primary bg-primary/10' :'border-border-accent/20 hover:border-primary/50'
-              }`}
-            >
-              <div className={`w-full h-16 rounded-lg mb-3 ${
-                theme === 'cyberpunk' ? 'bg-gradient-to-br from-primary to-secondary' :
-                theme === 'neural' ? 'bg-gradient-to-br from-accent to-primary' :
-                theme === 'futuristic'? 'bg-gradient-to-br from-secondary to-accent' : 'bg-gradient-to-br from-gray-300 to-gray-500'
-              }`}></div>
-              <div className="text-sm font-medium text-text-primary capitalize">{theme}</div>
-            </button>
-          ))}
+          {Array.isArray(localSettings.ui?.theme_presets) && localSettings.ui.theme_presets.length > 0 ? (
+            localSettings.ui.theme_presets.map((preset) => (
+              <button
+                key={preset.name}
+                onClick={() => handleSettingChange('defaultTheme', preset.name)}
+                className={`p-4 rounded-lg border-2 transition-all duration-fast ${
+                  localSettings.defaultTheme === preset.name
+                    ? 'border-primary bg-primary/10' :'border-border-accent/20 hover:border-primary/50'
+                }`}
+              >
+                <div
+                  className="w-full h-16 rounded-lg mb-3 flex overflow-hidden"
+                  style={{
+                    background: preset.background || '#111827'
+                  }}
+                >
+                  <div className="flex-1 h-full" style={{ background: preset.primary || '#6366f1', opacity: 0.85 }}></div>
+                  <div className="flex-1 h-full" style={{ background: preset.accent || '#f59e0b', opacity: 0.65 }}></div>
+                </div>
+                <div className="text-sm font-medium text-text-primary capitalize flex items-center justify-between">
+                  <span>{preset.name}</span>
+                  {localSettings.defaultTheme === preset.name && (
+                    <Icon name="Check" size={16} className="text-primary" />
+                  )}
+                </div>
+              </button>
+            ))
+          ) : (
+            ['cyberpunk', 'neural', 'futuristic', 'light'].map((theme) => (
+              <button
+                key={theme}
+                onClick={() => handleSettingChange('defaultTheme', theme)}
+                className={`p-4 rounded-lg border-2 transition-all duration-fast ${
+                  localSettings.defaultTheme === theme
+                    ? 'border-primary bg-primary/10' :'border-border-accent/20 hover:border-primary/50'
+                }`}
+              >
+                <div className={`w-full h-16 rounded-lg mb-3 ${
+                  theme === 'cyberpunk' ? 'bg-gradient-to-br from-primary to-secondary' :
+                  theme === 'neural' ? 'bg-gradient-to-br from-accent to-primary' :
+                  theme === 'futuristic'? 'bg-gradient-to-br from-secondary to-accent' : 'bg-gradient-to-br from-gray-300 to-gray-500'
+                }`}></div>
+                <div className="text-sm font-medium text-text-primary capitalize">{theme}</div>
+              </button>
+            ))
+          )}
         </div>
+        {Array.isArray(localSettings.ui?.theme_presets) && (
+          <div className="mt-4 text-xs text-text-secondary font-caption">
+            Theme presets are stored in settings.ui.theme_presets. You can extend them via a migration/patch.
+          </div>
+        )}
       </div>
 
       <div>
