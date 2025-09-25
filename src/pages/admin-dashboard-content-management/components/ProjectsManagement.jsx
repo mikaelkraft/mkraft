@@ -35,7 +35,11 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
   const [createForm, setCreateForm] = useState({
     title: '',
     description: '',
-    image: '',
+    featured_image: '',
+    gallery_images: [],
+    type: 'image',
+    video_url: '',
+    video_poster: '',
     technologies: '',
     status: 'draft',
     github_url: '',
@@ -50,7 +54,11 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
     setEditForm({
       title: project.title || '',
       description: project.description || '',
-      image: project.image || '',
+      featured_image: project.featured_image || '',
+      gallery_images: project.gallery_images || [],
+      type: project.type || 'image',
+      video_url: project.video_url || '',
+      video_poster: project.video_poster || '',
       technologies: (project.technologies || []).join(', '),
       status: project.status || 'draft',
       github_url: project.github_url || '',
@@ -70,7 +78,11 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
     onProjectCreate({
       title: createForm.title,
       description: createForm.description,
-      image: createForm.image,
+      featured_image: createForm.featured_image,
+      gallery_images: createForm.gallery_images,
+      type: createForm.type,
+      video_url: createForm.video_url,
+      video_poster: createForm.video_poster,
       technologies,
       status: createForm.status,
       github_url: createForm.github_url || undefined,
@@ -78,7 +90,19 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
       date: new Date().toISOString(),
     });
     setShowCreateModal(false);
-    setCreateForm({ title: '', description: '', image: '', technologies: '', status: 'draft', github_url: '', live_url: '' });
+    setCreateForm({ 
+      title: '', 
+      description: '', 
+      featured_image: '', 
+      gallery_images: [], 
+      type: 'image',
+      video_url: '',
+      video_poster: '',
+      technologies: '', 
+      status: 'draft', 
+      github_url: '', 
+      live_url: '' 
+    });
   };
 
   const submitEdit = (e) => {
@@ -94,7 +118,11 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
     onProjectUpdate(editingProject.id, {
       title: editForm.title,
       description: editForm.description,
-      image: editForm.image,
+      featured_image: editForm.featured_image,
+      gallery_images: editForm.gallery_images,
+      type: editForm.type,
+      video_url: editForm.video_url,
+      video_poster: editForm.video_poster,
       technologies,
       status: editForm.status,
       github_url: editForm.github_url || undefined,
@@ -396,6 +424,15 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
               {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
             </div>
             <div>
+              <label className="block text-sm text-text-secondary mb-1">Project Type</label>
+              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={createForm.type} onChange={(e) => setCreateForm({ ...createForm, type: e.target.value })}>
+                <option value="image">Image Project</option>
+                <option value="video">Video Project</option>
+                <option value="gallery">Image Gallery</option>
+                <option value="logo_gallery">Logo Gallery</option>
+              </select>
+            </div>
+            <div>
               <label className="block text-sm text-text-secondary mb-1">Status</label>
               <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}>
                 <option value="draft">Draft</option>
@@ -408,16 +445,54 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
             </div>
             <div className="md:col-span-2">
               <FileUpload
-                label="Project Image"
-                value={createForm.image}
-                onChange={(url) => setCreateForm({ ...createForm, image: url })}
+                label="Featured Image"
+                value={createForm.featured_image}
+                onChange={(url) => setCreateForm({ ...createForm, featured_image: url })}
                 bucket="media"
                 pathPrefix="projects"
                 accept="image"
                 helperText="Upload a representative image for this project."
               />
-              {formErrors.image && <p className="mt-1 text-xs text-error">{formErrors.image}</p>}
+              {formErrors.featured_image && <p className="mt-1 text-xs text-error">{formErrors.featured_image}</p>}
             </div>
+            {(createForm.type === 'video') && (
+              <>
+                <div className="md:col-span-2">
+                  <FileUpload
+                    label="Video File"
+                    value={createForm.video_url}
+                    onChange={(url) => setCreateForm({ ...createForm, video_url: url })}
+                    bucket="media"
+                    pathPrefix="videos"
+                    accept="video"
+                    helperText="Upload video file (MP4, WebM, OGG)."
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <FileUpload
+                    label="Video Poster Image"
+                    value={createForm.video_poster}
+                    onChange={(url) => setCreateForm({ ...createForm, video_poster: url })}
+                    bucket="media"
+                    pathPrefix="videos"
+                    accept="image"
+                    helperText="Upload a poster image for the video."
+                  />
+                </div>
+              </>
+            )}
+            {(createForm.type === 'gallery' || createForm.type === 'logo_gallery') && (
+              <div className="md:col-span-2">
+                <label className="block text-sm text-text-secondary mb-1">Gallery Images (comma-separated URLs)</label>
+                <textarea 
+                  className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" 
+                  rows={3} 
+                  value={Array.isArray(createForm.gallery_images) ? createForm.gallery_images.join(', ') : createForm.gallery_images} 
+                  onChange={(e) => setCreateForm({ ...createForm, gallery_images: e.target.value.split(',').map(url => url.trim()).filter(Boolean) })}
+                  placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                />
+              </div>
+            )}
             <div>
               <label className="block text-sm text-text-secondary mb-1">Technologies (comma-separated)</label>
               <Input value={createForm.technologies} onChange={(e) => setCreateForm({ ...createForm, technologies: e.target.value })} />
@@ -446,6 +521,15 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
               {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
             </div>
             <div>
+              <label className="block text-sm text-text-secondary mb-1">Project Type</label>
+              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}>
+                <option value="image">Image Project</option>
+                <option value="video">Video Project</option>
+                <option value="gallery">Image Gallery</option>
+                <option value="logo_gallery">Logo Gallery</option>
+              </select>
+            </div>
+            <div>
               <label className="block text-sm text-text-secondary mb-1">Status</label>
               <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
                 <option value="draft">Draft</option>
@@ -458,16 +542,54 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
             </div>
             <div className="md:col-span-2">
               <FileUpload
-                label="Project Image"
-                value={editForm.image}
-                onChange={(url) => setEditForm({ ...editForm, image: url })}
+                label="Featured Image"
+                value={editForm.featured_image}
+                onChange={(url) => setEditForm({ ...editForm, featured_image: url })}
                 bucket="media"
                 pathPrefix="projects"
                 accept="image"
                 helperText="Upload a representative image for this project."
               />
-              {formErrors.image && <p className="mt-1 text-xs text-error">{formErrors.image}</p>}
+              {formErrors.featured_image && <p className="mt-1 text-xs text-error">{formErrors.featured_image}</p>}
             </div>
+            {(editForm.type === 'video') && (
+              <>
+                <div className="md:col-span-2">
+                  <FileUpload
+                    label="Video File"
+                    value={editForm.video_url}
+                    onChange={(url) => setEditForm({ ...editForm, video_url: url })}
+                    bucket="media"
+                    pathPrefix="videos"
+                    accept="video"
+                    helperText="Upload video file (MP4, WebM, OGG)."
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <FileUpload
+                    label="Video Poster Image"
+                    value={editForm.video_poster}
+                    onChange={(url) => setEditForm({ ...editForm, video_poster: url })}
+                    bucket="media"
+                    pathPrefix="videos"
+                    accept="image"
+                    helperText="Upload a poster image for the video."
+                  />
+                </div>
+              </>
+            )}
+            {(editForm.type === 'gallery' || editForm.type === 'logo_gallery') && (
+              <div className="md:col-span-2">
+                <label className="block text-sm text-text-secondary mb-1">Gallery Images (comma-separated URLs)</label>
+                <textarea 
+                  className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" 
+                  rows={3} 
+                  value={Array.isArray(editForm.gallery_images) ? editForm.gallery_images.join(', ') : editForm.gallery_images} 
+                  onChange={(e) => setEditForm({ ...editForm, gallery_images: e.target.value.split(',').map(url => url.trim()).filter(Boolean) })}
+                  placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                />
+              </div>
+            )}
             <div>
               <label className="block text-sm text-text-secondary mb-1">Technologies (comma-separated)</label>
               <Input value={editForm.technologies} onChange={(e) => setEditForm({ ...editForm, technologies: e.target.value })} />

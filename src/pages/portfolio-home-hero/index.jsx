@@ -3,9 +3,12 @@ import { Helmet } from 'react-helmet';
 import HeaderNavigation from '../../components/ui/HeaderNavigation';
 import HeroSection from './components/HeroSection';
 import ProjectCarousel from './components/ProjectCarousel';
+import ProjectShowcase from './components/ProjectShowcase';
 import TechStackGrid from './components/TechStackGrid';
 import VisitorInfoPanel from './components/VisitorInfoPanel';
 import SocialMediaGrid from './components/SocialMediaGrid';
+import FeaturedBlogPosts from './components/FeaturedBlogPosts';
+import NewsletterSubscription from './components/NewsletterSubscription';
 import ThemeControls from './components/ThemeControls';
 import DynamicFooter from './components/DynamicFooter';
 import settingsService from '../../utils/settingsService';
@@ -113,7 +116,10 @@ const PortfolioHomeHero = () => {
           />
         )}
         {/* Header Navigation */}
-        <HeaderNavigation onThemeControlsToggle={handleThemeControlsToggle} />
+        <HeaderNavigation 
+          onThemeControlsToggle={handleThemeControlsToggle} 
+          currentTheme={currentTheme}
+        />
 
         {/* Theme Controls Modal */}
         <ThemeControls
@@ -133,8 +139,17 @@ const PortfolioHomeHero = () => {
           {/* Project Carousel */}
           <ProjectCarousel currentTheme={currentTheme} />
 
+          {/* Project Showcase - Video/Image/Logo Projects */}
+          <ProjectShowcase currentTheme={currentTheme} />
+
           {/* Technology Stack Grid */}
           <TechStackGrid currentTheme={currentTheme} items={techStack} />
+
+          {/* Featured Blog Posts */}
+          <FeaturedBlogPosts currentTheme={currentTheme} />
+
+          {/* Newsletter Subscription */}
+          <NewsletterSubscription currentTheme={currentTheme} />
 
           {/* Visitor Information Panel */}
           <VisitorInfoPanel currentTheme={currentTheme} />

@@ -102,18 +102,18 @@ const TechStackGrid = ({ currentTheme, items }) => {
       description: "UI/UX design and prototyping"
     },
     {
-      name: "Adobe CC",
+      name: "CorelDraw",
       icon: "Image",
       category: "Graphics",
       proficiency: 80,
-      description: "Photoshop, Illustrator, and creative tools"
+      description: "Vector graphics and digital design"
     },
     {
-      name: "Premiere Pro",
+      name: "Power Director",
       icon: "Video",
       category: "Video",
       proficiency: 75,
-      description: "Video editing and post-production"
+      description: "Professional video editing and effects"
     }
   ];
 

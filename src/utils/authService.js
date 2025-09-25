@@ -49,6 +49,37 @@ class AuthService {
     }
   }
 
+  // Sign in with OAuth (Google/GitHub)
+  async signInWithOAuth(provider) {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/admin-dashboard-content-management`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      if (error?.message?.includes('Failed to fetch') || 
+          error?.message?.includes('AuthRetryableFetchError')) {
+        return { 
+          success: false, 
+          error: 'Cannot connect to authentication service. Your Supabase project may be paused or inactive. Please check your Supabase dashboard and resume your project if needed.' 
+        };
+      }
+      return { success: false, error: 'An unexpected error occurred during OAuth sign in' };
+    }
+  }
+
   // Sign up new user
   async signUp(email, password, userData = {}) {
     try {

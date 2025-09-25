@@ -11,6 +11,12 @@ const DashboardSidebar = ({ activeSection, onSectionChange, stats }) => {
       description: 'Analytics & metrics'
     },
     {
+      id: 'analytics',
+      label: 'Analytics',
+      icon: 'TrendingUp',
+      description: 'Visit tracking & stats'
+    },
+    {
       id: 'projects',
       label: 'Projects',
       icon: 'FolderOpen',

@@ -142,6 +142,26 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // OAuth sign in function
+  const signInWithOAuth = async (provider) => {
+    try {
+      setAuthError(null);
+      const result = await authService.signInWithOAuth(provider);
+
+      if (!result?.success) {
+        setAuthError(result?.error || "OAuth login failed");
+        return { success: false, error: result?.error };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error) {
+      const errorMsg = "Something went wrong during OAuth login. Please try again.";
+      setAuthError(errorMsg);
+      console.log("OAuth sign in error:", error);
+      return { success: false, error: errorMsg };
+    }
+  };
+
   // Sign out function
   const signOut = async () => {
     try {
@@ -219,6 +239,7 @@ export function AuthProvider({ children }) {
     authError,
     signIn,
     signUp,
+    signInWithOAuth,
     signOut,
     updateProfile,
     resetPassword,

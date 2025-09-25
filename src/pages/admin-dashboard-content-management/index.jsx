@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import HeaderNavigation from '../../components/ui/HeaderNavigation';
 import DashboardSidebar from './components/DashboardSidebar';
 import DashboardOverview from './components/DashboardOverview';
+import AnalyticsOverview from './components/AnalyticsOverview';
 import ProjectsManagement from './components/ProjectsManagement';
 import BlogManagement from './components/BlogManagement';
 import BlogEditor from './components/BlogEditor';
@@ -397,6 +398,8 @@ const AdminDashboardContentManagement = () => {
             analytics={mockAnalytics} 
           />
         );
+      case 'analytics':
+        return <AnalyticsOverview />;
       case 'projects':
         return (
           <ProjectsManagement

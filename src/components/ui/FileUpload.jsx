@@ -7,6 +7,7 @@ const ACCEPT_MAP = {
   image: 'image/*',
   icon: '.ico,image/x-icon,image/vnd.microsoft.icon,image/png,image/svg+xml',
   video: 'video/*',
+  document: '.pdf,.doc,.docx',
 };
 
 const FileUpload = ({
@@ -64,6 +65,7 @@ const FileUpload = ({
           {value ? (
             (() => {
               const isVideo = (accept === 'video') || /\.(mp4|webm|ogg)(\?|#|$)/i.test(String(value));
+              const isDocument = (accept === 'document') || /\.(pdf|doc|docx)(\?|#|$)/i.test(String(value));
               if (isVideo) {
                 return (
                   <video
@@ -75,13 +77,18 @@ const FileUpload = ({
                   />
                 );
               }
+              if (isDocument) {
+                return (
+                  <Icon name="FileText" size={20} className="text-primary" />
+                );
+              }
               return (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={value} alt="preview" className="w-full h-full object-cover" />
               );
             })()
           ) : (
-            <Icon name={accept === 'video' ? 'Video' : 'Image'} size={20} className="text-text-secondary" />
+            <Icon name={accept === 'video' ? 'Video' : accept === 'document' ? 'FileText' : 'Image'} size={20} className="text-text-secondary" />
           )}
         </div>
         <div className="flex-1 min-w-0">

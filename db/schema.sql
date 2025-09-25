@@ -27,11 +27,14 @@ CREATE TABLE IF NOT EXISTS site_settings (
   default_font_size text,
   logo_url text,
   favicon_url text,
+  resume_url text,
   social_media jsonb,
   seo_settings jsonb,
   maintenance_mode boolean DEFAULT false,
   custom_css text,
   custom_js text,
+  resume_url text,
+  hero_image_url text,
   ui jsonb,
   ads jsonb,
   created_at timestamptz DEFAULT now(),
@@ -45,7 +48,7 @@ CREATE TABLE IF NOT EXISTS projects (
   description text,
   featured_image text,
   gallery_images text[], -- for gallery type
-  type text DEFAULT 'image', -- image | video | gallery
+  type text DEFAULT 'image', -- image | video | gallery | logo_gallery
   video_url text,
   video_poster text,
   tags text[],
@@ -67,6 +70,7 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   excerpt text,
   content text,
   featured_image text,
+  source_url text,
   tags text[],
   category text,
   status text DEFAULT 'draft',

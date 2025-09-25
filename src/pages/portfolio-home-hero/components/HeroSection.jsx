@@ -1,11 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
+import settingsService from '../../../utils/settingsService';
 
 const HeroSection = ({ currentTheme }) => {
   const [typedText, setTypedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [settings, setSettings] = useState({});
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await settingsService.getSettings();
+        if (res.success) {
+          setSettings(res.data);
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  // Utility to extract filename from URL
+  const getFilenameFromUrl = (url) => {
+    try {
+      const urlObj = new URL(url, window.location.origin);
+      const pathname = urlObj.pathname;
+      const filename = pathname.substring(pathname.lastIndexOf('/') + 1) || 'resume.pdf';
+      return filename;
+    } catch (e) {
+      return 'resume.pdf';
+    }
+  };
+
+  const handleDownloadResume = () => {
+    if (settings.resumeUrl) {
+      // Determine filename: use settings.resumeFilename if available, else derive from URL
+      const filename = settings.resumeFilename || getFilenameFromUrl(settings.resumeUrl);
+      // Create a temporary link element to trigger download
+      const link = document.createElement('a');
+      link.href = settings.resumeUrl;
+      link.download = filename;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   const phrases = [
     "React Developer",
@@ -87,7 +130,7 @@ const HeroSection = ({ currentTheme }) => {
   <div className="mt-8 md:mt-16 mb-8 flex justify-center">
           <div className={`relative w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 ${currentTheme === 'light' ? 'border-blue-200' : 'border-primary/50'} hover-glow-primary transition-all duration-normal`}>
             <Image 
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"
+              src={settings.heroImageUrl || settings.hero_image_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"}
               alt="Mikael Kraft - Full Stack Developer"
               className="w-full h-full object-cover"
             />
@@ -135,12 +178,17 @@ const HeroSection = ({ currentTheme }) => {
             <Icon name="FolderOpen" size={20} className="inline mr-2" />
             View Projects
           </button>
-          <button className={`
-            px-8 py-4 rounded-lg font-medium text-lg transition-all duration-fast border-2
-            ${currentTheme === 'light' ?'border-blue-600 text-blue-600 hover:bg-blue-50' :'border-primary text-primary hover:bg-primary/10'
-            }
-            min-h-[48px] min-w-[160px]
-          `}>
+          <button 
+            onClick={handleDownloadResume}
+            disabled={!settings.resumeUrl}
+            className={`
+              px-8 py-4 rounded-lg font-medium text-lg transition-all duration-fast border-2
+              ${!settings.resumeUrl ? 'opacity-50 cursor-not-allowed' : ''}
+              ${currentTheme === 'light' ?'border-blue-600 text-blue-600 hover:bg-blue-50' :'border-primary text-primary hover:bg-primary/10'
+              }
+              min-h-[48px] min-w-[160px]
+            `}
+          >
             <Icon name="Download" size={20} className="inline mr-2" />
             Download CV
           </button>

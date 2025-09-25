@@ -475,6 +475,24 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                   </div>
                 )}
 
+                {/* Source Attribution */}
+                {post.source_url && (
+                  <div className="mb-8 p-4 bg-background/30 border border-border-accent/20 rounded-lg">
+                    <div className="flex items-center space-x-2 text-sm text-text-secondary">
+                      <Icon name="ExternalLink" size={16} />
+                      <span>Source:</span>
+                      <a 
+                        href={post.source_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:text-secondary underline"
+                      >
+                        {new URL(post.source_url).hostname}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
                 {/* Comments Section - Only for published posts */}
                 {post.status === 'published' && (
                   <div className="border-t border-border-accent/20 pt-8">

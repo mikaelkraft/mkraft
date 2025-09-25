@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 
 const DynamicFooter = ({ currentTheme }) => {
@@ -65,8 +66,8 @@ const DynamicFooter = ({ currentTheme }) => {
     {
       title: "Resources",
       links: [
-        { name: "Documentation", href: "#" },
-        { name: "API Reference", href: "#" },
+        { name: "Documentation", href: "/documentation" },
+        { name: "API Reference", href: "/documentation#api" },
         { name: "Privacy Policy", href: "#" },
         { name: "Terms of Service", href: "#" }
       ]
@@ -88,7 +89,7 @@ const DynamicFooter = ({ currentTheme }) => {
             <div className="flex items-center space-x-3 mb-6">
               <div className="relative">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${currentTheme === 'light' ? 'bg-blue-600' : 'bg-gradient-to-br from-primary to-secondary'}`}>
-                  <Icon name="Zap" size={24} className={currentTheme === 'light' ? 'text-white' : 'text-background'} />
+                  <Icon name="Code" size={24} className={currentTheme === 'light' ? 'text-white' : 'text-background'} />
                 </div>
                 {currentTheme !== 'light' && (
                   <div className="absolute -inset-1 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg blur opacity-75 -z-10"></div>
@@ -136,20 +137,30 @@ const DynamicFooter = ({ currentTheme }) => {
               <ul className="space-y-3">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    <a
-                      href={link.href}
-                      target={link.external ? "_blank" : "_self"}
-                      rel={link.external ? "noopener noreferrer" : ""}
-                      className={`
-                        ${themeClasses.link} text-sm transition-colors duration-fast
-                        hover:underline flex items-center space-x-2
-                      `}
-                    >
-                      <span>{link.name}</span>
-                      {link.external && (
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`
+                          ${themeClasses.link} text-sm transition-colors duration-fast
+                          hover:underline flex items-center space-x-2
+                        `}
+                      >
+                        <span>{link.name}</span>
                         <Icon name="ExternalLink" size={12} />
-                      )}
-                    </a>
+                      </a>
+                    ) : (
+                      <Link
+                        to={link.href}
+                        className={`
+                          ${themeClasses.link} text-sm transition-colors duration-fast
+                          hover:underline
+                        `}
+                      >
+                        {link.name}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

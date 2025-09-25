@@ -1,13 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
+import settingsService from '../../../utils/settingsService';
 
 const ProjectCarousel = ({ currentTheme }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const intervalRef = useRef(null);
 
-  const projects = [
+  // Load projects from settings
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const res = await settingsService.getSettings();
+        if (res.success && res.data.ui?.demo_projects?.length) {
+          setProjects(res.data.ui.demo_projects);
+        } else {
+          // Fallback to default projects if none configured
+          setProjects(defaultProjects);
+        }
+      } catch (error) {
+        console.error('Failed to load demo projects:', error);
+        setProjects(defaultProjects);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProjects();
+  }, []);
+
+  const defaultProjects = [
     {
       id: 1,
       title: "CyberSecure Banking Platform",
@@ -56,7 +80,7 @@ const ProjectCarousel = ({ currentTheme }) => {
   ];
 
   useEffect(() => {
-    if (isAutoPlaying) {
+    if (isAutoPlaying && projects.length > 0 && !loading) {
       intervalRef.current = setInterval(() => {
         setCurrentSlide(prev => (prev + 1) % projects.length);
       }, 4000);
@@ -67,7 +91,7 @@ const ProjectCarousel = ({ currentTheme }) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isAutoPlaying, projects.length]);
+  }, [isAutoPlaying, projects.length, loading]);
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
@@ -121,6 +145,59 @@ const ProjectCarousel = ({ currentTheme }) => {
   };
 
   const themeClasses = getThemeClasses();
+
+  if (loading) {
+    return (
+      <section className={`py-20 px-6 ${currentTheme === 'light' ? 'bg-gray-50' : 'bg-background'}`}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="animate-pulse">
+              <div className="h-8 bg-surface/20 rounded w-64 mx-auto mb-4"></div>
+              <div className="h-4 bg-surface/10 rounded w-96 mx-auto"></div>
+            </div>
+          </div>
+          <div className={`${themeClasses.card} rounded-2xl border-2 overflow-hidden animate-pulse`}>
+            <div className="grid lg:grid-cols-2 gap-8 p-8">
+              <div className="aspect-video rounded-xl bg-surface/20"></div>
+              <div className="space-y-4">
+                <div className="h-6 bg-surface/20 rounded w-3/4"></div>
+                <div className="h-4 bg-surface/10 rounded w-full"></div>
+                <div className="h-4 bg-surface/10 rounded w-2/3"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (projects.length === 0) {
+    return (
+      <section className={`py-20 px-6 ${currentTheme === 'light' ? 'bg-gray-50' : 'bg-background'}`}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className={`font-heading text-3xl lg:text-4xl font-bold mb-4 ${themeClasses.text}`}>
+              Featured Projects
+            </h2>
+            <p className={`text-lg max-w-2xl mx-auto ${currentTheme === 'light' ? 'text-gray-600' : 'text-text-secondary'}`}>
+              Showcase projects will appear here once you add them in the admin dashboard
+            </p>
+          </div>
+          <div className="text-center py-12">
+            <div className={`w-24 h-24 mx-auto mb-6 rounded-full ${themeClasses.card} border-2 flex items-center justify-center`}>
+              <Icon name="FolderOpen" size={32} className={themeClasses.accent} />
+            </div>
+            <h3 className={`font-heading font-semibold text-xl ${themeClasses.text} mb-4`}>
+              No Demo Projects Yet
+            </h3>
+            <p className={`${currentTheme === 'light' ? 'text-gray-600' : 'text-text-secondary'} mb-6 max-w-md mx-auto`}>
+              Add demo projects in the admin dashboard to showcase your work here.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const getStatusColor = (status) => {
     switch(status) {
