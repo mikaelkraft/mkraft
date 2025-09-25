@@ -4,9 +4,11 @@ import Icon from '../AppIcon';
 import Button from './Button';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../auth/AuthModal';
+import SearchModal from './SearchModal';
 
-const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeControlsToggle }) => {
+const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeControlsToggle, currentTheme = 'cyberpunk' }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const location = useLocation();
   const { userProfile, signOut } = useAuth();
   const isAdmin = userProfile?.role === 'admin';
@@ -139,8 +141,16 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
               ))}
             </div>
 
-            {/* Desktop Auth Toggle and Theme Controls */}
+            {/* Desktop Search, Auth Toggle and Theme Controls */}
             <div className="hidden lg:flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchModalOpen(true)}
+                iconName="Search"
+                className="p-2"
+                title="Search portfolio"
+              />
               {onThemeControlsToggle && (
                 <Button
                   variant="ghost"
@@ -183,6 +193,14 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
 
             {/* Mobile Menu Button */}
             <div className="lg:hidden flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchModalOpen(true)}
+                iconName="Search"
+                className="p-2"
+                title="Search portfolio"
+              />
               {onThemeControlsToggle && (
                 <Button
                   variant="ghost"
@@ -293,6 +311,13 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
           </div>
         </div>
       </div>
+
+      {/* Search Modal */}
+      <SearchModal 
+        isOpen={searchModalOpen} 
+        onClose={() => setSearchModalOpen(false)} 
+        currentTheme={currentTheme}
+      />
 
       {/* Auth Modal */}
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} defaultMode="login" />

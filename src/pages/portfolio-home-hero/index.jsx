@@ -116,7 +116,10 @@ const PortfolioHomeHero = () => {
           />
         )}
         {/* Header Navigation */}
-        <HeaderNavigation onThemeControlsToggle={handleThemeControlsToggle} />
+        <HeaderNavigation 
+          onThemeControlsToggle={handleThemeControlsToggle} 
+          currentTheme={currentTheme}
+        />
 
         {/* Theme Controls Modal */}
         <ThemeControls
