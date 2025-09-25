@@ -1,6 +1,7 @@
 const { json, error, getUrl } = require('../_lib/respond.js');
 const { query } = require('../_lib/db.js');
 const { rateLimit } = require('../_lib/rateLimit.js');
+const { sanitize } = require('../_lib/sanitize.js');
 
 // GET /api/comments?postId=uuid -> returns top-level comments with replies
 // POST /api/comments -> create new comment or reply
@@ -63,7 +64,8 @@ module.exports = async function handler(req, res) {
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
       `;
-      const { rows } = await query(insertSql, [blog_post_id, parent_comment_id, author_name, author_email || null, content, ip, userAgent]);
+      const cleanContent = sanitize(content).slice(0, 5000);
+      const { rows } = await query(insertSql, [blog_post_id, parent_comment_id, author_name, author_email || null, cleanContent, ip, userAgent]);
 
       // Update blog post comment_count
       // Manual recount no longer needed (trigger handles approved changes); keep fallback recount for pending state only

@@ -27,11 +27,12 @@ app.all('/api/blog', wrap(withTransform(require('./api/blog/index.js'), { camel:
 app.all('/api/blog/by-slug', wrap(withTransform(require('./api/blog/by-slug.js'), { camel: true, cacheSeconds: 60 })));
 app.all('/api/slides', wrap(withTransform(require('./api/slides/index.js'), { camel: true, cacheSeconds: 30 })));
 app.all('/api/slides/reorder', wrap(require('./api/slides/reorder.js')));
-app.all('/api/comments', wrap(require('./api/comments/index.js')));
-app.all('/api/comments/moderate', wrap(require('./api/comments/moderate.js')));
-app.all('/api/likes/toggle', wrap(require('./api/likes/toggle.js')));
-app.all('/api/views/increment', wrap(require('./api/views/increment.js')));
-app.all('/api/newsletter', wrap(require('./api/newsletter/index.js')));
+app.all('/api/comments', wrap(withTransform(require('./api/comments/index.js'), { camel: true })));
+app.all('/api/comments/moderate', wrap(withTransform(require('./api/comments/moderate.js'), { camel: true })));
+app.all('/api/likes/toggle', wrap(withTransform(require('./api/likes/toggle.js'), { camel: true })));
+app.all('/api/views/increment', wrap(withTransform(require('./api/views/increment.js'), { camel: true })));
+app.all('/api/newsletter', wrap(withTransform(require('./api/newsletter/index.js'), { camel: true })));
+app.all('/api/profile/avatar', wrap(withTransform(require('./api/profile/avatar.js'), { camel: true })));
 app.all('/api/health', wrap(require('./api/health/index.js')));
 
 // Health check

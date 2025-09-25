@@ -1,9 +1,13 @@
 const { json, error } = require('../_lib/respond.js');
 const { query } = require('../_lib/db.js');
+const { rateLimit } = require('../_lib/rateLimit.js');
+
+const toggleLimiter = rateLimit({ windowMs: 60_000, max: 60 });
 
 module.exports = async function handler(req, res) {
   try {
-    if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
+  if (req.method !== 'POST') return error(res, 'Method not allowed', 405);
+  let proceed = false; await new Promise(r => toggleLimiter(req, res, () => { proceed = true; r(); })); if (!proceed) return;
     let body = '';
     req.on('data', c => body += c);
     await new Promise(r => req.on('end', r));
