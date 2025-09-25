@@ -1,6 +1,7 @@
 const { json, error, getUrl } = require('../_lib/respond.js');
 const { query } = require('../_lib/db.js');
 const { getJsonBody } = require('../_lib/body.js');
+const { rateLimit } = require('../_lib/rateLimit.js');
 
 // Helper function to validate email
 function isValidEmail(email) {
@@ -25,7 +26,13 @@ function validateEmailParam(email, res) {
   return emailTrimmed;
 }
 
+// Apply rate limiting per IP (subscribe/unsubscribe heavy operations)
+const limiter = rateLimit({ windowMs: 60_000, max: 10 });
+
 module.exports = async function handler(req, res) {
+  let proceed = false;
+  await new Promise((resolve) => limiter(req, res, () => { proceed = true; resolve(); }));
+  if (!proceed) return; // rate limited
   try {
     const url = getUrl(req);
     

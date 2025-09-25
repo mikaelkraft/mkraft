@@ -177,11 +177,13 @@ const AdminDashboardContentManagement = () => {
     };
   }, []);
 
+  const [moderationFilter, setModerationFilter] = useState('pending');
+
   const loadModeration = async () => {
     try {
       setModerationLoading(true);
       const base = import.meta.env.VITE_API_BASE_URL || '/api';
-      const res = await fetch(base + '/comments/moderate?status=approved');
+      const res = await fetch(base + '/comments/moderate?status=' + moderationFilter);
       if (res.ok) {
         const data = await res.json();
         setModerationComments(data);
@@ -402,12 +404,36 @@ const AdminDashboardContentManagement = () => {
   };
 
   const handleSlideReorder = async (slideId, newOrder) => {
-    const res = await slideService.updateSlideOrder(slideId, newOrder);
-    if (res.success) {
-      setSlides((prev) => prev.map((s) => (s.id === slideId ? { ...s, display_order: newOrder } : s)));
-      show('Slide order updated', { type: 'success' });
-    } else {
-      show(res.error || 'Failed to reorder slide', { type: 'error' });
+    // Fallback to existing single update if API batch not used environment
+    const base = import.meta.env.VITE_API_BASE_URL || '/api';
+    try {
+      // Build new ordering array client-side
+      const reordered = [...slides]
+        .map(s => ({ ...s }))
+        .sort((a,b) => a.display_order - b.display_order);
+      const idx = reordered.findIndex(s => s.id === slideId);
+      if (idx === -1) return;
+      const target = reordered.splice(idx,1)[0];
+      // Clamp newOrder
+      const clamped = Math.max(1, Math.min(newOrder, reordered.length + 1));
+      reordered.splice(clamped - 1, 0, target);
+      // Reassign sequential orders
+      const payload = reordered.map((s,i) => ({ id: s.id, display_order: i+1 }));
+      const token = (await import('../../utils/supabase.js')).default.auth.getSession ? (await (await import('../../utils/supabase.js')).default.auth.getSession()).data.session?.access_token : null;
+      const headers = { 'content-type':'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const res = await fetch(base + '/slides/reorder', { method: 'POST', headers, body: JSON.stringify({ order: payload }) });
+      if (res.ok) {
+        setSlides(prev => payload.map(p => {
+          const found = prev.find(s => s.id === p.id);
+            return { ...found, display_order: p.display_order };
+        }));
+        show('Slides reordered', { type: 'success' });
+      } else {
+        show('Failed batch reorder; falling back', { type: 'error' });
+      }
+    } catch (e) {
+      show('Reorder error', { type: 'error' });
     }
   };
 
@@ -506,7 +532,14 @@ const AdminDashboardContentManagement = () => {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-text-primary">Comment Moderation</h2>
-              <button onClick={loadModeration} className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80">Refresh</button>
+              <div className="flex items-center gap-2">
+                <select value={moderationFilter} onChange={(e) => { setModerationFilter(e.target.value); setTimeout(loadModeration, 0); }} className="bg-surface border border-border-accent/30 rounded px-2 py-1 text-sm">
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="all">All</option>
+                </select>
+                <button onClick={loadModeration} className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80">Refresh</button>
+              </div>
             </div>
             {moderationLoading && <div className="text-sm text-text-secondary">Loading comments…</div>}
             <div className="space-y-4">

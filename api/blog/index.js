@@ -3,6 +3,7 @@ const { query } = require('../_lib/db.js');
 const { requireAdmin } = require('../_lib/auth.js');
 const { getJsonBody } = require('../_lib/body.js');
 const { ensureUserProfile } = require('../_lib/profile.js');
+const { sanitize } = require('../_lib/sanitize.js');
 
 // GET /api/blog?published=true&featured=true&limit=10
 module.exports = async function handler(req, res) {
@@ -58,7 +59,8 @@ module.exports = async function handler(req, res) {
       const user = await requireAdmin(req, res);
       if (!user) return;
       await ensureUserProfile(user);
-      const body = await getJsonBody(req);
+  const body = await getJsonBody(req);
+  if (body.content) body.content = sanitize(body.content);
       const slug = (body.slug && String(body.slug).trim()) ? String(body.slug).trim().toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/(^-|-$)/g,'') : String(body.title || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
       const publishedAt = body.published_at ? new Date(body.published_at) : (body.status === 'published' ? new Date() : null);
       const insertSql = `
@@ -92,7 +94,7 @@ module.exports = async function handler(req, res) {
       }
       if ('title' in body) setField('title', body.title);
       if ('excerpt' in body) setField('excerpt', body.excerpt);
-      if ('content' in body) setField('content', body.content);
+  if ('content' in body) setField('content', body.content ? sanitize(body.content) : null);
       if ('featured_image' in body) setField('featured_image', body.featured_image);
       if ('source_url' in body) setField('source_url', body.source_url);
       if ('tags' in body) setField('tags', body.tags);

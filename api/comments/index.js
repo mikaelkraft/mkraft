@@ -1,8 +1,11 @@
 const { json, error, getUrl } = require('../_lib/respond.js');
 const { query } = require('../_lib/db.js');
+const { rateLimit } = require('../_lib/rateLimit.js');
 
 // GET /api/comments?postId=uuid -> returns top-level comments with replies
 // POST /api/comments -> create new comment or reply
+const postLimiter = rateLimit({ windowMs: 60_000, max: 20 });
+
 module.exports = async function handler(req, res) {
   try {
     if (req.method === 'GET') {
@@ -41,6 +44,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
+      let proceed = false; await new Promise(r => postLimiter(req, res, () => { proceed = true; r(); })); if (!proceed) return;
       let body = '';
       req.on('data', chunk => { body += chunk; });
       await new Promise(resolve => req.on('end', resolve));
@@ -55,21 +59,14 @@ module.exports = async function handler(req, res) {
       const userAgent = req.headers['user-agent'] || '';
 
       const insertSql = `
-        INSERT INTO wisdomintech.comments (blog_post_id, parent_comment_id, author_name, author_email, content, is_approved, visitor_ip, user_agent)
-        VALUES ($1, $2, $3, $4, $5, true, $6, $7)
+        INSERT INTO wisdomintech.comments (blog_post_id, parent_comment_id, author_name, author_email, content, visitor_ip, user_agent)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
       `;
       const { rows } = await query(insertSql, [blog_post_id, parent_comment_id, author_name, author_email || null, content, ip, userAgent]);
 
       // Update blog post comment_count
-      const countSql = `
-        UPDATE wisdomintech.blog_posts bp
-        SET comment_count = (
-          SELECT count(1) FROM wisdomintech.comments c WHERE c.blog_post_id = bp.id AND c.is_approved = true
-        )
-        WHERE bp.id = $1
-      `;
-      await query(countSql, [blog_post_id]);
+      // Manual recount no longer needed (trigger handles approved changes); keep fallback recount for pending state only
 
       return json(res, rows[0], 201);
     }

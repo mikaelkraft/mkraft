@@ -19,7 +19,8 @@ module.exports = async function handler(req, res) {
       if (status === 'approved') {
         sql = `SELECT * FROM wisdomintech.comments WHERE is_approved = true ORDER BY created_at DESC LIMIT 200`;
       } else if (status === 'pending') {
-        // Pending = currently storing all as approved (future: if we switch default). For now, show recent.
+        sql = `SELECT * FROM wisdomintech.comments WHERE is_approved = false ORDER BY created_at DESC LIMIT 200`;
+      } else if (status === 'all') {
         sql = `SELECT * FROM wisdomintech.comments ORDER BY created_at DESC LIMIT 200`;
       } else {
         return error(res, 'Invalid status', 400);
