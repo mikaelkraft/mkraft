@@ -21,6 +21,8 @@ const AdminDashboardContentManagement = () => {
   const [projects, setProjects] = useState([]);
   const [blogPosts, setBlogPosts] = useState([]);
   const [slides, setSlides] = useState([]);
+  const [moderationComments, setModerationComments] = useState([]);
+  const [moderationLoading, setModerationLoading] = useState(false);
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -162,6 +164,8 @@ const AdminDashboardContentManagement = () => {
         if (posts.success) setBlogPosts(posts.data);
         if (sld.success) setSlides(sld.data);
         if (stg.success) setSettings(stg.data);
+        // Load moderation comments (approved for now; future: pending only if workflow changes)
+        loadModeration();
       } catch (e) {
         if (mounted) setError('Failed to load admin data');
       } finally {
@@ -172,6 +176,52 @@ const AdminDashboardContentManagement = () => {
       mounted = false;
     };
   }, []);
+
+  const loadModeration = async () => {
+    try {
+      setModerationLoading(true);
+      const base = import.meta.env.VITE_API_BASE_URL || '/api';
+      const res = await fetch(base + '/comments/moderate?status=approved');
+      if (res.ok) {
+        const data = await res.json();
+        setModerationComments(data);
+      }
+    } catch (e) {
+      // ignore
+    } finally {
+      setModerationLoading(false);
+    }
+  };
+
+  const handleModerationApproveToggle = async (id, next) => {
+    try {
+      const base = import.meta.env.VITE_API_BASE_URL || '/api';
+      const res = await fetch(base + '/comments/moderate?id=' + id, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ is_approved: next }) });
+      if (res.ok) {
+        setModerationComments(prev => prev.map(c => c.id === id ? { ...c, is_approved: next } : c));
+        show(next ? 'Comment approved' : 'Comment unapproved', { type: 'success' });
+      } else {
+        show('Failed to update comment', { type: 'error' });
+      }
+    } catch {
+      show('Error updating comment', { type: 'error' });
+    }
+  };
+
+  const handleModerationDelete = async (id) => {
+    try {
+      const base = import.meta.env.VITE_API_BASE_URL || '/api';
+      const res = await fetch(base + '/comments/moderate?id=' + id, { method: 'DELETE' });
+      if (res.ok) {
+        setModerationComments(prev => prev.filter(c => c.id !== id));
+        show('Comment deleted', { type: 'success' });
+      } else {
+        show('Failed to delete comment', { type: 'error' });
+      }
+    } catch {
+      show('Error deleting comment', { type: 'error' });
+    }
+  };
 
   const normalizedPosts = blogPosts.map((p) => ({
     id: p.id,
@@ -390,7 +440,7 @@ const AdminDashboardContentManagement = () => {
   };
 
   const renderMainContent = () => {
-    switch (activeSection) {
+  switch (activeSection) {
       case 'overview':
         return (
               <DashboardOverview 
@@ -450,6 +500,36 @@ const AdminDashboardContentManagement = () => {
             onSlideCreate={handleSlideCreate}
             onSlideReorder={handleSlideReorder}
           />
+        );
+      case 'moderation':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-text-primary">Comment Moderation</h2>
+              <button onClick={loadModeration} className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80">Refresh</button>
+            </div>
+            {moderationLoading && <div className="text-sm text-text-secondary">Loading comments…</div>}
+            <div className="space-y-4">
+              {moderationComments.map(c => (
+                <div key={c.id} className="p-4 rounded-lg border border-border-accent/20 bg-surface/40">
+                  <div className="flex justify-between gap-4">
+                    <div>
+                      <div className="text-sm font-semibold text-text-primary">{c.author_name} <span className="font-normal text-text-secondary">&lt;{c.author_email || 'anonymous'}&gt;</span></div>
+                      <div className="text-xs text-text-secondary mb-2">{new Date(c.created_at).toLocaleString()}</div>
+                      <div className="text-sm text-text-primary whitespace-pre-wrap">{c.content}</div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button onClick={() => handleModerationApproveToggle(c.id, !c.is_approved)} className={`px-2 py-1 text-xs rounded ${c.is_approved ? 'bg-warning text-background' : 'bg-success text-background'}`}>{c.is_approved ? 'Unapprove' : 'Approve'}</button>
+                      <button onClick={() => handleModerationDelete(c.id)} className="px-2 py-1 text-xs rounded bg-error text-background">Delete</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {!moderationLoading && moderationComments.length === 0 && (
+                <div className="text-sm text-text-secondary">No comments available.</div>
+              )}
+            </div>
+          </div>
         );
       case 'settings':
         return (

@@ -172,3 +172,17 @@ CREATE INDEX IF NOT EXISTS idx_wit_comments_post_id ON wisdomintech.comments(blo
 CREATE INDEX IF NOT EXISTS idx_wit_likes_blog_post_id ON wisdomintech.likes(blog_post_id);
 CREATE INDEX IF NOT EXISTS idx_wit_likes_comment_id ON wisdomintech.likes(comment_id);
 CREATE INDEX IF NOT EXISTS idx_wit_likes_project_id ON wisdomintech.likes(project_id);
+
+-- Newsletter subscribers
+CREATE TABLE IF NOT EXISTS wisdomintech.newsletter_subscribers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL UNIQUE,
+  name TEXT,
+  is_active BOOLEAN DEFAULT true,
+  subscribed_at TIMESTAMPTZ,
+  reactivated_at TIMESTAMPTZ,
+  unsubscribed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_wit_newsletter_active ON wisdomintech.newsletter_subscribers(is_active);
