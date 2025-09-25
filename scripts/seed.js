@@ -61,10 +61,21 @@ const crypto = require('crypto');
     if (settings.rows.length === 0) {
       const { rows } = await client.query(
         `INSERT INTO wisdomintech.site_settings
-          (site_title, site_tagline, site_description, admin_email, enable_video, default_theme)
-         VALUES ($1,$2,$3,$4,$5,$6)
+          (site_title, site_tagline, site_description, contact_email, admin_email, enable_video, default_theme, ui, ads, hero_image_url)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
          RETURNING id`,
-        ['My Site', 'Just seeded', 'A seeded settings row', email, true, 'light']
+        [
+          'WisdomInTech',
+          'Neo-Cyberpunk Experience',
+          'Seeded settings row',
+          email,
+          email,
+          true,
+          'cyberpunk',
+          JSON.stringify({ toast_duration_ms: 3500 }),
+          JSON.stringify({ enabled: false, provider: 'adsense', auto_ads: true, grid_interval: 6 }),
+          null
+        ]
       );
       console.log('Seeded site settings:', rows[0]);
     } else {
