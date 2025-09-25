@@ -4,6 +4,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 
+const { withTransform } = require('./api/_lib/responseWrap.js');
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
@@ -19,12 +20,12 @@ const wrap = (handler) => async (req, res) => {
 };
 
 // Mount API routes by reusing the serverless handlers
-app.all('/api/settings', wrap(require('./api/settings/index.js')));
-app.all('/api/projects', wrap(require('./api/projects/index.js')));
-app.all('/api/projects/by-id', wrap(require('./api/projects/by-id.js')));
-app.all('/api/blog', wrap(require('./api/blog/index.js')));
-app.all('/api/blog/by-slug', wrap(require('./api/blog/by-slug.js')));
-app.all('/api/slides', wrap(require('./api/slides/index.js')));
+app.all('/api/settings', wrap(withTransform(require('./api/settings/index.js'), { camel: true, cacheSeconds: 30 })));
+app.all('/api/projects', wrap(withTransform(require('./api/projects/index.js'), { camel: true, cacheSeconds: 10 })));
+app.all('/api/projects/by-id', wrap(withTransform(require('./api/projects/by-id.js'), { camel: true, cacheSeconds: 10 })));
+app.all('/api/blog', wrap(withTransform(require('./api/blog/index.js'), { camel: true, cacheSeconds: 15 })));
+app.all('/api/blog/by-slug', wrap(withTransform(require('./api/blog/by-slug.js'), { camel: true, cacheSeconds: 60 })));
+app.all('/api/slides', wrap(withTransform(require('./api/slides/index.js'), { camel: true, cacheSeconds: 30 })));
 app.all('/api/slides/reorder', wrap(require('./api/slides/reorder.js')));
 app.all('/api/comments', wrap(require('./api/comments/index.js')));
 app.all('/api/comments/moderate', wrap(require('./api/comments/moderate.js')));
