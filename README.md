@@ -611,3 +611,198 @@ Prioritize according to impact vs. effort. Suggested first slice: (1) Structured
 
 Feel free to request reordering or pruning; I can convert selected items into GitHub issues with acceptance criteria.
 
+
+## 🛠 Actionable Next Moves (Execution Tracks)
+
+Structured tracks translating the opportunity list into implementable sequences. Each track lists: Objective → Key Steps → Definition of Done (DoD) → Stretch.
+
+### 1. Structured Logging & Metrics Foundation
+**Objective:** Gain observability into API usage & errors.
+**Steps:**
+1. Create `src/utils/log.js` (wrapper: level, context, correlationId).
+2. Add request ID middleware (header `x-request-id` fallback to UUID) in `server.js`.
+3. Log start/end + duration for each API handler.
+4. Emit lightweight counters (in-memory map) for: route hits, 4xx, 5xx.
+5. Expose `/api/health` extended with metrics snapshot (non-sensitive).
+**DoD:** Logs consistent JSON shape; metrics visible locally; no handler uncaught rejections.
+**Stretch:** Pluggable exporter (console → future external sink).
+
+### 2. Lighthouse CI + Performance Budgets
+**Objective:** Prevent regressions in Core Web Vitals.
+**Steps:**
+1. Add `.github/workflows/perf.yml` running Lighthouse CI on build output.
+2. Define budgets (JS < 2500 KB total, LCP < 3.0s local profile).
+3. Fail PR if thresholds exceeded (warn first phase).
+**DoD:** CI comment with scores; red build on hard fail.
+**Stretch:** Track historical trends (artifact upload).
+
+### 3. Media Library Enhancements (Phase 1)
+**Objective:** Improve asset governance & metadata surface.
+**Steps:**
+1. Add DB table `media_assets` (id, path, width, height, mime, alt, created_at).
+2. On upload (avatar / future media), store metadata.
+3. Create `/api/media` list endpoint (paginated, filter by type).
+4. Admin UI grid component to browse + copy URLs.
+**DoD:** Assets visible with dimensions; alt text editable.
+**Stretch:** Dominant color extraction (client side canvas first pass).
+
+### 4. Draft / Revision System (Posts)
+**Objective:** Enable safe iterative authoring.
+**Steps:**
+1. Add `post_revisions` table (id, post_id, content_md, created_at, author_id).
+2. Modify blog save endpoint: if post published → create new revision instead of overwriting.
+3. Admin UI: Revisions panel (list + restore button).
+4. Diff view (simple word diff or highlight changed blocks later).
+**DoD:** Can restore an old revision; published slug stable.
+**Stretch:** Autosave every X seconds (client debounced) when editing.
+
+### 5. Recommendation Engine MVP
+**Objective:** Related posts module to improve session depth.
+**Steps:**
+1. Add SQL similarity using tag overlap + simple keyword frequency.
+2. New endpoint `/api/blog/related?slug=...` returning top 3.
+3. Inject widget into blog post page below content.
+4. Track click events (log or metric counter).
+**DoD:** At least one related post appears when tags shared.
+**Stretch:** Later upgrade to embeddings.
+
+### 6. Admin Command Palette
+**Objective:** Power-user navigation & quick actions.
+**Steps:**
+1. Add palette component (Ctrl/Cmd+K) listing: New Post, New Project, Go to Settings, Toggle Theme.
+2. Build action registry (array of { id, title, shortcut?, run }).
+3. Fuzzy search (simple lowercase includes first pass).
+4. Integrate in admin layout root.
+**DoD:** All core actions invokable via keyboard.
+**Stretch:** Add inline command arguments (e.g. “open post …”).
+
+### 7. Full‑Text Search Skeleton
+**Objective:** Foundation for on-site search.
+**Steps:**
+1. Add tsvector column & GIN index for posts (migration patch).
+2. Backfill existing rows.
+3. Endpoint `/api/blog/search?q=` performing plainto_tsquery.
+4. Basic UI search bar (debounced) returning title + excerpt.
+**DoD:** Search returns relevant posts by title/body semantics.
+**Stretch:** Weighted ranking (title > tags > body).
+
+### 8. Basic Feature Flags
+**Objective:** Safely roll out new UI components.
+**Steps:**
+1. Create `feature_flags` table (key, enabled, note, created_at).
+2. Add `/api/settings/features` endpoint.
+3. Frontend hook `useFeature('flagKey')` with local caching.
+4. Use to guard recommendations + command palette initial rollout.
+**DoD:** Toggle in DB reflects in UI after refresh.
+**Stretch:** In-memory stale-while-revalidate cache + override via query param for testing.
+
+### 9. Git Hooks & Conventional Commits
+**Objective:** Improve commit hygiene & accelerate code reviews.
+**Steps:**
+1. Add `husky` + `lint-staged` devDeps.
+2. Pre-commit: run `npm test -- --run \"src/utils\"` (fast subset) + prettier.
+3. Commit-msg hook: simple regex for conventional style.
+**DoD:** Invalid commit message blocked; staged files formatted.
+**Stretch:** Scope suggestions based on changed paths.
+
+### 10. Code Splitting & Bundle Reduction
+**Objective:** Reduce initial JS cost.
+**Steps:**
+1. Lazy import admin dashboard routes (`React.lazy`).
+2. Lazy load heavy viz libs (d3/recharts) only where needed.
+3. Add manualChunks in `vite.config.mjs` for vendor separation.
+4. Measure before/after (Lighthouse, bundle size diff).
+**DoD:** ≥20% reduction in main bundle.
+**Stretch:** Prefetch on idle.
+
+### 11. Security Headers & Hardening
+**Objective:** Baseline security posture.
+**Steps:**
+1. Add helmet-lite manual headers in `server.js` (CSP, Referrer-Policy, Permissions-Policy).
+2. Configure `Strict-Transport-Security` (handled by host if using Vercel).
+3. Add minimal request size limit + body parser limit.
+4. Document threat model assumptions in `SECURITY.md`.
+**DoD:** Headers visible in response; no breakage of scripts/styles.
+**Stretch:** CSP nonce pipeline.
+
+### 12. Accessibility Automation
+**Objective:** Detect regressions early.
+**Steps:**
+1. Add `axe-core` + a vitest a11y smoke test on key pages (render + check violations).
+2. CI step fails on new critical violations.
+**DoD:** Test suite reports 0 critical issues on base pages.
+**Stretch:** Add color contrast scanning.
+
+### 13. Internationalization Readiness
+**Objective:** Prepare for multi-language without refactor.
+**Steps:**
+1. Wrap user-facing strings in a central `t()` util (pass-through for now).
+2. Inventory static strings (generate report).
+3. Add language setting in site settings table.
+**DoD:** All major UI strings pass through abstraction.
+**Stretch:** JSON locale file loader.
+
+### 14. Semantic Events Schema
+**Objective:** Consistent analytics events.
+**Steps:**
+1. Define `events.md` spec (event_name, required props).
+2. Utility `track(event, props)` with runtime validation.
+3. Emit events: project_view, blog_read, like_toggle, newsletter_subscribe.
+**DoD:** Events logged in dev console structured.
+**Stretch:** Adapter for external analytics later.
+
+### 15. Background Job Abstraction
+**Objective:** Future-proof for async workloads.
+**Steps:**
+1. Create `jobs/queue.js` (in-memory FIFO now; interface: enqueue(type,payload)).
+2. Worker loop processes tasks (e.g., image metadata extraction placeholder).
+3. Replace direct heavy logic calls with enqueue.
+**DoD:** Jobs run async without blocking request.
+**Stretch:** Swap implementation to BullMQ transparently.
+
+### 16. Automated OG Image Generation
+**Objective:** Rich sharing previews.
+**Steps:**
+1. Add serverless function `/api/og/post` generating PNG (satori/canvas).
+2. Template: title, author, date, gradient background.
+3. Add `<meta property="og:image">` dynamic injection (React Helmet).
+**DoD:** Visiting share debugger shows custom image.
+**Stretch:** Theming by post tags.
+
+### 17. Minimal Search Telemetry
+**Objective:** Understand search behavior post-launch.
+**Steps:**
+1. Log query + result_count (no PII) when `/api/blog/search` called.
+2. Add simple admin panel chart (top queries, zero-result queries).
+**DoD:** Dashboard shows distribution.
+**Stretch:** Suggest content gaps.
+
+### 18. Privacy & Data Lifecycle
+**Objective:** Reduce long-term risk.
+**Steps:**
+1. Add cron substitute (setInterval) pruning old view logs > 180d.
+2. Document retention in README privacy note.
+**DoD:** Old rows removed locally.
+**Stretch:** Configurable retention per table.
+
+### 19. Error Budget & SLO Draft
+**Objective:** Reliability baseline.
+**Steps:**
+1. Define provisional SLOs (API success rate 99%, latency p95 < 400ms).
+2. Extend metrics collection to track success/failure per route.
+3. Simple report endpoint `/api/ops/metrics`.
+**DoD:** Can manually inspect if error budget consumed.
+**Stretch:** Alerting hook stub.
+
+### 20. Progressive TypeScript Adoption
+**Objective:** Improve maintainability gradually.
+**Steps:**
+1. Add `tsconfig.json` with `allowJs` & `checkJs`.
+2. Convert utility file (e.g., `src/utils/authService.js`) to `.ts`.
+3. Introduce types for API response wrappers.
+**DoD:** Build passes, no type regressions; one file typed.
+**Stretch:** Convert API handlers.
+
+---
+Pick any track and execute independently; they’re intentionally decoupled. Ask to generate GitHub issues for specific tracks when ready.
+

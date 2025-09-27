@@ -3,19 +3,46 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const crypto = require('crypto');
 
 const { withTransform } = require('./api/_lib/responseWrap.js');
+const { log } = require('./api/_lib/log.js');
+const { inc, observe } = require('./api/_lib/metrics.js');
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
 
-// Small wrapper to normalize error handling
+// Request ID + metrics + access logging middleware (must precede routes)
+app.use((req, res, next) => {
+  const start = Date.now();
+  const requestId = req.headers['x-request-id'] || crypto.randomBytes(8).toString('hex');
+  req.id = requestId;
+  res.setHeader('x-request-id', requestId);
+  inc('requests_total');
+  inc(`method_${req.method.toLowerCase()}_total`);
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    observe('latency_ms', ms);
+    inc(`status_${res.statusCode}_total`);
+    log.info('access', {
+      requestId,
+      method: req.method,
+      path: req.originalUrl,
+      status: res.statusCode,
+      ms
+    });
+  });
+  next();
+});
+
+// Updated wrapper with structured logging & metrics
 const wrap = (handler) => async (req, res) => {
   try {
     await handler(req, res);
   } catch (e) {
-    console.error('Handler error:', e);
-    res.status(500).json({ error: 'Internal Server Error', detail: e.message });
+    inc('handler_errors_total');
+    log.error('handler_error', { requestId: req.id, err: e.message, stack: e.stack });
+    res.status(500).json({ error: 'Internal Server Error', detail: e.message, requestId: req.id });
   }
 };
 
