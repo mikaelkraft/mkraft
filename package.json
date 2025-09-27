@@ -45,7 +45,8 @@
     "dev": "run-p dev:*",
     "dev:client": "vite",
     "dev:api": "node server.js 5000",
-    "test": "vitest run"
+    "test": "vitest run",
+    "perf": "lhci autorun || echo 'Lighthouse CI not installed locally'"
   },
   "eslintConfig": {
     "extends": [
