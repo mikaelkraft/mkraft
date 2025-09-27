@@ -80,6 +80,21 @@ module.exports = async function handler(req, res) {
       const id = url.searchParams.get('id');
       if (!id) return error(res, 'id is required', 400);
       const body = await getJsonBody(req);
+      // Capture existing row for revision BEFORE applying updates
+      try {
+        const existingRes = await query('SELECT * FROM wisdomintech.blog_posts WHERE id = $1', [id]);
+        if (existingRes.rows.length) {
+          const r = existingRes.rows[0];
+          await query(`
+            INSERT INTO wisdomintech.blog_post_revisions (
+              blog_post_id, title, excerpt, content, tags, category, status, featured, featured_image, source_url, author_id
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+          `, [r.id, r.title, r.excerpt, r.content, r.tags, r.category, r.status, r.featured, r.featured_image, r.source_url, r.author_id]);
+        }
+      } catch (revErr) {
+        // Non-fatal: log but continue update
+        console.error('revision_capture_failed', { id, message: revErr.message });
+      }
       let slugPart = '';
       const paramsUpdate = [id];
       let i = 2;

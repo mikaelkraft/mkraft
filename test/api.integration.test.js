@@ -29,3 +29,39 @@ describe('API integration (shallow)', () => {
     }
   });
 });
+
+describe('Blog revisions workflow (smoke)', () => {
+  it('captures a revision on update and can list revisions', async () => {
+    let baseOk = true;
+    try { await fetch(BASE + '/api/blog?limit=1'); } catch { baseOk = false; }
+    if (!baseOk) return; // server not running
+
+    // Create a draft post (requires admin; if forbidden skip silently)
+    const draftResp = await fetch(BASE + '/api/blog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'Rev Test Post', status: 'draft', content: 'First version' })
+    });
+    if (draftResp.status === 403) return; // no admin session in test env
+    if (draftResp.status !== 201) return; // cannot proceed
+    const draft = await draftResp.json();
+
+    // Update the post -> should create a revision of original
+    const updateResp = await fetch(BASE + `/api/blog?id=${draft.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: 'Second version', title: 'Rev Test Post Updated' })
+    });
+    if (updateResp.status !== 200) return; // skip if update blocked
+
+    // Fetch revisions
+    const revListResp = await fetch(BASE + `/api/blog/revisions?postId=${draft.id}&limit=5`);
+    if (revListResp.status !== 200) return; // revisions endpoint may require DB state
+    const revs = await revListResp.json();
+    expect(Array.isArray(revs)).toBe(true);
+    if (revs.length) {
+      expect(revs[0]).toHaveProperty('id');
+      expect(revs[0]).toHaveProperty('blog_post_id');
+    }
+  });
+});

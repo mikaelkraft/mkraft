@@ -646,6 +646,20 @@ Structured tracks translating the opportunity list into implementable sequences.
 **DoD:** Assets visible with dimensions; alt text editable.
 **Stretch:** Dominant color extraction (client side canvas first pass).
 
+Status: ✅ Implemented (DB table, upload endpoint with metadata, admin grid). Follow-up enhancements listed below.
+
+#### Suggested Next Incremental Enhancements (Post Phase 1)
+To evolve the media system pragmatically while avoiding premature over‑engineering:
+- Add DELETE endpoint with soft delete (`deleted_at`) and UI button.
+- Generate responsive derivatives (e.g. 320/640/1280) via sharp; record in a `media_variants` table.
+- Extract & store dominant color / palette for placeholder backgrounds.
+- Add bulk tagging & alt text editing modal.
+- Introduce signed upload URLs (Supabase Storage or S3) to offload server.
+- Add simple CDN caching headers & cache-busting strategy (hash in filename if transformed).
+- Implement usage references mapping (track which blog posts/projects reference an asset) to warn before delete.
+- Accessibility audit: surface missing alt text count in admin dashboard.
+
+
 ### 4. Draft / Revision System (Posts)
 **Objective:** Enable safe iterative authoring.
 **Steps:**
@@ -655,6 +669,7 @@ Structured tracks translating the opportunity list into implementable sequences.
 4. Diff view (simple word diff or highlight changed blocks later).
 **DoD:** Can restore an old revision; published slug stable.
 **Stretch:** Autosave every X seconds (client debounced) when editing.
+Status: 🚧 In progress — migration + revision capture on update + revisions list/restore API implemented. Pending: UI panel & diff view future stretch.
 
 ### 5. Recommendation Engine MVP
 **Objective:** Related posts module to improve session depth.
