@@ -52,6 +52,7 @@ app.all('/api/projects', wrap(withTransform(require('./api/projects/index.js'), 
 app.all('/api/projects/by-id', wrap(withTransform(require('./api/projects/by-id.js'), { camel: true, cacheSeconds: 10 })));
 app.all('/api/blog', wrap(withTransform(require('./api/blog/index.js'), { camel: true, cacheSeconds: 15 })));
 app.all('/api/blog/by-slug', wrap(withTransform(require('./api/blog/by-slug.js'), { camel: true, cacheSeconds: 60 })));
+app.all('/api/blog/related', wrap(withTransform(require('./api/blog/related.js'), { camel: true, cacheSeconds: 30 })));
 app.all('/api/blog/revisions', wrap(withTransform(require('./api/blog/revisions.js'), { camel: true })));
 app.all('/api/slides', wrap(withTransform(require('./api/slides/index.js'), { camel: true, cacheSeconds: 30 })));
 app.all('/api/slides/reorder', wrap(require('./api/slides/reorder.js')));

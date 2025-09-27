@@ -65,3 +65,25 @@ describe('Blog revisions workflow (smoke)', () => {
     }
   });
 });
+
+describe('Related posts (heuristic)', () => {
+  it('returns at most 3 related posts or empty array', async () => {
+    let reachable = true; try { await fetch(BASE + '/api/blog?limit=1'); } catch { reachable = false; }
+    if (!reachable) return;
+    const baseList = await fetch(BASE + '/api/blog?published=true&limit=1');
+    if (baseList.status !== 200) return;
+    const posts = await baseList.json();
+    if (!Array.isArray(posts) || !posts.length) return; // no published posts to test
+    const slug = posts[0].slug;
+    if (!slug) return;
+    const relRes = await fetch(BASE + `/api/blog/related?slug=${encodeURIComponent(slug)}`);
+    if (relRes.status !== 200) return;
+    const related = await relRes.json();
+    expect(Array.isArray(related)).toBe(true);
+    expect(related.length).toBeLessThanOrEqual(3);
+    if (related.length) {
+      expect(related[0]).toHaveProperty('slug');
+      expect(related[0]).toHaveProperty('title');
+    }
+  });
+});

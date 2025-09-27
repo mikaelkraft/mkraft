@@ -494,6 +494,22 @@ npm run seed       # Add sample data
 
 ## 🙏 Acknowledgments
 
+## ▶️ Next Steps (Execution Focus)
+Immediate upcoming tracks to continue momentum:
+
+1. Track 5 – Recommendation Engine MVP
+   - Simple related posts via tag overlap & basic keyword scoring.
+   - Endpoint: `/api/blog/related?slug=` returning up to 3 items.
+   - Frontend widget (below post body) with click tracking.
+2. Track 6 – Admin Command Palette
+   - Ctrl/Cmd+K quick navigation + actions (New Post/Project, Toggle Theme, Go to Settings).
+3. Track 7 – Full‑Text Search Skeleton
+   - Postgres tsvector + GIN, `/api/blog/search?q=` + lightweight UI search bar.
+4. Track 8 – Basic Feature Flags
+   - `feature_flags` table + `/api/settings/features` + `useFeature()` hook to gate new UI.
+
+These will be implemented sequentially (favoring small deployable slices). Feel free to reprioritize.
+
 - **Mikael Kraft** © 2025 - Creator and Developer
 - **Built with**: React 18, Vite, TailwindCSS, PostgreSQL
 - **Powered by**: Node.js, Express, Supabase
@@ -669,7 +685,7 @@ To evolve the media system pragmatically while avoiding premature over‑enginee
 4. Diff view (simple word diff or highlight changed blocks later).
 **DoD:** Can restore an old revision; published slug stable.
 **Stretch:** Autosave every X seconds (client debounced) when editing.
-Status: 🚧 In progress — migration + revision capture on update + revisions list/restore API implemented. Pending: UI panel & diff view future stretch.
+Status: ✅ Backend implemented (migration, capture on update, list & restore API). UI diff panel deferred (stretch).
 
 ### 5. Recommendation Engine MVP
 **Objective:** Related posts module to improve session depth.
@@ -680,6 +696,7 @@ Status: 🚧 In progress — migration + revision capture on update + revisions 
 4. Track click events (log or metric counter).
 **DoD:** At least one related post appears when tags shared.
 **Stretch:** Later upgrade to embeddings.
+Status: 🚧 Starting — backend related posts endpoint in progress (tag overlap + basic keyword fallback).
 
 ### 6. Admin Command Palette
 **Objective:** Power-user navigation & quick actions.
