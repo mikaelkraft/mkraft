@@ -9,6 +9,7 @@ import ProjectDetail from "pages/project-detail";
 import BlogContentHub from "pages/blog-content-hub";
 import Documentation from "pages/documentation";
 import AdminDashboardContentManagement from "pages/admin-dashboard-content-management";
+import MediaLibrary from "pages/admin-dashboard-content-management/MediaLibrary.jsx";
 import RequireAdmin from "components/auth/RequireAdmin";
 import NotFound from "pages/NotFound";
 import ResetPassword from "pages/ResetPassword";
@@ -35,6 +36,7 @@ const Routes = () => {
             </RequireAdmin>
           }
         />
+        <Route path="/admin/media" element={<MediaLibrary />} />
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
       </ErrorBoundary>

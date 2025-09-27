@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "formidable": "^3.5.1",
+    "sharp": "^0.33.4",
     "@hapi/boom": "^10.0.1",
     "@reduxjs/toolkit": "^2.6.1",
     "@supabase/supabase-js": "^2.39.3",

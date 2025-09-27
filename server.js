@@ -61,6 +61,7 @@ app.all('/api/views/increment', wrap(withTransform(require('./api/views/incremen
 app.all('/api/newsletter', wrap(withTransform(require('./api/newsletter/index.js'), { camel: true })));
 app.all('/api/profile/avatar', wrap(withTransform(require('./api/profile/avatar.js'), { camel: true })));
 app.all('/api/media', wrap(withTransform(require('./api/media/index.js'), { camel: true })));
+app.all('/api/media/upload', wrap(withTransform(require('./api/media/upload.js'), { camel: true })));
 app.all('/api/health', wrap(require('./api/health/index.js')));
 
 // Health check
