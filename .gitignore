@@ -6,3 +6,24 @@ package-lock.json
 .vscode/
 .idea/
 vite.config.*s.*
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage / test
+coverage
+
+# OS
+Thumbs.db
+
+# Build artifacts (already have /build)
+dist
+*.tsbuildinfo

@@ -284,6 +284,30 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 VITE_ADMIN_EMAIL=admin@example.com
 ```
 
+### Environment & Secrets Management
+
+| Type | File / Source | Committed? | Sent to Browser? | Notes |
+|------|---------------|------------|------------------|-------|
+| Local template | `.env.example` | Yes | N/A | Safe placeholder values only |
+| Runtime secrets | `.env` / Vercel Project Settings | No | Only variables prefixed `VITE_` are embedded into client bundle |
+| Server-only secrets | `POSTGRES_URL`, `POSTGRES_SSL`, future `JWT_SECRET` | No | No | Do NOT prefix with `VITE_` |
+| Client config | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_USE_API` | Yes (exposed) | Yes | Required for frontend operation |
+
+Important:
+- Any variable starting with `VITE_` is statically injected into the built JavaScript and is publicly visible. Treat `VITE_SUPABASE_ANON_KEY` as a public key (Supabase uses RLS policies to protect data).
+- Never commit `.env`; it's now ignored via `.gitignore`.
+- Provide safe defaults in `.env.example` only.
+- Use separate environments (Development / Preview / Production) in Vercel with distinct values.
+- If you add sensitive server logic later (e.g., JWT signing), keep that secret unprefixed and used only inside server code (`server.js` or API handlers).
+
+Secret Rotation Tips:
+1. Update value in hosting provider dashboard.
+2. Trigger a redeploy (push empty commit if needed).
+3. Invalidate old credentials (DB keys, API keys) if applicable.
+
+Auditing Exposure:
+Run `grep -R "VITE_" build/` after a production build to see which keys were inlined.
+
 ### Database Setup
 
 1. **Using Supabase**: Apply the migration in `supabase/migrations/`
