@@ -60,6 +60,7 @@ app.all('/api/likes/toggle', wrap(withTransform(require('./api/likes/toggle.js')
 app.all('/api/views/increment', wrap(withTransform(require('./api/views/increment.js'), { camel: true })));
 app.all('/api/newsletter', wrap(withTransform(require('./api/newsletter/index.js'), { camel: true })));
 app.all('/api/profile/avatar', wrap(withTransform(require('./api/profile/avatar.js'), { camel: true })));
+app.all('/api/media', wrap(withTransform(require('./api/media/index.js'), { camel: true })));
 app.all('/api/health', wrap(require('./api/health/index.js')));
 
 // Health check
