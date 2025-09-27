@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "vite.config.mjs", "use": "@vercel/static-build", "config": { "distDir": "build" } },
+    { "src": "api/**/*.[jt]s", "use": "@vercel/node" }
+  ],
+  "env": {
+    "VITE_USE_API": "${VITE_USE_API}" 
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)\.(js|css|png|jpg|svg|ico|json|txt|webp|avif)", "headers": { "cache-control": "public, max-age=31536000, immutable" }, "continue": true },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}

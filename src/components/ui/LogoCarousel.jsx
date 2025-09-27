@@ -127,5 +127,3 @@ const LogoCarousel = ({ images = [], autoPlay = true, speed = 3000, showDots = t
 };
 
 export default LogoCarousel;
-
-export default LogoCarousel;
