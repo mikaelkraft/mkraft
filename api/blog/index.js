@@ -56,20 +56,36 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const user = await requireAdmin(req, res);
+      // Allow publishers (flag gated) & admins. Publishers always forced to draft & cannot set featured/published directly.
+      const { requireAdmin, requirePublisherOrAdmin, getUserWithRole } = require('../_lib/auth.js');
+      const { rows: flagRows } = await query('SELECT enabled FROM wisdomintech.feature_flags WHERE flag_key = $1', ['publisher_program']);
+      const publisherProgramEnabled = !!flagRows.find(r => r.enabled);
+      let user = null;
+      if (publisherProgramEnabled) {
+        user = await requirePublisherOrAdmin(req, res);
+      } else {
+        user = await requireAdmin(req, res); // legacy behavior before flag on
+      }
       if (!user) return;
       await ensureUserProfile(user);
   const body = await getJsonBody(req);
   if (body.content) body.content = sanitize(body.content);
       const slug = (body.slug && String(body.slug).trim()) ? String(body.slug).trim().toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/(^-|-$)/g,'') : String(body.title || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-      const publishedAt = body.published_at ? new Date(body.published_at) : (body.status === 'published' ? new Date() : null);
+      let desiredStatus = body.status || 'draft';
+      let publishedAt = body.published_at ? new Date(body.published_at) : (desiredStatus === 'published' ? new Date() : null);
+      if (user.role === 'publisher' && publisherProgramEnabled) {
+        // Enforce draft for publishers, ignore attempts to publish or feature
+        desiredStatus = 'draft';
+        publishedAt = null;
+        body.featured = false;
+      }
       const insertSql = `
         INSERT INTO wisdomintech.blog_posts (
           slug, title, excerpt, content, featured_image, source_url, tags, category, status, featured, author_id, published_at
         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
         RETURNING *
       `;
-      const params = [slug, body.title || '', body.excerpt || null, body.content || null, body.featured_image || null, body.source_url || null, body.tags || null, body.category || null, body.status || 'draft', !!body.featured, user.id, publishedAt];
+      const params = [slug, body.title || '', body.excerpt || null, body.content || null, body.featured_image || null, body.source_url || null, body.tags || null, body.category || null, desiredStatus, !!body.featured, user.id, publishedAt];
       const { rows } = await query(insertSql, params);
       return json(res, rows[0], 201);
     }

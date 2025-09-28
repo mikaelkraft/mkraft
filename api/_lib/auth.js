@@ -38,14 +38,42 @@ async function verifyAuth(req) {
   }
 }
 
-async function requireAdmin(req, res) {
+const { query } = require('./db.js');
+
+async function getUserWithRole(req) {
   const { user } = await verifyAuth(req);
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.VITE_ADMIN_EMAIL;
-  if (!user || !user.email || (adminEmail && user.email !== adminEmail)) {
+  if (!user) return null;
+  try {
+    const { rows } = await query('SELECT id, email, role, publisher_request_status FROM wisdomintech.user_profiles WHERE id = $1', [user.id]);
+    let role = rows[0]?.role || 'viewer';
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.VITE_ADMIN_EMAIL;
+    // Auto-promote configured admin email for backward compatibility
+    if (adminEmail && user.email === adminEmail && role !== 'admin') {
+      await query('UPDATE wisdomintech.user_profiles SET role = \'admin\', role_updated_at = now() WHERE id = $1', [user.id]);
+      role = 'admin';
+    }
+    return { ...user, role, publisher_request_status: rows[0]?.publisher_request_status || null };
+  } catch {
+    return { ...user, role: 'viewer' };
+  }
+}
+
+async function requireAdmin(req, res) {
+  const user = await getUserWithRole(req);
+  if (!user || user.role !== 'admin') {
     res.status(401).json({ error: 'Unauthorized' });
     return null;
   }
   return user;
 }
 
-module.exports = { verifyAuth, requireAdmin };
+async function requirePublisherOrAdmin(req, res) {
+  const user = await getUserWithRole(req);
+  if (!user || (user.role !== 'admin' && user.role !== 'publisher')) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return null;
+  }
+  return user;
+}
+
+module.exports = { verifyAuth, requireAdmin, requirePublisherOrAdmin, getUserWithRole };

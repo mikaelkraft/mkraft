@@ -61,6 +61,22 @@ const BlogPost = () => {
       <main className="max-w-3xl mx-auto p-6">
         <article>
           <h1 className="font-heading text-3xl md:text-4xl font-bold mb-4">{title}</h1>
+          <div className="flex items-center gap-2 mb-4">
+            <button
+              onClick={() => {
+                const shareData = { title, text: desc, url: window.location.href };
+                if (navigator.share) {
+                  navigator.share(shareData).catch(() => {});
+                } else {
+                  try { navigator.clipboard.writeText(window.location.href); alert('Link copied to clipboard'); } catch {}
+                }
+              }}
+              className="inline-flex items-center gap-1 text-xs px-2 py-1 border border-border-accent/40 rounded hover:bg-primary/10 text-text-secondary hover:text-primary transition-colors"
+              aria-label="Share this post"
+            >
+              <Icon name="Share2" size={14} /> Share
+            </button>
+          </div>
           {post.author?.full_name && (
             <div className="text-sm text-text-secondary mb-6 flex items-center gap-2">
               <Icon name="User" size={16} />
