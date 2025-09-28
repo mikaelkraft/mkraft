@@ -12,6 +12,8 @@ import projectService from '../../utils/projectService';
 import blogService from '../../utils/blogService';
 import slideService from '../../utils/slideService';
 import settingsService from '../../utils/settingsService';
+import publisherProgramService from '../../utils/publisherProgramService';
+import useFeature from '../../hooks/useFeature';
 import { useToast } from '../../contexts/ToastContext';
 
 const AdminDashboardContentManagement = () => {
@@ -27,6 +29,29 @@ const AdminDashboardContentManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [blogEditorState, setBlogEditorState] = useState({ open: false, mode: 'create', post: null });
+  const publisherProgramEnabled = useFeature('publisher_program');
+  const [publisherRequests, setPublisherRequests] = useState([]);
+  const [publisherReqLoading, setPublisherReqLoading] = useState(false);
+
+  const loadPublisherRequests = async () => {
+    if (!publisherProgramEnabled) return;
+    setPublisherReqLoading(true);
+    const res = await publisherProgramService.listPending();
+    if (res.success) setPublisherRequests(res.data);
+    setPublisherReqLoading(false);
+  };
+  useEffect(() => { if (publisherProgramEnabled) loadPublisherRequests(); }, [publisherProgramEnabled]);
+
+  const handlePublisherDecision = async (user_id, action) => {
+    const fn = action === 'approve' ? publisherProgramService.approve : publisherProgramService.reject;
+    const res = await fn(user_id);
+    if (res.success) {
+      show(`User ${action}d`, { type: 'success' });
+      setPublisherRequests(prev => prev.filter(p => p.id !== user_id));
+    } else {
+      show(res.error || 'Action failed', { type: 'error' });
+    }
+  };
 
   // Helper mappers (UI shape -> DB shape)
   const toDbProject = (data = {}) => {
@@ -244,7 +269,23 @@ const AdminDashboardContentManagement = () => {
     featured: p.featured,
     metaTitle: p.meta_title,
     metaDescription: p.meta_description,
+    authorRole: p.author_role || p.author?.role || 'viewer',
+    authorName: p.author?.full_name || '',
   }));
+
+  const reviewQueuePosts = normalizedPosts.filter(p => p.status === 'draft' && p.authorRole === 'publisher');
+
+  const ADMIN_EMAIL = (normalizedSettings?.adminEmail) || (settings?.admin_email) || (import.meta.env.VITE_ADMIN_EMAIL || '');
+
+  const RoleBadge = ({ role, email }) => {
+    if (!role) return null;
+    const isSuper = role === 'admin' && email && ADMIN_EMAIL && email === ADMIN_EMAIL;
+    const base = 'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium tracking-wide border';
+    if (isSuper) return <span className={base + ' bg-gradient-to-r from-primary to-accent border-primary/50 text-background shadow-glow-primary'}>SUPER ADMIN</span>;
+    if (role === 'admin') return <span className={base + ' bg-primary/15 border-primary/40 text-primary'}>ADMIN</span>;
+    if (role === 'publisher') return <span className={base + ' bg-warning/15 border-warning/40 text-warning'}>PUBLISHER</span>;
+    return <span className={base + ' bg-surface/60 border-border-accent/30 text-text-secondary'}>VIEWER</span>;
+  };
 
   const normalizedSlides = slides.map((s) => ({
     id: s.id,
@@ -560,6 +601,103 @@ const AdminDashboardContentManagement = () => {
               ))}
               {!moderationLoading && moderationComments.length === 0 && (
                 <div className="text-sm text-text-secondary">No comments available.</div>
+              )}
+            </div>
+          </div>
+        );
+      case 'review-queue':
+        // Draft posts created by publishers awaiting admin review (simple filter)
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-text-primary">Review Queue</h2>
+              <div className="flex items-center gap-2">
+                <button onClick={() => {
+                  // simple reload of posts
+                  (async () => {
+                    const posts = await blogService.getAllPosts();
+                    if (posts.success) setBlogPosts(posts.data);
+                  })();
+                }} className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80">Refresh</button>
+              </div>
+            </div>
+            <div className="text-xs text-text-secondary">Draft posts authored by publishers. Publish or request changes.</div>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {reviewQueuePosts.map(p => (
+                <div key={p.id} className="p-4 rounded-lg border border-border-accent/20 bg-surface/40 flex flex-col gap-2">
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-semibold text-text-primary truncate">{p.title || '(Untitled)'}</div>
+                        <RoleBadge role={p.authorRole} email={p.authorEmail} />
+                      </div>
+                      <div className="text-[10px] text-text-secondary uppercase tracking-wide mt-0.5">Draft • {p.authorRole || 'unknown'}</div>
+                    </div>
+                    <button
+                      onClick={() => setBlogEditorState({ open: true, mode: 'edit', post: p })}
+                      className="text-[10px] px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20"
+                    >Open</button>
+                  </div>
+                  <div className="text-xs text-text-secondary line-clamp-3">{p.excerpt || 'No excerpt provided.'}</div>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={async () => {
+                        // Publish immediately
+                        const res = await blogService.updatePost(p.id, { status: 'published' });
+                        if (res.success) {
+                          setBlogPosts(prev => prev.map(b => b.id === p.id ? res.data : b));
+                          show('Post published', { type: 'success' });
+                        } else {
+                          show(res.error || 'Failed to publish', { type: 'error' });
+                        }
+                      }}
+                      className="px-2 py-1 text-xs rounded bg-success text-background hover:bg-success/80"
+                    >Publish</button>
+                    <button
+                      onClick={() => {
+                        // For now simple toast (future: inline feedback mechanism)
+                        show('Feedback workflow not implemented yet', { type: 'info' });
+                      }}
+                      className="px-2 py-1 text-xs rounded bg-warning text-background hover:bg-warning/80"
+                    >Request Changes</button>
+                  </div>
+                </div>
+              ))}
+              {reviewQueuePosts.length === 0 && (
+                <div className="text-sm text-text-secondary col-span-full">No publisher drafts pending review.</div>
+              )}
+            </div>
+          </div>
+        );
+      case 'publisher-requests':
+        if (!publisherProgramEnabled) {
+          return <div className="text-sm text-text-secondary">Publisher program disabled.</div>;
+        }
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-text-primary">Publisher Requests</h2>
+              <div className="flex items-center gap-2">
+                <button onClick={loadPublisherRequests} className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80">Refresh</button>
+              </div>
+            </div>
+            {publisherReqLoading && <div className="text-sm text-text-secondary">Loading requests…</div>}
+            <div className="space-y-4">
+              {publisherRequests.map(r => (
+                <div key={r.id} className="p-4 rounded-lg border border-border-accent/20 bg-surface/40 flex justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-semibold text-text-primary">{r.full_name || '(No Name)'} <span className="font-normal text-text-secondary">&lt;{r.email}&gt;</span></div>
+                    <div className="text-xs text-text-secondary mb-2">Requested {r.publisher_requested_at ? new Date(r.publisher_requested_at).toLocaleString() : '—'}</div>
+                    <div className="text-xs text-text-secondary">Status: {r.publisher_request_status}</div>
+                  </div>
+                  <div className="flex flex-col gap-2 text-xs">
+                    <button onClick={() => handlePublisherDecision(r.id, 'approve')} className="px-2 py-1 rounded bg-success text-background hover:bg-success/80">Approve</button>
+                    <button onClick={() => handlePublisherDecision(r.id, 'reject')} className="px-2 py-1 rounded bg-error text-background hover:bg-error/80">Reject</button>
+                  </div>
+                </div>
+              ))}
+              {!publisherReqLoading && publisherRequests.length === 0 && (
+                <div className="text-sm text-text-secondary">No pending requests.</div>
               )}
             </div>
           </div>

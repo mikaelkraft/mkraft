@@ -763,6 +763,37 @@ Status: ✅ Completed (enhanced baseline delivered).
 
 Status: ✅ Completed. Proceeding to Track 9.
 
+### Publisher Program (Flag: `publisher_program`)
+**Objective:** Enable multi-author workflow while preserving admin editorial control.
+
+**Schema Additions:** `role` (viewer|publisher|admin), `publisher_request_status` (pending|approved|rejected), audit timestamps.
+
+**Endpoints (flag-gated):**
+- `GET/POST /api/profile/publisher-request` – viewer requests access; returns `{ role, publisher_request_status }`.
+- `GET /api/profile/publisher-requests` – admin list pending requests.
+- `POST /api/profile/publisher-approval` – admin approve/reject.
+
+**Role Rules (Phase 2 – Invite):**
+- viewer: read content, can request access (once pending).
+- publisher: create draft posts only (server forces `status=draft`, `featured=false`).
+- admin: full CRUD, publish/feature, approve publishers.
+
+**Rate Limiting:** In‑memory guard (5 requests / 10 min / user) on request endpoint; single pending enforced.
+
+**Phased Rollout:**
+1. Internal (flag off): Only admin authorship (legacy behavior).
+2. Invite (flag on): Manual approval pipeline; publishers draft content.
+3. Open (future): Auto-approval / invitation codes, quota & quality metrics.
+
+**Planned Enhancements:**
+- Draft review queue UI (diff vs. last revision).
+- Email / notification on approval.
+- Publisher activity metrics (draft count, accepted ratio).
+- Advanced rate limiting / abuse signals (IP + account age) via Redis.
+- Optional editorial notes per approval.
+
+Status: 🚧 Backend + flag + minimal request widget implemented (UI surfacing request & status). Further admin UI pending.
+
 ## 🤝 Contributing & Commit Conventions
 
 This project uses lightweight guardrails to keep the history clean and automatable.

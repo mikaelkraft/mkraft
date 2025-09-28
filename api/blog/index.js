@@ -40,7 +40,8 @@ module.exports = async function handler(req, res) {
 
     const sql = `
       SELECT bp.*, 
-             json_build_object('full_name', up.full_name, 'email', up.email) as author
+             json_build_object('full_name', up.full_name, 'email', up.email, 'role', up.role) as author,
+             up.role as author_role
       FROM wisdomintech.blog_posts bp
       LEFT JOIN wisdomintech.user_profiles up ON up.id = bp.author_id
       ${where}
