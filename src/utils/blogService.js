@@ -531,6 +531,34 @@ class BlogService {
       return { success: false, error: 'Failed to get tags' };
     }
   }
+
+  // Get related posts by slug (API only for now)
+  async getRelatedPosts(slug) {
+    try {
+      if (USE_API) {
+        const data = await api.get('/blog/related', { slug });
+        return { success: true, data: data || [] };
+      }
+      // Fallback heuristic client-side (Supabase mode): fetch published posts & filter by tag overlap
+      const published = await this.getPublishedPosts({ limit: 50 });
+      if (!published.success) return { success: false, error: 'Failed to fetch base posts' };
+      const target = published.data.find(p => p.slug === slug);
+      if (!target) return { success: true, data: [] };
+      const tags = target.tags || [];
+      const related = published.data
+        .filter(p => p.slug !== slug)
+        .map(p => ({
+          ...p,
+          __score: (p.tags || []).filter(t => tags.includes(t)).length
+        }))
+        .filter(p => p.__score > 0)
+        .sort((a, b) => b.__score - a.__score)
+        .slice(0, 3);
+      return { success: true, data: related };
+    } catch (e) {
+      return { success: false, error: 'Failed to load related posts' };
+    }
+  }
 }
 
 const blogService = new BlogService();

@@ -703,7 +703,7 @@ Status: ✅ Backend implemented (migration, capture on update, list & restore AP
 4. Track click events (log or metric counter).
 **DoD:** At least one related post appears when tags shared.
 **Stretch:** Later upgrade to embeddings.
-Status: 🚧 Starting — backend related posts endpoint in progress (tag overlap + basic keyword fallback).
+Status: ✅ Backend + initial UI widget (related posts on blog post page). Future: click tracking + improved scoring.
 
 ### 6. Admin Command Palette
 **Objective:** Power-user navigation & quick actions.
@@ -714,6 +714,7 @@ Status: 🚧 Starting — backend related posts endpoint in progress (tag overla
 4. Integrate in admin layout root.
 **DoD:** All core actions invokable via keyboard.
 **Stretch:** Add inline command arguments (e.g. “open post …”).
+Status: 🚧 Starting — skeleton component & basic action registry pending.
 
 ### 7. Full‑Text Search Skeleton
 **Objective:** Foundation for on-site search.

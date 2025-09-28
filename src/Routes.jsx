@@ -7,6 +7,7 @@ import PortfolioHomeHero from "pages/portfolio-home-hero";
 import ProjectsPortfolioGrid from "pages/projects-portfolio-grid";
 import ProjectDetail from "pages/project-detail";
 import BlogContentHub from "pages/blog-content-hub";
+import BlogPost from "pages/blog-post";
 import Documentation from "pages/documentation";
 import AdminDashboardContentManagement from "pages/admin-dashboard-content-management";
 import MediaLibrary from "pages/admin-dashboard-content-management/MediaLibrary.jsx";
@@ -26,6 +27,7 @@ const Routes = () => {
         <Route path="/projects-portfolio-grid" element={<ProjectsPortfolioGrid />} />
         <Route path="/project/:id" element={<ProjectDetail />} />
         <Route path="/blog-content-hub" element={<BlogContentHub />} />
+  <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/documentation" element={<Documentation />} />
   <Route path="/reset-password" element={<ResetPassword />} />
         <Route

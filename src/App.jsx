@@ -4,6 +4,7 @@ import { ToastProvider, ToastContainer } from "./contexts/ToastContext";
 import Routes from "./Routes";
 import settingsService from "./utils/settingsService";
 import DevOtpBanner from "./components/auth/DevOtpBanner";
+import CommandPalette from "./components/CommandPalette";
 
 function App() {
   const [toastDuration, setToastDuration] = useState(3500);
@@ -26,6 +27,7 @@ function App() {
         <Routes />
         <ToastContainer />
         <DevOtpBanner />
+  <CommandPalette />
       </AuthProvider>
     </ToastProvider>
   );
