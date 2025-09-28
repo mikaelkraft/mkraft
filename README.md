@@ -708,23 +708,25 @@ Status: ✅ Backend + initial UI widget (related posts on blog post page). Futur
 ### 6. Admin Command Palette
 **Objective:** Power-user navigation & quick actions.
 **Steps:**
-1. Add palette component (Ctrl/Cmd+K) listing: New Post, New Project, Go to Settings, Toggle Theme.
-2. Build action registry (array of { id, title, shortcut?, run }).
-3. Fuzzy search (simple lowercase includes first pass).
-4. Integrate in admin layout root.
-**DoD:** All core actions invokable via keyboard.
-**Stretch:** Add inline command arguments (e.g. “open post …”).
-Status: 🚧 Starting — skeleton component & basic action registry pending.
+1. Palette component (Ctrl/Cmd+K) with core actions.
+2. Central action registry extracted (`coreActions`).
+3. Fuzzy search scoring + keyboard navigation (↑ ↓ Enter).
+4. Dynamic post suggestions (queries hit search API / fallback heuristic).
+5. Ephemeral inline action: `post:Title` to create a new draft.
+**DoD:** All core actions + search results navigable via keyboard, inline create appears for pattern.
+**Stretch:** Command arguments & theming toggle (deferred).
+Status: ✅ Completed (fuzzy scoring, grouping, suggestions, inline create, accessibility improvements).
 
 ### 7. Full‑Text Search Skeleton
 **Objective:** Foundation for on-site search.
 **Steps:**
-1. Add tsvector column & GIN index for posts (migration patch).
-2. Backfill existing rows.
-3. Endpoint `/api/blog/search?q=` performing plainto_tsquery.
-4. Basic UI search bar (debounced) returning title + excerpt.
-**DoD:** Search returns relevant posts by title/body semantics.
-**Stretch:** Weighted ranking (title > tags > body).
+1. (Done) tsvector column + trigger + GIN index patch `patch_20250928_full_text_search.sql`.
+2. (Done) Endpoint `/api/blog/search?q=` with rank ordering.
+3. (In Progress) Frontend search bar (currently palette suggestions consume service).
+4. (Planned) Dedicated UI search component + result page.
+**DoD:** Search returns relevant posts by title/body/tags semantics (now supported via palette + API).
+**Stretch:** Weighted query tuning, websearch_to_tsquery, trigram fallback.
+Status: 🟡 In Progress — backend + palette integration done; standalone UI pending.
 
 ### 8. Basic Feature Flags
 **Objective:** Safely roll out new UI components.

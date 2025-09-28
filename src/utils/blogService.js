@@ -3,6 +3,20 @@ import { api } from './api/client';
 const USE_API = import.meta.env.VITE_USE_API === 'true';
 
 class BlogService {
+  // Full text / heuristic search (API first, fallback to supabase includes)
+  async searchPosts(q, options = {}) {
+    try {
+      if (!q || !q.trim()) return { success: true, data: [] };
+      if (USE_API) {
+        const data = await api.get('/blog/search', { q, limit: options.limit || 10 });
+        return { success: true, data: data || [] };
+      }
+      // Fallback: use existing published post ilike search
+      return await this.getPublishedPosts({ search: q, limit: options.limit || 10 });
+    } catch (e) {
+      return { success: false, error: 'Search failed' };
+    }
+  }
   // Get all published blog posts (public access)
   async getPublishedPosts(options = {}) {
     try {

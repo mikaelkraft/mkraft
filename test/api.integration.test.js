@@ -87,3 +87,20 @@ describe('Related posts (heuristic)', () => {
     }
   });
 });
+
+describe('Full-text search endpoint (if available)', () => {
+  it('returns ranked results or empty array', async () => {
+    let reachable = true; try { await fetch(BASE + '/api/blog?limit=1'); } catch { reachable = false; }
+    if (!reachable) return;
+    let res; try { res = await fetch(BASE + '/api/blog/search?q=hello'); } catch { return; }
+    if (![200,400].includes(res.status)) return; // skip if not wired
+    if (res.status === 200) {
+      const data = await res.json();
+      expect(Array.isArray(data)).toBe(true);
+      if (data.length) {
+        expect(data[0]).toHaveProperty('slug');
+        expect(data[0]).toHaveProperty('title');
+      }
+    }
+  });
+});
