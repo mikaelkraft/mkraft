@@ -48,6 +48,7 @@ const wrap = (handler) => async (req, res) => {
 
 // Mount API routes by reusing the serverless handlers
 app.all('/api/settings', wrap(withTransform(require('./api/settings/index.js'), { camel: true, cacheSeconds: 30 })));
+app.all('/api/settings/features', wrap(withTransform(require('./api/settings/features.js'), { camel: true, cacheSeconds: 5 })));
 app.all('/api/projects', wrap(withTransform(require('./api/projects/index.js'), { camel: true, cacheSeconds: 10 })));
 app.all('/api/projects/by-id', wrap(withTransform(require('./api/projects/by-id.js'), { camel: true, cacheSeconds: 10 })));
 app.all('/api/blog', wrap(withTransform(require('./api/blog/index.js'), { camel: true, cacheSeconds: 15 })));

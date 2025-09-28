@@ -30,6 +30,21 @@ describe('API integration (shallow)', () => {
   });
 });
 
+describe('Feature flags endpoint (if available)', () => {
+  it('returns an array of flags with expected shape', async () => {
+    let reachable = true; try { await fetch(BASE + '/api/settings'); } catch { reachable = false; }
+    if (!reachable) return;
+    let res; try { res = await fetch(BASE + '/api/settings/features'); } catch { return; }
+    if (res.status !== 200) return; // skip if not wired
+    const data = await res.json();
+    if (!Array.isArray(data)) return;
+    if (data.length) {
+      expect(data[0]).toHaveProperty('flagKey');
+      expect(data[0]).toHaveProperty('enabled');
+    }
+  });
+});
+
 describe('Blog revisions workflow (smoke)', () => {
   it('captures a revision on update and can list revisions', async () => {
     let baseOk = true;

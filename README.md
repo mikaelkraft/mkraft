@@ -705,6 +705,18 @@ Status: ✅ Backend implemented (migration, capture on update, list & restore AP
 **Stretch:** Later upgrade to embeddings.
 Status: ✅ Backend + initial UI widget (related posts on blog post page). Future: click tracking + improved scoring.
 
+Follow‑Up Enhancements (Related Posts):
+- Track impression + click events (CTR for future ranking tuning).
+- Add explanation tooltip: "Based on shared tags" (or future semantic source).
+- Prefetch related posts immediately after main post load (parent-level concurrency) to shorten perceived latency.
+- Implement fallback strategy when no tag overlap: recent posts in same category, then global recents.
+- Introduce A/B test flag (e.g., `related_algo_v2`) to compare heuristic vs. future embedding scoring.
+- Add skeleton shimmer placeholders (improves perceived load).
+- Personalization (logged-in): boost posts recently interacted with (views/likes) but not yet read fully.
+- Expand to show micro-metadata: estimated read time, published date badge.
+- Cache layer: cache key `related:<slug>` with short TTL to reduce DB hits under traffic spikes.
+- Semantic upgrade path: store vector embeddings for content/title; fallback gracefully if vector system offline.
+
 ### 6. Admin Command Palette
 **Objective:** Power-user navigation & quick actions.
 **Steps:**
@@ -737,6 +749,7 @@ Status: 🟡 In Progress — backend + palette integration done; standalone UI p
 4. Use to guard recommendations + command palette initial rollout.
 **DoD:** Toggle in DB reflects in UI after refresh.
 **Stretch:** In-memory stale-while-revalidate cache + override via query param for testing.
+Status: 🟡 In Progress — table + seed patch, endpoint, hook caching implemented; components now gated (`command_palette`, `related_posts`, `full_text_search`). UI to manage flags in admin dashboard pending.
 
 ### 9. Git Hooks & Conventional Commits
 **Objective:** Improve commit hygiene & accelerate code reviews.

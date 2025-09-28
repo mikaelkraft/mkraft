@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import blogService from 'utils/blogService';
 import Icon from 'components/AppIcon';
+import useFeature from 'hooks/useFeature';
 
 /**
  * RelatedPosts Component
@@ -9,6 +10,7 @@ import Icon from 'components/AppIcon';
  * Includes safeguards against memory leaks / race conditions.
  */
 export default function RelatedPosts({ slug, limit = 3, heading = 'Related Posts' }) {
+	const enabled = useFeature('related_posts', true);
 	const [posts, setPosts] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
@@ -51,7 +53,7 @@ export default function RelatedPosts({ slug, limit = 3, heading = 'Related Posts
 		};
 	}, [slug, limit]);
 
-	if (!slug) return null;
+		if (!slug || !enabled) return null;
 	return (
 		<section aria-labelledby="related-posts-heading" className="mt-10">
 			<h2 id="related-posts-heading" className="text-xl font-semibold mb-4 flex items-center gap-2">
