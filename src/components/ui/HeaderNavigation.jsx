@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Icon from '../AppIcon';
 import Button from './Button';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../auth/AuthModal';
 import SearchModal from './SearchModal';
+import useFeature from 'hooks/useFeature';
+import { useNavigate } from 'react-router-dom';
 
 const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeControlsToggle, currentTheme = 'cyberpunk' }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const searchEnabled = useFeature('full_text_search', true);
+  const [searchVal, setSearchVal] = useState('');
+  const searchDebounceRef = useRef(null);
+  const navigate = useNavigate();
   const location = useLocation();
   const { userProfile, signOut } = useAuth();
   const isAdmin = userProfile?.role === 'admin';
@@ -143,6 +149,21 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
 
             {/* Desktop Search, Auth Toggle and Theme Controls */}
             <div className="hidden lg:flex items-center space-x-4">
+              {searchEnabled && (
+                <div className="relative group">
+                  <input
+                    type="text"
+                    value={searchVal}
+                    onChange={(e) => {
+                      const v = e.target.value; setSearchVal(v); clearTimeout(searchDebounceRef.current); searchDebounceRef.current = setTimeout(()=>{ if (v.trim().length>1) navigate(`/search?q=${encodeURIComponent(v.trim())}`); }, 300);
+                    }}
+                    placeholder="Search posts…"
+                    className="w-56 px-3 py-2 rounded-lg bg-background/60 border border-border-accent/30 focus:border-primary focus:outline-none text-sm placeholder-text-secondary/50 transition"
+                    aria-label="Search posts"
+                  />
+                  <Icon name="Search" size={14} className="absolute top-1/2 -translate-y-1/2 right-2 text-text-secondary/60" />
+                </div>
+              )}
               <Button
                 variant="ghost"
                 size="sm"

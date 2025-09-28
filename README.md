@@ -734,11 +734,11 @@ Status: ✅ Completed (fuzzy scoring, grouping, suggestions, inline create, acce
 **Steps:**
 1. (Done) tsvector column + trigger + GIN index patch `patch_20250928_full_text_search.sql`.
 2. (Done) Endpoint `/api/blog/search?q=` with rank ordering.
-3. (In Progress) Frontend search bar (currently palette suggestions consume service).
-4. (Planned) Dedicated UI search component + result page.
-**DoD:** Search returns relevant posts by title/body/tags semantics (now supported via palette + API).
-**Stretch:** Weighted query tuning, websearch_to_tsquery, trigram fallback.
-Status: 🟡 In Progress — backend + palette integration done; standalone UI pending.
+3. (Done) Header inline search bar (flagged) + palette suggestions.
+4. (Done) `/search` results page consuming API.
+**DoD:** Search returns relevant posts by title/body/tags semantics via dedicated UI and command palette.
+**Stretch:** Weighted query tuning, websearch_to_tsquery, trigram fallback, snippet highlighting, analytics dashboard.
+Status: ✅ Completed (baseline). Future enhancements tracked under Follow‑Up.
 
 ### 8. Basic Feature Flags
 **Objective:** Safely roll out new UI components.
@@ -749,7 +749,7 @@ Status: 🟡 In Progress — backend + palette integration done; standalone UI p
 4. Use to guard recommendations + command palette initial rollout.
 **DoD:** Toggle in DB reflects in UI after refresh.
 **Stretch:** In-memory stale-while-revalidate cache + override via query param for testing.
-Status: 🟡 In Progress — table + seed patch, endpoint, hook caching implemented; components now gated (`command_palette`, `related_posts`, `full_text_search`). UI to manage flags in admin dashboard pending.
+Status: 🟡 In Progress — backend + hook + gating implemented; admin UI page `/admin/feature-flags` added for toggling. Next: local override URL param + stale-while-revalidate background refresh.
 
 ### 9. Git Hooks & Conventional Commits
 **Objective:** Improve commit hygiene & accelerate code reviews.
