@@ -509,6 +509,13 @@ Immediate upcoming tracks to continue momentum:
    - `feature_flags` table + `/api/settings/features` + `useFeature()` hook to gate new UI.
 
 These will be implemented sequentially (favoring small deployable slices). Feel free to reprioritize.
+ 
+### Near-Term Additions (Planned Slices)
+- Blog Post Detail Page with Related Posts widget (consuming Track 5 endpoint).
+- Command Palette skeleton (Ctrl/Cmd+K) with navigation + create shortcuts.
+- Feature Flag hook stub (`useFeature`) returning false until backend table added.
+- Optional: Related post click tracking (increment simple counter for future ranking).
+
 
 - **Mikael Kraft** © 2025 - Creator and Developer
 - **Built with**: React 18, Vite, TailwindCSS, PostgreSQL
