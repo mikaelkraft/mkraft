@@ -42,18 +42,27 @@ export default function SearchResultsPage() {
               <p className="text-sm text-text-secondary">No results found.</p>
             )}
             <ul className="space-y-4">
-              {results.map(r => (
-                <li key={r.id} className="p-4 rounded border border-border-accent/20 bg-surface hover:border-primary/60 transition">
-                  <Link to={`/blog/${r.slug}`} className="group block">
-                    <h2 className="font-medium group-hover:text-primary line-clamp-1">{r.title}</h2>
-                    {r.excerpt && <p className="text-sm text-text-secondary line-clamp-2 mt-1">{r.excerpt}</p>}
-                    <div className="mt-2 text-[10px] uppercase tracking-wide text-text-secondary/70 flex items-center gap-2">
-                      {r.published_at && <time dateTime={r.published_at}>{new Date(r.published_at).toLocaleDateString()}</time>}
-                      {typeof r.rank === 'number' && <span>Rank: {r.rank.toFixed(2)}</span>}
-                    </div>
-                  </Link>
-                </li>
-              ))}
+              {results.map(r => {
+                const snippetHtml = r.snippet || '';
+                const hasSnippet = /<mark>/i.test(snippetHtml);
+                return (
+                  <li key={r.id} className="p-4 rounded border border-border-accent/20 bg-surface hover:border-primary/60 transition">
+                    <Link to={`/blog/${r.slug}`} className="group block">
+                      <h2 className="font-medium group-hover:text-primary line-clamp-1">{r.title}</h2>
+                      {hasSnippet && (
+                        <p className="text-sm text-text-secondary mt-1 line-clamp-3" dangerouslySetInnerHTML={{ __html: snippetHtml }} />
+                      )}
+                      {!hasSnippet && r.excerpt && (
+                        <p className="text-sm text-text-secondary line-clamp-2 mt-1">{r.excerpt}</p>
+                      )}
+                      <div className="mt-2 text-[10px] uppercase tracking-wide text-text-secondary/70 flex items-center gap-2">
+                        {r.published_at && <time dateTime={r.published_at}>{new Date(r.published_at).toLocaleDateString()}</time>}
+                        {typeof r.rank === 'number' && <span>Rank: {r.rank.toFixed(2)}</span>}
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </>
         )}
