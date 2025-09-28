@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import RoleBadge from '../../../components/ui/RoleBadge';
 import ReactMarkdown from 'react-markdown';
 import { validateBlog } from '../../../utils/validation';
 import Icon from '../../../components/AppIcon';
@@ -292,7 +293,10 @@ ${lang}\n${selected}\n\
             />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-medium text-text-primary truncate">{post?.title || 'Untitled'}</div>
+            <div className="flex items-center gap-2">
+              <div className="font-medium text-text-primary truncate">{post?.title || 'Untitled'}</div>
+              <RoleBadge role={post?.authorRole} />
+            </div>
             <div className="text-sm text-text-secondary font-caption truncate">
               {post?.excerpt || 'No excerpt available'}
             </div>

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet';
 import HeaderNavigation from 'components/ui/HeaderNavigation';
 import blogService from 'utils/blogService';
 import Icon from 'components/AppIcon';
+import RoleBadge from 'components/ui/RoleBadge';
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -78,10 +79,13 @@ const BlogPost = () => {
             </button>
           </div>
           {post.author?.full_name && (
-            <div className="text-sm text-text-secondary mb-6 flex items-center gap-2">
-              <Icon name="User" size={16} />
-              <span>{post.author.full_name}</span>
-              {post.published_at && <time dateTime={post.published_at}>{new Date(post.published_at).toLocaleDateString()}</time>}
+            <div className="text-sm text-text-secondary mb-6 flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Icon name="User" size={16} />
+                <span className="text-text-primary font-medium">{post.author.full_name}</span>
+              </div>
+              <RoleBadge role={post.author.role} email={post.author.email} adminEmail={import.meta.env.VITE_ADMIN_EMAIL} />
+              {post.published_at && <time className="text-xs" dateTime={post.published_at}>{new Date(post.published_at).toLocaleDateString()}</time>}
             </div>
           )}
           {post.featured_image && (
@@ -102,7 +106,10 @@ const BlogPost = () => {
             {related.map(r => (
               <li key={r.id}>
                 <Link to={`/blog/${r.slug}`} className="group block p-4 rounded bg-surface border border-border-accent/20 hover:border-primary transition">
-                  <h3 className="font-medium group-hover:text-primary">{r.title}</h3>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <h3 className="font-medium group-hover:text-primary truncate">{r.title}</h3>
+                    {r.author?.role && <RoleBadge role={r.author.role} email={r.author.email} adminEmail={import.meta.env.VITE_ADMIN_EMAIL} />}
+                  </div>
                   {r.excerpt && <p className="text-sm text-text-secondary line-clamp-2">{r.excerpt}</p>}
                   {r.tags?.length ? <div className="mt-2 flex flex-wrap gap-1">{r.tags.slice(0,4).map(t => <span key={t} className="text-[10px] bg-border-accent/40 px-1 rounded">{t}</span>)}</div> : null}
                 </Link>
