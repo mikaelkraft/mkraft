@@ -4,6 +4,7 @@ import { ToastProvider, ToastContainer } from "./contexts/ToastContext";
 import Routes from "./Routes";
 import Header from './components/layout/Header';
 import Canonical from "./components/seo/Canonical";
+import OGMeta from './components/seo/OGMeta';
 import settingsService from "./utils/settingsService";
 import DevOtpBanner from "./components/auth/DevOtpBanner";
 import CommandPalette from "./components/CommandPalette";
@@ -27,6 +28,7 @@ function App() {
     <ToastProvider defaultDuration={toastDuration}>
       <AuthProvider>
   <Header />
+  <OGMeta />
   <Routes />
   <Canonical />
         <ToastContainer />

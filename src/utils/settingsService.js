@@ -241,6 +241,9 @@ class SettingsService {
         default_theme: 'cyberpunk',
         default_font_size: 'medium',
         logo_url: '',
+    logo_light_url: '',
+    logo_dark_url: '',
+  og_default_image_url: '/assets/images/mklogo.png',
         favicon_url: '',
         social_media: {
           twitter: 'mikael_kraft',
@@ -263,6 +266,26 @@ class SettingsService {
     } catch (error) {
       return { success: false, error: 'Failed to reset settings to defaults' };
     }
+  }
+
+  // Upload (set) site logos (light/dark) by URL or base64 (API mode only currently)
+  async setLogos({ light, dark }) {
+    if (!USE_API) {
+      // Direct DB mode: just patch settings
+      const payload = {};
+      if (light !== undefined) payload.logo_light_url = light;
+      if (dark !== undefined) payload.logo_dark_url = dark;
+      return this.updateSettings(payload);
+    }
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    if (!token) return { success: false, error: 'Authentication required' };
+    const res = await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/settings/logo-upload', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ light, dark })
+    });
+    if (!res.ok) return { success: false, error: await res.text() };
+    return { success: true, data: await res.json() };
   }
 
   // Export settings (admin only)

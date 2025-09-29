@@ -45,6 +45,7 @@ This repo = Portfolio + CMS + Blog + Engagement layer, shipping today with a pra
  - **Safe Video Embeds** – Optional YouTube/Vimeo embeds sanitized + responsive wrapper
  - **Change Auditing** – Profile field changes recorded (who/what/when)
  - **Lightweight Rate Limiting** – Basic in-memory guard on sensitive mutation endpoints
+ - **Dual Logo Theme Support** – Light/dark logo variants + automatic OG image fallback
 
 ## 📋 Prerequisites
 
@@ -356,6 +357,36 @@ Rate Limiting:
 - For production scale replace with Redis / durable store keyed by user and possibly IP.
 
 ### Safe Video Embeds
+### Logos & Branding
+
+New branding capabilities:
+- `logo_light_url`, `logo_dark_url` columns allow theme‑specific variants.
+- `site_logo_url` / `logo_url` continue to work; light/dark fall back to these if unset.
+- Direct upload endpoint (admin): `PUT /api/settings/logo-upload` with body `{ "light": "data:image/png;base64,...", "dark": "data:image/png;base64,..." }` or HTTPS URLs.
+- Simple URL set endpoint: `PUT /api/settings/logo` `{ "url": "https://..." }` (legacy / single variant).
+- OG meta fallback uses `og_default_image_url` (auto‑backfilled) or `logo_url`.
+
+Example upload (base64 minimal):
+```json
+PUT /api/settings/logo-upload
+{
+   "light": "data:image/png;base64,iVBORw0KGgo...",
+   "dark": "https://cdn.example.com/brand/logo-dark.png"
+}
+```
+
+### Automatic Featured Image Extraction
+When creating a blog post (POST `/api/blog`) if `featured_image` is omitted, the backend scans `content` for the first `<img>` tag and uses its `src` as `featured_image`.
+- Explicit `featured_image` field always takes precedence.
+- If no image tags present, field remains null.
+- `no_image.png` still used client-side as a visual fallback where appropriate.
+
+### Open Graph Meta
+The root app now injects OG meta tags with `<OGMeta />` component:
+- Title: `site_title` (overrideable per page in future).
+- Description: `site_description`.
+- Image: `og_default_image_url` → `logo_url` → `/assets/images/mklogo.png`.
+
 
 Blog post HTML is sanitized; when `site_settings.enable_video` is true:
 - Trusted sources: YouTube & Vimeo iframe `src` domains only.

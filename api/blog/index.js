@@ -97,13 +97,19 @@ module.exports = async function handler(req, res) {
         publishedAt = null;
         body.featured = false;
       }
+      // Auto-extract first <img> if featured_image missing
+      let autoFeatured = null;
+      if (!body.featured_image && body.content) {
+        const imgMatch = body.content.match(/<img[^>]*src=["']([^"'>]+)["'][^>]*>/i);
+        if (imgMatch) autoFeatured = imgMatch[1];
+      }
       const insertSql = `
         INSERT INTO wisdomintech.blog_posts (
           slug, title, excerpt, content, featured_image, source_url, tags, category, status, featured, author_id, published_at
         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
         RETURNING *
       `;
-      const params = [slug, body.title || '', body.excerpt || null, body.content || null, body.featured_image || null, body.source_url || null, body.tags || null, body.category || null, desiredStatus, !!body.featured, user.id, publishedAt];
+      const params = [slug, body.title || '', body.excerpt || null, body.content || null, body.featured_image || autoFeatured || null, body.source_url || null, body.tags || null, body.category || null, desiredStatus, !!body.featured, user.id, publishedAt];
       const { rows } = await query(insertSql, params);
       return json(res, rows[0], 201);
     }
