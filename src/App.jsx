@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider, ToastContainer } from "./contexts/ToastContext";
 import Routes from "./Routes";
+import Header from './components/layout/Header';
 import Canonical from "./components/seo/Canonical";
 import settingsService from "./utils/settingsService";
 import DevOtpBanner from "./components/auth/DevOtpBanner";
@@ -25,6 +26,7 @@ function App() {
   return (
     <ToastProvider defaultDuration={toastDuration}>
       <AuthProvider>
+  <Header />
   <Routes />
   <Canonical />
         <ToastContainer />

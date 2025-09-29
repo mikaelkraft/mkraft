@@ -41,6 +41,10 @@ This repo = Portfolio + CMS + Blog + Engagement layer, shipping today with a pra
 - **Form Management** - React Hook Form for efficient form handling
 - **Animation** - Framer Motion for smooth UI animations
 - **Responsive Design** - Mobile-first design with dark/light theme support
+ - **Configurable Profile Fields** – Editable/required fields governed by DB rules with audit logging
+ - **Safe Video Embeds** – Optional YouTube/Vimeo embeds sanitized + responsive wrapper
+ - **Change Auditing** – Profile field changes recorded (who/what/when)
+ - **Lightweight Rate Limiting** – Basic in-memory guard on sensitive mutation endpoints
 
 ## 📋 Prerequisites
 
@@ -325,8 +329,50 @@ When `VITE_USE_API=true`, the following endpoints are available:
 - `GET /api/slides` - Hero slides
 - `POST /api/views/increment` - Track page views
 - `POST /api/likes/toggle` - Toggle likes
+ - `GET /api/profile` / `PUT /api/profile` - Fetch or update current (or target, admin) user profile with field rule enforcement
+ - `GET /api/profile/fields` / `POST /api/profile/fields` - Read / upsert profile field rule definitions (admin mutation)
 
 Full API documentation available in `README_API.md`.
+
+### Profile Field Governance & Auditing
+
+Profiles are governed by a `profile_field_rules` table allowing runtime control over:
+- `enabled` – Whether a field is surfaced / writable.
+- `editable_roles` – Array of roles permitted to edit (e.g. `["admin","publisher"]`).
+- `required` – Enforced on update: missing or empty values trigger a 400.
+
+Update Behavior:
+- Non-admin users can only modify fields where their role appears in `editable_roles` and `enabled` is true.
+- Admins may target another user via payload `{ "userId": "..." }`.
+- Normalization: `website_url` & `avatar_url` auto-prepend `https://` if protocol absent; social handles strip leading `@`.
+- Empty payload or no editable fields returns `400`.
+
+Auditing:
+- Each change writes a row to `profile_change_events` capturing: `user_id`, `actor_id`, `field_name`, `old_value`, `new_value`, timestamp.
+- Values truncated to 1000 chars for storage safety.
+
+Rate Limiting:
+- Profile updates limited to 10 per minute per user (in-memory). Returns `429` when exceeded.
+- For production scale replace with Redis / durable store keyed by user and possibly IP.
+
+### Safe Video Embeds
+
+Blog post HTML is sanitized; when `site_settings.enable_video` is true:
+- Trusted sources: YouTube & Vimeo iframe `src` domains only.
+- Allowed attributes reduced to a safe subset; `allow` attribute filtered to approved feature tokens.
+- Each iframe wrapped in a `<div class="video-embed-container">...</div>` for responsive styling.
+- When video disabled, disallowed `<iframe>` elements are stripped entirely (no orphan closing tags).
+
+Add CSS (example) if not already present in global styles:
+```css
+.video-embed-container { position: relative; aspect-ratio: 16/9; width: 100%; max-width: 100%; }
+.video-embed-container iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+```
+
+### Error Responses (Conventions)
+- Validation errors: `{ "error": "Missing required fields", "fields": ["bio","headline"] }`
+- Rate limits: `{ "error": "Rate limit exceeded" }`
+- Auth failures: `{ "error": "Unauthorized" }`
 
 
 ## 🎨 Styling & Themes
