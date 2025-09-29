@@ -50,9 +50,15 @@ export default [
       "import/no-unresolved": "off",
       "unused-imports/no-unused-imports": "warn",
       "no-console": ["warn", { allow: ["warn", "error"] }],
-      // Temporary relaxations to unblock migration; TODO tighten later
-      "no-unused-vars": "off",
-      "no-empty": "off",
+      "no-unused-vars": [
+        "warn",
+        {
+          args: "after-used",
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
+      "no-empty": ["warn", { allowEmptyCatch: true }],
     },
   },
   // Backend Node API files (CommonJS style)
@@ -74,8 +80,15 @@ export default [
       "import/no-unresolved": "off",
       "unused-imports/no-unused-imports": "warn",
       "no-console": ["warn", { allow: ["warn", "error"] }],
-      "no-unused-vars": "off",
-      "no-empty": "off",
+      "no-unused-vars": [
+        "warn",
+        {
+          args: "after-used",
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
+      "no-empty": ["warn", { allowEmptyCatch: true }],
     },
   },
 ];

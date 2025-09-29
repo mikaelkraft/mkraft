@@ -205,7 +205,7 @@ class SettingsService {
   async updateSocialMedia(socialMediaData) {
     try {
       return await this.updateSetting("social_media", socialMediaData);
-    } catch (error) {
+    } catch {
       return {
         success: false,
         error: "Failed to update social media settings",
@@ -217,7 +217,7 @@ class SettingsService {
   async updateSEOSettings(seoData) {
     try {
       return await this.updateSetting("seo_settings", seoData);
-    } catch (error) {
+    } catch {
       return { success: false, error: "Failed to update SEO settings" };
     }
   }
@@ -293,7 +293,7 @@ class SettingsService {
       };
 
       return await this.updateSettings(defaultSettings);
-    } catch (error) {
+    } catch {
       return { success: false, error: "Failed to reset settings to defaults" };
     }
   }
@@ -364,7 +364,7 @@ class SettingsService {
         data: exportData,
         filename: `wisdomintech-settings-${new Date().toISOString().split("T")[0]}.json`,
       };
-    } catch (error) {
+    } catch {
       return { success: false, error: "Failed to export settings" };
     }
   }
@@ -392,7 +392,7 @@ class SettingsService {
       delete cleanedData.updated_at;
 
       return await this.updateSettings(cleanedData);
-    } catch (error) {
+    } catch {
       return { success: false, error: "Failed to import settings" };
     }
   }
@@ -422,7 +422,7 @@ class SettingsService {
       };
 
       return { success: true, data: mockAnalytics };
-    } catch (error) {
+    } catch {
       return { success: false, error: "Failed to get analytics data" };
     }
   }

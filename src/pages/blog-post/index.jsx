@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import blogService from "utils/blogService";
+// Removed direct Helmet usage; OGMeta now centralizes meta tags
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -32,7 +33,9 @@ const BlogPost = () => {
       try {
         const rel = await blogService.getRelatedPosts(slug);
         if (rel.success) setRelated(rel.data);
-      } catch {}
+      } catch {
+        // Silently ignore related post errors (non-critical)
+      }
     })();
   }, [slug]);
 
@@ -65,18 +68,7 @@ const BlogPost = () => {
         description={desc}
         image={post.featured_image || undefined}
       />
-      <Helmet>
-        <title>{title} — Blog</title>
-        <meta name="description" content={desc} />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={desc} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://mkraft.tech/blog/${slug}`} />
-        <meta
-          property="og:image"
-          content={post.featured_image || "/assets/images/no_image.png"}
-        />
-      </Helmet>
+      {/* Title + basic meta tags handled by OGMeta & global SEO component */}
       <HeaderNavigation />
       <main className="max-w-3xl mx-auto p-6">
         <article>
@@ -92,12 +84,16 @@ const BlogPost = () => {
                   url: window.location.href,
                 };
                 if (navigator.share) {
-                  navigator.share(shareData).catch(() => {});
+                  navigator.share(shareData).catch(() => {
+                    /* ignore */
+                  });
                 } else {
                   try {
                     navigator.clipboard.writeText(window.location.href);
                     alert("Link copied to clipboard");
-                  } catch {}
+                  } catch {
+                    /* ignore */
+                  }
                 }
               }}
               className="inline-flex items-center gap-1 text-xs px-2 py-1 border border-border-accent/40 rounded hover:bg-primary/10 text-text-secondary hover:text-primary transition-colors"
@@ -161,8 +157,8 @@ const BlogPost = () => {
           <ul className="space-y-3">
             {related.map((r) => (
               <li key={r.id}>
-                <Link
-                  to={`/blog/${r.slug}`}
+                <a
+                  href={`/blog/${r.slug}`}
                   className="group block p-4 rounded bg-surface border border-border-accent/20 hover:border-primary transition"
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
@@ -194,7 +190,7 @@ const BlogPost = () => {
                       ))}
                     </div>
                   ) : null}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>

@@ -38,6 +38,7 @@ const AdminDashboardContentManagement = () => {
   };
   useEffect(() => {
     if (publisherProgramEnabled) loadPublisherRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadPublisherRequests stable enough
   }, [publisherProgramEnabled]);
 
   const handlePublisherDecision = async (user_id, action) => {
@@ -61,11 +62,7 @@ const AdminDashboardContentManagement = () => {
 
   // Helper mappers (UI shape -> DB shape)
   const toDbProject = (data = {}) => {
-    const {
-      image,
-      date, // UI-only
-      ...rest
-    } = data || {};
+    const { image, date: _date, ...rest } = data || {}; // _date ignored
     return {
       ...rest,
       featured_image: image,
@@ -77,11 +74,7 @@ const AdminDashboardContentManagement = () => {
     const {
       featuredImage,
       publishDate,
-      views,
-      comments,
-      likes,
       readTime,
-      id, // ignore client-provided id
       slug,
       featured,
       metaTitle,
@@ -98,7 +91,6 @@ const AdminDashboardContentManagement = () => {
       featured,
       meta_title: metaTitle,
       meta_description: metaDescription,
-      // counters managed by DB
     };
   };
 
@@ -108,7 +100,7 @@ const AdminDashboardContentManagement = () => {
       ctaText,
       ctaLink,
       order,
-      views, // ignore
+      views: _views,
       status,
       ...rest
     } = data || {};
@@ -205,7 +197,7 @@ const AdminDashboardContentManagement = () => {
         if (stg.success) setSettings(stg.data);
         // Load moderation comments (approved for now; future: pending only if workflow changes)
         loadModeration();
-      } catch (e) {
+      } catch {
         if (mounted) setError("Failed to load admin data");
       } finally {
         if (mounted) setLoading(false);
@@ -229,7 +221,7 @@ const AdminDashboardContentManagement = () => {
         const data = await res.json();
         setModerationComments(data);
       }
-    } catch (e) {
+    } catch {
       // ignore
     } finally {
       setModerationLoading(false);
@@ -304,11 +296,7 @@ const AdminDashboardContentManagement = () => {
     (p) => p.status === "draft" && p.authorRole === "publisher",
   );
 
-  const ADMIN_EMAIL =
-    normalizedSettings?.adminEmail ||
-    settings?.admin_email ||
-    import.meta.env.VITE_ADMIN_EMAIL ||
-    "";
+  // ADMIN_EMAIL removed (unused)
 
   const normalizedSlides = slides.map((s) => ({
     id: s.id,
@@ -377,12 +365,9 @@ const AdminDashboardContentManagement = () => {
     },
   };
 
-  const handleSectionChange = (section, action = null) => {
+  const handleSectionChange = (section, _action = null) => {
     setActiveSection(section);
-    if (action) {
-      // Handle specific actions like 'create', 'edit', etc.
-      console.log(`Action: ${action} for section: ${section}`);
-    }
+    // _action reserved for future contextual behaviors (create/edit); currently no-op
   };
 
   const handleAuthToggle = () => {
@@ -531,7 +516,7 @@ const AdminDashboardContentManagement = () => {
       } else {
         show("Failed batch reorder; falling back", { type: "error" });
       }
-    } catch (e) {
+    } catch {
       show("Reorder error", { type: "error" });
     }
   };
