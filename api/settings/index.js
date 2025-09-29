@@ -8,7 +8,8 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       const sql = `SELECT * FROM wisdomintech.site_settings LIMIT 1`;
       const { rows } = await query(sql);
-      const row = rows[0] || {};
+  const row = rows[0] || {};
+  if (row.logo_url && !row.site_logo_url) row.site_logo_url = row.logo_url; // alias
       // Backward compatibility: expose ui_settings / ads_settings aliases
       if (row.ui && !row.ui_settings) row.ui_settings = row.ui;
       if (row.ads && !row.ads_settings) row.ads_settings = row.ads;
@@ -27,7 +28,8 @@ module.exports = async function handler(req, res) {
         const id = existing.rows[0].id;
         const params = [body.site_title||null, body.site_tagline||null, body.site_description||null, body.contact_email||null, body.admin_email||null, body.enable_video??null, body.default_theme||null, body.default_font_size||null, body.logo_url||null, body.favicon_url||null, body.resume_url||null, body.hero_image_url||null, body.social_media||null, body.seo_settings||null, body.maintenance_mode??null, body.custom_css||null, body.custom_js||null, body.ui||null, body.ads||null, id];
         const { rows } = await query(updateSql, params);
-        const out = rows[0];
+  const out = rows[0];
+  if (out.logo_url && !out.site_logo_url) out.site_logo_url = out.logo_url;
         if (out.ui && !out.ui_settings) out.ui_settings = out.ui;
         if (out.ads && !out.ads_settings) out.ads_settings = out.ads;
         return json(res, out);
@@ -36,6 +38,7 @@ module.exports = async function handler(req, res) {
         const params = [body.site_title||null, body.site_tagline||null, body.site_description||null, body.contact_email||null, body.admin_email||null, body.enable_video??null, body.default_theme||null, body.default_font_size||null, body.logo_url||null, body.favicon_url||null, body.resume_url||null, body.hero_image_url||null, body.social_media||null, body.seo_settings||null, body.maintenance_mode??null, body.custom_css||null, body.custom_js||null, body.ui||null, body.ads||null];
         const { rows } = await query(insertSql, params);
         const out = rows[0];
+        if (out.logo_url && !out.site_logo_url) out.site_logo_url = out.logo_url;
         if (out.ui && !out.ui_settings) out.ui_settings = out.ui;
         if (out.ads && !out.ads_settings) out.ads_settings = out.ads;
         return json(res, out, 201);
