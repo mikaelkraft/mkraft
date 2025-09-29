@@ -1,7 +1,15 @@
 #!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
+###############################################################################
+# Husky v9+ lightweight hook (deprecated husky.sh sourcing removed)
+# Runs lint-staged and a fast subset of tests before allowing commit.
+# Fails the commit if either step exits non‑zero.
+###############################################################################
+set -e
 
 # Run lint-staged (will execute configured formatters/tests on staged files)
 npm run lint:staged
+
 echo "Running fast test subset..."
-npm run --silent test:fast || exit 1
+npm run --silent test:fast
+
+echo "✅ pre-commit checks passed"

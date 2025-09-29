@@ -1,26 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import RoleBadge from '../../components/ui/RoleBadge';
-import HeaderNavigation from '../../components/ui/HeaderNavigation';
-import DashboardSidebar from './components/DashboardSidebar';
-import DashboardOverview from './components/DashboardOverview';
-import AnalyticsOverview from './components/AnalyticsOverview';
-import ProjectsManagement from './components/ProjectsManagement';
-import BlogManagement from './components/BlogManagement';
-import BlogEditor from './components/BlogEditor';
-import SlidesManagement from './components/SlidesManagement';
-import SiteSettings from './components/SiteSettings';
-import BrandingHints from '../../components/admin/BrandingHints';
-import projectService from '../../utils/projectService';
-import blogService from '../../utils/blogService';
-import slideService from '../../utils/slideService';
-import settingsService from '../../utils/settingsService';
-import publisherProgramService from '../../utils/publisherProgramService';
-import useFeature from '../../hooks/useFeature';
-import { useToast } from '../../contexts/ToastContext';
+import { useEffect, useState } from "react";
+import projectService from "../../utils/projectService";
+import blogService from "../../utils/blogService";
+import slideService from "../../utils/slideService";
+import settingsService from "../../utils/settingsService";
+import publisherProgramService from "../../utils/publisherProgramService";
+import useFeature from "../../hooks/useFeature";
+import { useToast } from "../../contexts/ToastContext";
 
 const AdminDashboardContentManagement = () => {
   const { show } = useToast();
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState("overview");
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [projects, setProjects] = useState([]);
   const [blogPosts, setBlogPosts] = useState([]);
@@ -30,8 +19,12 @@ const AdminDashboardContentManagement = () => {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [blogEditorState, setBlogEditorState] = useState({ open: false, mode: 'create', post: null });
-  const publisherProgramEnabled = useFeature('publisher_program');
+  const [blogEditorState, setBlogEditorState] = useState({
+    open: false,
+    mode: "create",
+    post: null,
+  });
+  const publisherProgramEnabled = useFeature("publisher_program");
   const [publisherRequests, setPublisherRequests] = useState([]);
   const [publisherReqLoading, setPublisherReqLoading] = useState(false);
   const [publisherReqActionIds, setPublisherReqActionIds] = useState([]); // ids currently being processed
@@ -43,22 +36,27 @@ const AdminDashboardContentManagement = () => {
     if (res.success) setPublisherRequests(res.data);
     setPublisherReqLoading(false);
   };
-  useEffect(() => { if (publisherProgramEnabled) loadPublisherRequests(); }, [publisherProgramEnabled]);
+  useEffect(() => {
+    if (publisherProgramEnabled) loadPublisherRequests();
+  }, [publisherProgramEnabled]);
 
   const handlePublisherDecision = async (user_id, action) => {
-    const fn = action === 'approve' ? publisherProgramService.approve : publisherProgramService.reject;
-    setPublisherReqActionIds(ids => [...ids, user_id]);
+    const fn =
+      action === "approve"
+        ? publisherProgramService.approve
+        : publisherProgramService.reject;
+    setPublisherReqActionIds((ids) => [...ids, user_id]);
     // Optimistic removal
-    setPublisherRequests(prev => prev.filter(p => p.id !== user_id));
+    setPublisherRequests((prev) => prev.filter((p) => p.id !== user_id));
     const res = await fn(user_id);
     if (res.success) {
-      show(`User ${action}d`, { type: 'success' });
+      show(`User ${action}d`, { type: "success" });
     } else {
-      show(res.error || 'Action failed', { type: 'error' });
+      show(res.error || "Action failed", { type: "error" });
       // Revert on failure: re-fetch list
       await loadPublisherRequests();
     }
-    setPublisherReqActionIds(ids => ids.filter(id => id !== user_id));
+    setPublisherReqActionIds((ids) => ids.filter((id) => id !== user_id));
   };
 
   // Helper mappers (UI shape -> DB shape)
@@ -79,7 +77,10 @@ const AdminDashboardContentManagement = () => {
     const {
       featuredImage,
       publishDate,
-      views, comments, likes, readTime,
+      views,
+      comments,
+      likes,
+      readTime,
       id, // ignore client-provided id
       slug,
       featured,
@@ -118,7 +119,12 @@ const AdminDashboardContentManagement = () => {
       cta_link: ctaLink,
       display_order: order,
       // Map UI status to DB content_status
-      status: status === 'active' ? 'published' : status === 'inactive' ? 'draft' : status,
+      status:
+        status === "active"
+          ? "published"
+          : status === "inactive"
+            ? "draft"
+            : status,
     };
   };
 
@@ -127,56 +133,56 @@ const AdminDashboardContentManagement = () => {
     projects: projects.length,
     blogPosts: blogPosts.length,
     slides: slides.length,
-    totalViews: 0
+    totalViews: 0,
   };
 
   const mockAnalytics = {
     visitorData: [
-      { date: '2024-01-01', visitors: 120 },
-      { date: '2024-01-02', visitors: 150 },
-      { date: '2024-01-03', visitors: 180 },
-      { date: '2024-01-04', visitors: 200 },
-      { date: '2024-01-05', visitors: 170 },
-      { date: '2024-01-06', visitors: 220 },
-      { date: '2024-01-07', visitors: 250 }
+      { date: "2024-01-01", visitors: 120 },
+      { date: "2024-01-02", visitors: 150 },
+      { date: "2024-01-03", visitors: 180 },
+      { date: "2024-01-04", visitors: 200 },
+      { date: "2024-01-05", visitors: 170 },
+      { date: "2024-01-06", visitors: 220 },
+      { date: "2024-01-07", visitors: 250 },
     ],
     contentData: [
-      { type: 'Projects', views: 8500 },
-      { type: 'Blog', views: 12000 },
-      { type: 'About', views: 4200 }
+      { type: "Projects", views: 8500 },
+      { type: "Blog", views: 12000 },
+      { type: "About", views: 4200 },
     ],
     recentActivity: [
       {
-        type: 'create',
+        type: "create",
         action: 'Created new blog post "Advanced React Patterns"',
-        timestamp: '2 hours ago'
+        timestamp: "2 hours ago",
       },
       {
-        type: 'update',
+        type: "update",
         action: 'Updated project "E-commerce Platform"',
-        timestamp: '4 hours ago'
+        timestamp: "4 hours ago",
       },
       {
-        type: 'create',
+        type: "create",
         action: 'Added new hero slide "Innovation Showcase"',
-        timestamp: '1 day ago'
+        timestamp: "1 day ago",
       },
       {
-        type: 'update',
-        action: 'Modified site settings',
-        timestamp: '2 days ago'
+        type: "update",
+        action: "Modified site settings",
+        timestamp: "2 days ago",
       },
       {
-        type: 'delete',
+        type: "delete",
         action: 'Removed outdated project "Legacy App"',
-        timestamp: '3 days ago'
-      }
+        timestamp: "3 days ago",
+      },
     ],
     popularContent: [
-      { name: 'Projects', value: 45 },
-      { name: 'Blog Posts', value: 35 },
-      { name: 'About Page', value: 20 }
-    ]
+      { name: "Projects", value: 45 },
+      { name: "Blog Posts", value: 35 },
+      { name: "About Page", value: 20 },
+    ],
   };
 
   // Load data
@@ -200,7 +206,7 @@ const AdminDashboardContentManagement = () => {
         // Load moderation comments (approved for now; future: pending only if workflow changes)
         loadModeration();
       } catch (e) {
-        if (mounted) setError('Failed to load admin data');
+        if (mounted) setError("Failed to load admin data");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -210,13 +216,15 @@ const AdminDashboardContentManagement = () => {
     };
   }, []);
 
-  const [moderationFilter, setModerationFilter] = useState('pending');
+  const [moderationFilter, setModerationFilter] = useState("pending");
 
   const loadModeration = async () => {
     try {
       setModerationLoading(true);
-      const base = import.meta.env.VITE_API_BASE_URL || '/api';
-      const res = await fetch(base + '/comments/moderate?status=' + moderationFilter);
+      const base = import.meta.env.VITE_API_BASE_URL || "/api";
+      const res = await fetch(
+        base + "/comments/moderate?status=" + moderationFilter,
+      );
       if (res.ok) {
         const data = await res.json();
         setModerationComments(data);
@@ -230,31 +238,41 @@ const AdminDashboardContentManagement = () => {
 
   const handleModerationApproveToggle = async (id, next) => {
     try {
-      const base = import.meta.env.VITE_API_BASE_URL || '/api';
-      const res = await fetch(base + '/comments/moderate?id=' + id, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ is_approved: next }) });
+      const base = import.meta.env.VITE_API_BASE_URL || "/api";
+      const res = await fetch(base + "/comments/moderate?id=" + id, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ is_approved: next }),
+      });
       if (res.ok) {
-        setModerationComments(prev => prev.map(c => c.id === id ? { ...c, is_approved: next } : c));
-        show(next ? 'Comment approved' : 'Comment unapproved', { type: 'success' });
+        setModerationComments((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, is_approved: next } : c)),
+        );
+        show(next ? "Comment approved" : "Comment unapproved", {
+          type: "success",
+        });
       } else {
-        show('Failed to update comment', { type: 'error' });
+        show("Failed to update comment", { type: "error" });
       }
     } catch {
-      show('Error updating comment', { type: 'error' });
+      show("Error updating comment", { type: "error" });
     }
   };
 
   const handleModerationDelete = async (id) => {
     try {
-      const base = import.meta.env.VITE_API_BASE_URL || '/api';
-      const res = await fetch(base + '/comments/moderate?id=' + id, { method: 'DELETE' });
+      const base = import.meta.env.VITE_API_BASE_URL || "/api";
+      const res = await fetch(base + "/comments/moderate?id=" + id, {
+        method: "DELETE",
+      });
       if (res.ok) {
-        setModerationComments(prev => prev.filter(c => c.id !== id));
-        show('Comment deleted', { type: 'success' });
+        setModerationComments((prev) => prev.filter((c) => c.id !== id));
+        show("Comment deleted", { type: "success" });
       } else {
-        show('Failed to delete comment', { type: 'error' });
+        show("Failed to delete comment", { type: "error" });
       }
     } catch {
-      show('Error deleting comment', { type: 'error' });
+      show("Error deleting comment", { type: "error" });
     }
   };
 
@@ -277,15 +295,20 @@ const AdminDashboardContentManagement = () => {
     featured: p.featured,
     metaTitle: p.meta_title,
     metaDescription: p.meta_description,
-    authorRole: p.author_role || p.author?.role || 'viewer',
-    authorName: p.author?.full_name || '',
-    authorEmail: p.author?.email || '',
+    authorRole: p.author_role || p.author?.role || "viewer",
+    authorName: p.author?.full_name || "",
+    authorEmail: p.author?.email || "",
   }));
 
-  const reviewQueuePosts = normalizedPosts.filter(p => p.status === 'draft' && p.authorRole === 'publisher');
+  const reviewQueuePosts = normalizedPosts.filter(
+    (p) => p.status === "draft" && p.authorRole === "publisher",
+  );
 
-  const ADMIN_EMAIL = (normalizedSettings?.adminEmail) || (settings?.admin_email) || (import.meta.env.VITE_ADMIN_EMAIL || '');
-
+  const ADMIN_EMAIL =
+    normalizedSettings?.adminEmail ||
+    settings?.admin_email ||
+    import.meta.env.VITE_ADMIN_EMAIL ||
+    "";
 
   const normalizedSlides = slides.map((s) => ({
     id: s.id,
@@ -296,7 +319,7 @@ const AdminDashboardContentManagement = () => {
     ctaLink: s.cta_link,
     duration: s.duration,
     order: s.display_order,
-    status: s.status === 'published' ? 'active' : 'inactive',
+    status: s.status === "published" ? "active" : "inactive",
     views: s.view_count,
   }));
 
@@ -317,27 +340,41 @@ const AdminDashboardContentManagement = () => {
     customCSS: settings.custom_css,
     customJS: settings.custom_js,
     ui: settings.ui_settings || {},
-    ads: settings.ads_settings || { enabled: false, provider: 'adsense', publisher_id: null, auto_ads: true, grid_interval: 6, ad_slot: null },
+    ads: settings.ads_settings || {
+      enabled: false,
+      provider: "adsense",
+      publisher_id: null,
+      auto_ads: true,
+      grid_interval: 6,
+      ad_slot: null,
+    },
   };
 
   const defaultUiSettings = {
-  siteTitle: 'WisdomInTech',
-    siteTagline: 'Neo-Cyberpunk Experience',
-    siteDescription: '',
-    contactEmail: '',
-    adminEmail: '',
+    siteTitle: "WisdomInTech",
+    siteTagline: "Neo-Cyberpunk Experience",
+    siteDescription: "",
+    contactEmail: "",
+    adminEmail: "",
     enableVideo: true,
-    defaultTheme: 'cyberpunk',
-    defaultFontSize: 'medium',
-    logoUrl: '',
-    faviconUrl: '',
-    socialMedia: { twitter: '', linkedin: '', github: '', email: '' },
-    seo: { keywords: '', ogImage: '', googleAnalytics: '', searchConsole: '' },
+    defaultTheme: "cyberpunk",
+    defaultFontSize: "medium",
+    logoUrl: "",
+    faviconUrl: "",
+    socialMedia: { twitter: "", linkedin: "", github: "", email: "" },
+    seo: { keywords: "", ogImage: "", googleAnalytics: "", searchConsole: "" },
     maintenanceMode: false,
-    customCSS: '',
-    customJS: '',
+    customCSS: "",
+    customJS: "",
     ui: { toast_duration_ms: 3500 },
-    ads: { enabled: false, provider: 'adsense', publisher_id: '', auto_ads: true, grid_interval: 6, ad_slot: '' },
+    ads: {
+      enabled: false,
+      provider: "adsense",
+      publisher_id: "",
+      auto_ads: true,
+      grid_interval: 6,
+      ad_slot: "",
+    },
   };
 
   const handleSectionChange = (section, action = null) => {
@@ -353,12 +390,17 @@ const AdminDashboardContentManagement = () => {
   };
 
   const handleProjectUpdate = async (projectId, updatedData) => {
-    const res = await projectService.updateProject(projectId, toDbProject(updatedData));
+    const res = await projectService.updateProject(
+      projectId,
+      toDbProject(updatedData),
+    );
     if (res.success) {
-      setProjects((prev) => prev.map((p) => (p.id === projectId ? res.data : p)));
-      show('Project updated successfully', { type: 'success' });
+      setProjects((prev) =>
+        prev.map((p) => (p.id === projectId ? res.data : p)),
+      );
+      show("Project updated successfully", { type: "success" });
     } else {
-      show(res.error || 'Failed to update project', { type: 'error' });
+      show(res.error || "Failed to update project", { type: "error" });
     }
   };
 
@@ -366,9 +408,9 @@ const AdminDashboardContentManagement = () => {
     const res = await projectService.deleteProject(projectId);
     if (res.success) {
       setProjects((prev) => prev.filter((p) => p.id !== projectId));
-      show('Project deleted', { type: 'success' });
+      show("Project deleted", { type: "success" });
     } else {
-      show(res.error || 'Failed to delete project', { type: 'error' });
+      show(res.error || "Failed to delete project", { type: "error" });
     }
   };
 
@@ -376,9 +418,9 @@ const AdminDashboardContentManagement = () => {
     const res = await projectService.createProject(toDbProject(projectData));
     if (res.success) {
       setProjects((prev) => [res.data, ...prev]);
-      show('Project created', { type: 'success' });
+      show("Project created", { type: "success" });
     } else {
-      show(res.error || 'Failed to create project', { type: 'error' });
+      show(res.error || "Failed to create project", { type: "error" });
     }
   };
 
@@ -386,10 +428,10 @@ const AdminDashboardContentManagement = () => {
     const res = await blogService.updatePost(postId, toDbPost(updatedData));
     if (res.success) {
       setBlogPosts((prev) => prev.map((b) => (b.id === postId ? res.data : b)));
-      show('Post updated', { type: 'success' });
-      setBlogEditorState({ open: false, mode: 'create', post: null });
+      show("Post updated", { type: "success" });
+      setBlogEditorState({ open: false, mode: "create", post: null });
     } else {
-      show(res.error || 'Failed to update post', { type: 'error' });
+      show(res.error || "Failed to update post", { type: "error" });
     }
   };
 
@@ -397,9 +439,9 @@ const AdminDashboardContentManagement = () => {
     const res = await blogService.deletePost(postId);
     if (res.success) {
       setBlogPosts((prev) => prev.filter((b) => b.id !== postId));
-      show('Post deleted', { type: 'success' });
+      show("Post deleted", { type: "success" });
     } else {
-      show(res.error || 'Failed to delete post', { type: 'error' });
+      show(res.error || "Failed to delete post", { type: "error" });
     }
   };
 
@@ -407,10 +449,10 @@ const AdminDashboardContentManagement = () => {
     const res = await blogService.createPost(toDbPost(postData));
     if (res.success) {
       setBlogPosts((prev) => [res.data, ...prev]);
-      show('Post created', { type: 'success' });
-      setBlogEditorState({ open: false, mode: 'create', post: null });
+      show("Post created", { type: "success" });
+      setBlogEditorState({ open: false, mode: "create", post: null });
     } else {
-      show(res.error || 'Failed to create post', { type: 'error' });
+      show(res.error || "Failed to create post", { type: "error" });
     }
   };
 
@@ -418,9 +460,9 @@ const AdminDashboardContentManagement = () => {
     const res = await slideService.updateSlide(slideId, toDbSlide(updatedData));
     if (res.success) {
       setSlides((prev) => prev.map((s) => (s.id === slideId ? res.data : s)));
-      show('Slide updated', { type: 'success' });
+      show("Slide updated", { type: "success" });
     } else {
-      show(res.error || 'Failed to update slide', { type: 'error' });
+      show(res.error || "Failed to update slide", { type: "error" });
     }
   };
 
@@ -428,9 +470,9 @@ const AdminDashboardContentManagement = () => {
     const res = await slideService.deleteSlide(slideId);
     if (res.success) {
       setSlides((prev) => prev.filter((s) => s.id !== slideId));
-      show('Slide deleted', { type: 'success' });
+      show("Slide deleted", { type: "success" });
     } else {
-      show(res.error || 'Failed to delete slide', { type: 'error' });
+      show(res.error || "Failed to delete slide", { type: "error" });
     }
   };
 
@@ -438,43 +480,59 @@ const AdminDashboardContentManagement = () => {
     const res = await slideService.createSlide(toDbSlide(slideData));
     if (res.success) {
       setSlides((prev) => [res.data, ...prev]);
-      show('Slide created', { type: 'success' });
+      show("Slide created", { type: "success" });
     } else {
-      show(res.error || 'Failed to create slide', { type: 'error' });
+      show(res.error || "Failed to create slide", { type: "error" });
     }
   };
 
   const handleSlideReorder = async (slideId, newOrder) => {
     // Fallback to existing single update if API batch not used environment
-    const base = import.meta.env.VITE_API_BASE_URL || '/api';
+    const base = import.meta.env.VITE_API_BASE_URL || "/api";
     try {
       // Build new ordering array client-side
       const reordered = [...slides]
-        .map(s => ({ ...s }))
-        .sort((a,b) => a.display_order - b.display_order);
-      const idx = reordered.findIndex(s => s.id === slideId);
+        .map((s) => ({ ...s }))
+        .sort((a, b) => a.display_order - b.display_order);
+      const idx = reordered.findIndex((s) => s.id === slideId);
       if (idx === -1) return;
-      const target = reordered.splice(idx,1)[0];
+      const target = reordered.splice(idx, 1)[0];
       // Clamp newOrder
       const clamped = Math.max(1, Math.min(newOrder, reordered.length + 1));
       reordered.splice(clamped - 1, 0, target);
       // Reassign sequential orders
-      const payload = reordered.map((s,i) => ({ id: s.id, display_order: i+1 }));
-      const token = (await import('../../utils/supabase.js')).default.auth.getSession ? (await (await import('../../utils/supabase.js')).default.auth.getSession()).data.session?.access_token : null;
-      const headers = { 'content-type':'application/json' };
+      const payload = reordered.map((s, i) => ({
+        id: s.id,
+        display_order: i + 1,
+      }));
+      const token = (await import("../../utils/supabase.js")).default.auth
+        .getSession
+        ? (
+            await (
+              await import("../../utils/supabase.js")
+            ).default.auth.getSession()
+          ).data.session?.access_token
+        : null;
+      const headers = { "content-type": "application/json" };
       if (token) headers.Authorization = `Bearer ${token}`;
-      const res = await fetch(base + '/slides/reorder', { method: 'POST', headers, body: JSON.stringify({ order: payload }) });
+      const res = await fetch(base + "/slides/reorder", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ order: payload }),
+      });
       if (res.ok) {
-        setSlides(prev => payload.map(p => {
-          const found = prev.find(s => s.id === p.id);
+        setSlides((prev) =>
+          payload.map((p) => {
+            const found = prev.find((s) => s.id === p.id);
             return { ...found, display_order: p.display_order };
-        }));
-        show('Slides reordered', { type: 'success' });
+          }),
+        );
+        show("Slides reordered", { type: "success" });
       } else {
-        show('Failed batch reorder; falling back', { type: 'error' });
+        show("Failed batch reorder; falling back", { type: "error" });
       }
     } catch (e) {
-      show('Reorder error', { type: 'error' });
+      show("Reorder error", { type: "error" });
     }
   };
 
@@ -500,31 +558,28 @@ const AdminDashboardContentManagement = () => {
     });
     if (res.success) {
       setSettings(res.data);
-      show('Settings updated', { type: 'success' });
+      show("Settings updated", { type: "success" });
     } else {
-      show(res.error || 'Failed to update settings', { type: 'error' });
+      show(res.error || "Failed to update settings", { type: "error" });
     }
   };
 
   const renderMainContent = () => {
-  switch (activeSection) {
-      case 'overview':
+    switch (activeSection) {
+      case "overview":
         return (
-              <DashboardOverview 
-            stats={mockStats} 
-            analytics={mockAnalytics} 
-          />
+          <DashboardOverview stats={mockStats} analytics={mockAnalytics} />
         );
-      case 'analytics':
+      case "analytics":
         return <AnalyticsOverview />;
-      case 'projects':
+      case "projects":
         return (
           <ProjectsManagement
             projects={(projects || []).map((p) => ({
               id: p.id,
               title: p.title,
               description: p.description,
-              image: p.featured_image || '/assets/images/no_image.png',
+              image: p.featured_image || "/assets/images/no_image.png",
               technologies: p.technologies || [],
               status: p.status,
               date: p.created_at,
@@ -534,7 +589,7 @@ const AdminDashboardContentManagement = () => {
             onProjectCreate={handleProjectCreate}
           />
         );
-      case 'blog':
+      case "blog":
         return (
           <div className="h-full flex flex-col">
             {!blogEditorState.open && (
@@ -543,22 +598,42 @@ const AdminDashboardContentManagement = () => {
                 onPostUpdate={handlePostUpdate}
                 onPostDelete={handlePostDelete}
                 onPostCreate={handlePostCreate}
-                onOpenEditor={({ mode, post }) => setBlogEditorState({ open: true, mode: mode || 'create', post: post || null })}
+                onOpenEditor={({ mode, post }) =>
+                  setBlogEditorState({
+                    open: true,
+                    mode: mode || "create",
+                    post: post || null,
+                  })
+                }
               />
             )}
             {blogEditorState.open && (
               <div className="flex-1 min-h-[60vh]">
                 <BlogEditor
                   mode={blogEditorState.mode}
-                  initialData={blogEditorState.mode === 'edit' && blogEditorState.post ? blogEditorState.post : {}}
-                  onCancel={() => setBlogEditorState({ open: false, mode: 'create', post: null })}
-                  onSave={(data) => blogEditorState.mode === 'edit' && blogEditorState.post ? handlePostUpdate(blogEditorState.post.id, data) : handlePostCreate(data)}
+                  initialData={
+                    blogEditorState.mode === "edit" && blogEditorState.post
+                      ? blogEditorState.post
+                      : {}
+                  }
+                  onCancel={() =>
+                    setBlogEditorState({
+                      open: false,
+                      mode: "create",
+                      post: null,
+                    })
+                  }
+                  onSave={(data) =>
+                    blogEditorState.mode === "edit" && blogEditorState.post
+                      ? handlePostUpdate(blogEditorState.post.id, data)
+                      : handlePostCreate(data)
+                  }
                 />
               </div>
             )}
           </div>
         );
-      case 'slides':
+      case "slides":
         return (
           <SlidesManagement
             slides={normalizedSlides}
@@ -568,154 +643,293 @@ const AdminDashboardContentManagement = () => {
             onSlideReorder={handleSlideReorder}
           />
         );
-      case 'moderation':
+      case "moderation":
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-text-primary">Comment Moderation</h2>
+              <h2 className="text-lg font-semibold text-text-primary">
+                Comment Moderation
+              </h2>
               <div className="flex items-center gap-2">
-                <select value={moderationFilter} onChange={(e) => { setModerationFilter(e.target.value); setTimeout(loadModeration, 0); }} className="bg-surface border border-border-accent/30 rounded px-2 py-1 text-sm">
+                <select
+                  value={moderationFilter}
+                  onChange={(e) => {
+                    setModerationFilter(e.target.value);
+                    setTimeout(loadModeration, 0);
+                  }}
+                  className="bg-surface border border-border-accent/30 rounded px-2 py-1 text-sm"
+                >
                   <option value="pending">Pending</option>
                   <option value="approved">Approved</option>
                   <option value="all">All</option>
                 </select>
-                <button onClick={loadModeration} className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80">Refresh</button>
+                <button
+                  onClick={loadModeration}
+                  className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80"
+                >
+                  Refresh
+                </button>
               </div>
             </div>
-            {moderationLoading && <div className="text-sm text-text-secondary">Loading comments…</div>}
+            {moderationLoading && (
+              <div className="text-sm text-text-secondary">
+                Loading comments…
+              </div>
+            )}
             <div className="space-y-4">
-              {moderationComments.map(c => (
-                <div key={c.id} className="p-4 rounded-lg border border-border-accent/20 bg-surface/40">
+              {moderationComments.map((c) => (
+                <div
+                  key={c.id}
+                  className="p-4 rounded-lg border border-border-accent/20 bg-surface/40"
+                >
                   <div className="flex justify-between gap-4">
                     <div>
-                      <div className="text-sm font-semibold text-text-primary">{c.author_name} <span className="font-normal text-text-secondary">&lt;{c.author_email || 'anonymous'}&gt;</span></div>
-                      <div className="text-xs text-text-secondary mb-2">{new Date(c.created_at).toLocaleString()}</div>
-                      <div className="text-sm text-text-primary whitespace-pre-wrap">{c.content}</div>
+                      <div className="text-sm font-semibold text-text-primary">
+                        {c.author_name}{" "}
+                        <span className="font-normal text-text-secondary">
+                          &lt;{c.author_email || "anonymous"}&gt;
+                        </span>
+                      </div>
+                      <div className="text-xs text-text-secondary mb-2">
+                        {new Date(c.created_at).toLocaleString()}
+                      </div>
+                      <div className="text-sm text-text-primary whitespace-pre-wrap">
+                        {c.content}
+                      </div>
                     </div>
                     <div className="flex flex-col gap-2">
-                      <button onClick={() => handleModerationApproveToggle(c.id, !c.is_approved)} className={`px-2 py-1 text-xs rounded ${c.is_approved ? 'bg-warning text-background' : 'bg-success text-background'}`}>{c.is_approved ? 'Unapprove' : 'Approve'}</button>
-                      <button onClick={() => handleModerationDelete(c.id)} className="px-2 py-1 text-xs rounded bg-error text-background">Delete</button>
+                      <button
+                        onClick={() =>
+                          handleModerationApproveToggle(c.id, !c.is_approved)
+                        }
+                        className={`px-2 py-1 text-xs rounded ${c.is_approved ? "bg-warning text-background" : "bg-success text-background"}`}
+                      >
+                        {c.is_approved ? "Unapprove" : "Approve"}
+                      </button>
+                      <button
+                        onClick={() => handleModerationDelete(c.id)}
+                        className="px-2 py-1 text-xs rounded bg-error text-background"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </div>
               ))}
               {!moderationLoading && moderationComments.length === 0 && (
-                <div className="text-sm text-text-secondary">No comments available.</div>
+                <div className="text-sm text-text-secondary">
+                  No comments available.
+                </div>
               )}
             </div>
           </div>
         );
-      case 'review-queue':
+      case "review-queue":
         // Draft posts created by publishers awaiting admin review (simple filter)
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-text-primary">Review Queue</h2>
+              <h2 className="text-lg font-semibold text-text-primary">
+                Review Queue
+              </h2>
               <div className="flex items-center gap-2">
-                <button onClick={() => {
-                  // simple reload of posts
-                  (async () => {
-                    const posts = await blogService.getAllPosts();
-                    if (posts.success) setBlogPosts(posts.data);
-                  })();
-                }} className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80">Refresh</button>
+                <button
+                  onClick={() => {
+                    // simple reload of posts
+                    (async () => {
+                      const posts = await blogService.getAllPosts();
+                      if (posts.success) setBlogPosts(posts.data);
+                    })();
+                  }}
+                  className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80"
+                >
+                  Refresh
+                </button>
               </div>
             </div>
-            <div className="text-xs text-text-secondary">Draft posts authored by publishers. Publish or request changes.</div>
+            <div className="text-xs text-text-secondary">
+              Draft posts authored by publishers. Publish or request changes.
+            </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {reviewQueuePosts.map(p => (
-                <div key={p.id} className="p-4 rounded-lg border border-border-accent/20 bg-surface/40 flex flex-col gap-2">
+              {reviewQueuePosts.map((p) => (
+                <div
+                  key={p.id}
+                  className="p-4 rounded-lg border border-border-accent/20 bg-surface/40 flex flex-col gap-2"
+                >
                   <div className="flex justify-between items-start gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <div className="text-sm font-semibold text-text-primary truncate">{p.title || '(Untitled)'}</div>
+                        <div className="text-sm font-semibold text-text-primary truncate">
+                          {p.title || "(Untitled)"}
+                        </div>
                         <RoleBadge role={p.authorRole} email={p.authorEmail} />
                       </div>
-                      <div className="text-[10px] text-text-secondary uppercase tracking-wide mt-0.5">Draft • {p.authorRole || 'unknown'}</div>
+                      <div className="text-[10px] text-text-secondary uppercase tracking-wide mt-0.5">
+                        Draft • {p.authorRole || "unknown"}
+                      </div>
                     </div>
                     <button
-                      onClick={() => setBlogEditorState({ open: true, mode: 'edit', post: p })}
+                      onClick={() =>
+                        setBlogEditorState({
+                          open: true,
+                          mode: "edit",
+                          post: p,
+                        })
+                      }
                       className="text-[10px] px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20"
-                    >Open</button>
+                    >
+                      Open
+                    </button>
                   </div>
-                  <div className="text-xs text-text-secondary line-clamp-3">{p.excerpt || 'No excerpt provided.'}</div>
+                  <div className="text-xs text-text-secondary line-clamp-3">
+                    {p.excerpt || "No excerpt provided."}
+                  </div>
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={async () => {
                         // Publish immediately
-                        const res = await blogService.updatePost(p.id, { status: 'published' });
+                        const res = await blogService.updatePost(p.id, {
+                          status: "published",
+                        });
                         if (res.success) {
-                          setBlogPosts(prev => prev.map(b => b.id === p.id ? res.data : b));
-                          show('Post published', { type: 'success' });
+                          setBlogPosts((prev) =>
+                            prev.map((b) => (b.id === p.id ? res.data : b)),
+                          );
+                          show("Post published", { type: "success" });
                         } else {
-                          show(res.error || 'Failed to publish', { type: 'error' });
+                          show(res.error || "Failed to publish", {
+                            type: "error",
+                          });
                         }
                       }}
                       className="px-2 py-1 text-xs rounded bg-success text-background hover:bg-success/80"
-                    >Publish</button>
+                    >
+                      Publish
+                    </button>
                     <button
                       onClick={() => {
                         // For now simple toast (future: inline feedback mechanism)
-                        show('Feedback workflow not implemented yet', { type: 'info' });
+                        show("Feedback workflow not implemented yet", {
+                          type: "info",
+                        });
                       }}
                       className="px-2 py-1 text-xs rounded bg-warning text-background hover:bg-warning/80"
-                    >Request Changes</button>
+                    >
+                      Request Changes
+                    </button>
                   </div>
                 </div>
               ))}
               {reviewQueuePosts.length === 0 && (
-                <div className="text-sm text-text-secondary col-span-full">No publisher drafts pending review.</div>
+                <div className="text-sm text-text-secondary col-span-full">
+                  No publisher drafts pending review.
+                </div>
               )}
             </div>
           </div>
         );
-      case 'publisher-requests':
+      case "publisher-requests":
         if (!publisherProgramEnabled) {
-          return <div className="text-sm text-text-secondary">Publisher program disabled.</div>;
+          return (
+            <div className="text-sm text-text-secondary">
+              Publisher program disabled.
+            </div>
+          );
         }
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-text-primary">Publisher Requests</h2>
+              <h2 className="text-lg font-semibold text-text-primary">
+                Publisher Requests
+              </h2>
               <div className="flex items-center gap-2">
-                <button onClick={loadPublisherRequests} className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80">Refresh</button>
+                <button
+                  onClick={loadPublisherRequests}
+                  className="px-3 py-1 rounded bg-primary text-background text-sm hover:bg-primary/80"
+                >
+                  Refresh
+                </button>
               </div>
             </div>
-            {publisherReqLoading && <div className="text-sm text-text-secondary">Loading requests…</div>}
+            {publisherReqLoading && (
+              <div className="text-sm text-text-secondary">
+                Loading requests…
+              </div>
+            )}
             <div className="space-y-4">
-              {publisherRequests.map(r => (
-                <div key={r.id} className="p-4 rounded-lg border border-border-accent/20 bg-surface/40 flex justify-between gap-4 relative">
+              {publisherRequests.map((r) => (
+                <div
+                  key={r.id}
+                  className="p-4 rounded-lg border border-border-accent/20 bg-surface/40 flex justify-between gap-4 relative"
+                >
                   {publisherReqActionIds.includes(r.id) && (
-                    <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center text-xs text-text-secondary">Processing…</div>
+                    <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center text-xs text-text-secondary">
+                      Processing…
+                    </div>
                   )}
                   <div>
-                    <div className="text-sm font-semibold text-text-primary">{r.full_name || '(No Name)'} <span className="font-normal text-text-secondary">&lt;{r.email}&gt;</span></div>
-                    <div className="text-xs text-text-secondary mb-2">Requested {r.publisher_requested_at ? new Date(r.publisher_requested_at).toLocaleString() : '—'}</div>
-                    <div className="text-xs text-text-secondary">Status: {r.publisher_request_status}</div>
+                    <div className="text-sm font-semibold text-text-primary">
+                      {r.full_name || "(No Name)"}{" "}
+                      <span className="font-normal text-text-secondary">
+                        &lt;{r.email}&gt;
+                      </span>
+                    </div>
+                    <div className="text-xs text-text-secondary mb-2">
+                      Requested{" "}
+                      {r.publisher_requested_at
+                        ? new Date(r.publisher_requested_at).toLocaleString()
+                        : "—"}
+                    </div>
+                    <div className="text-xs text-text-secondary">
+                      Status: {r.publisher_request_status}
+                    </div>
                   </div>
                   <div className="flex flex-col gap-2 text-xs">
-                    <button disabled={publisherReqActionIds.includes(r.id)} onClick={() => handlePublisherDecision(r.id, 'approve')} className="px-2 py-1 rounded bg-success text-background hover:bg-success/80 disabled:opacity-50">Approve</button>
-                    <button disabled={publisherReqActionIds.includes(r.id)} onClick={() => handlePublisherDecision(r.id, 'reject')} className="px-2 py-1 rounded bg-error text-background hover:bg-error/80 disabled:opacity-50">Reject</button>
+                    <button
+                      disabled={publisherReqActionIds.includes(r.id)}
+                      onClick={() => handlePublisherDecision(r.id, "approve")}
+                      className="px-2 py-1 rounded bg-success text-background hover:bg-success/80 disabled:opacity-50"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      disabled={publisherReqActionIds.includes(r.id)}
+                      onClick={() => handlePublisherDecision(r.id, "reject")}
+                      className="px-2 py-1 rounded bg-error text-background hover:bg-error/80 disabled:opacity-50"
+                    >
+                      Reject
+                    </button>
                   </div>
                 </div>
               ))}
               {!publisherReqLoading && publisherRequests.length === 0 && (
-                <div className="text-sm text-text-secondary">No pending requests.</div>
+                <div className="text-sm text-text-secondary">
+                  No pending requests.
+                </div>
               )}
             </div>
           </div>
         );
-      case 'settings':
+      case "settings":
         return (
           <div className="space-y-8">
             <SiteSettings
               settings={normalizedSettings || defaultUiSettings}
               onSettingsUpdate={handleSettingsUpdate}
             />
-            <BrandingHints settings={settings || {}} />
+            <BrandingHints
+              settings={settings || {}}
+              onOgImageChange={async (val) => {
+                const res = await settingsService.setOgImage(val);
+                if (res.success) {
+                  const refreshed = await settingsService.getSettings();
+                  if (refreshed.success) setSettings(refreshed.data);
+                }
+              }}
+            />
           </div>
         );
-      case 'tech':
+      case "tech":
         return (
           <SiteSettings
             settings={normalizedSettings || defaultUiSettings}
@@ -724,10 +938,7 @@ const AdminDashboardContentManagement = () => {
         );
       default:
         return (
-          <DashboardOverview 
-            stats={mockStats} 
-            analytics={mockAnalytics} 
-          />
+          <DashboardOverview stats={mockStats} analytics={mockAnalytics} />
         );
     }
   };
@@ -738,7 +949,9 @@ const AdminDashboardContentManagement = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80">
           <div className="bg-surface border border-border-accent/20 rounded-lg px-6 py-4 shadow-glow-primary">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
-            <div className="text-sm text-text-secondary">Loading admin data…</div>
+            <div className="text-sm text-text-secondary">
+              Loading admin data…
+            </div>
           </div>
         </div>
       )}
@@ -747,11 +960,11 @@ const AdminDashboardContentManagement = () => {
           {error}
         </div>
       )}
-      <HeaderNavigation 
+      <HeaderNavigation
         isAuthenticated={isAuthenticated}
         onAuthToggle={handleAuthToggle}
       />
-      
+
       <div className="pt-16 lg:pt-18">
         <div className="flex h-[calc(100vh-4rem)] lg:h-[calc(100vh-4.5rem)]">
           {/* Sidebar */}
