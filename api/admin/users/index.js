@@ -9,7 +9,8 @@ module.exports = async function handler(req, res) {
     const admin = await requireAdmin(req, res);
     if (!admin) return;
     if (req.method !== 'GET') return error(res, 'Method not allowed', 405);
-    const url = new URL(req.url, 'http://localhost');
+  const { resolveBaseUrl } = require('../../_lib/respond.js');
+  const url = new URL(req.url, resolveBaseUrl());
     const search = url.searchParams.get('search');
     const limit = Math.min(Number(url.searchParams.get('limit') || 50), 200);
     const conditions = [];

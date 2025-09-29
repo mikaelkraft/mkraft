@@ -89,4 +89,8 @@ if (process.env.NODE_ENV === 'production') {
 const argPort = process.argv[2];
 const rawPort = (argPort || process.env.API_PORT || process.env.PORT || '5000').toString().trim();
 const PORT = Number.parseInt(rawPort, 10) || 5000;
-app.listen(PORT, () => console.log(`API server listening on http://localhost:${PORT}`));
+const { resolveBaseUrl } = require('./api/_lib/respond.js');
+app.listen(PORT, () => {
+  const base = resolveBaseUrl();
+  console.log(`API server listening on ${base.replace(/\/$/, '')}/ (port ${PORT})`);
+});

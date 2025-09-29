@@ -11,7 +11,8 @@ module.exports = async function handler(req, res) {
     const admin = await requireAdmin(req, res);
     if (!admin) return; // response already sent
 
-    const url = new URL(req.url, `http://localhost`);
+  const { resolveBaseUrl } = require('../_lib/respond.js');
+  const url = new URL(req.url, resolveBaseUrl());
     const limit = Math.min(parseInt(url.searchParams.get('limit') || '20', 10), 100);
     const offset = parseInt(url.searchParams.get('offset') || '0', 10);
     const tag = url.searchParams.get('tag');
