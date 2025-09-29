@@ -41,6 +41,14 @@ function sanitize(html = '', opts = {}) {
       const allowed = /^(https:\/\/(www\.)?(youtube\.com|youtu\.be|player\.vimeo\.com)\/)/i.test(srcVal);
       if (!allowed) return ''; // strip entire iframe if not whitelisted
       // Force rel="noopener" not relevant for iframe; ensure no javascript: encoded
+        // Sanitize allow attribute to a curated subset
+        cleanAttrs = cleanAttrs.replace(/allow=("[^"]*"|'[^']*')/gi, (m) => {
+          const val = m.split('=')[1].replace(/^["']|["']$/g,'');
+          const features = val.split(/;|,/).map(v => v.trim().toLowerCase());
+          const allowedFeatures = ['accelerometer','autoplay','clipboard-write','encrypted-media','gyroscope','picture-in-picture'];
+          const filtered = features.filter(f => allowedFeatures.includes(f));
+          return filtered.length ? `allow="${filtered.join('; ')}"` : '';
+        });
     }
     return `<${t}${cleanAttrs ? ' ' + cleanAttrs : ''}>`;
   });

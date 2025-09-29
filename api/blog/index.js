@@ -76,7 +76,17 @@ module.exports = async function handler(req, res) {
   if (body.content) {
     const { rows: settings } = await query('SELECT enable_video FROM wisdomintech.site_settings ORDER BY created_at DESC NULLS LAST LIMIT 1');
     const allowVideo = !!settings[0]?.enable_video;
-    body.content = sanitize(body.content, { allowVideo });
+    let processed = sanitize(body.content, { allowVideo });
+    if (allowVideo) {
+      // Wrap iframes in responsive container if not already wrapped
+      processed = processed.replace(/<iframe([^>]*)><\/iframe>/g, '<iframe$1></iframe>'); // normalize empty
+      processed = processed.replace(/<iframe([^>]*)><\/iframe>/g, '<iframe$1></iframe>');
+      processed = processed.replace(/<iframe([\s\S]*?)<\/iframe>/g, (m) => {
+        if (/class="[^"]*video-embed-container/.test(m)) return m; // already wrapped indirectly
+        return `<div class="video-embed-container">${m}</div>`;
+      });
+    }
+    body.content = processed;
   }
       const slug = (body.slug && String(body.slug).trim()) ? String(body.slug).trim().toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/(^-|-$)/g,'') : String(body.title || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
       let desiredStatus = body.status || 'draft';
@@ -136,7 +146,18 @@ module.exports = async function handler(req, res) {
   if ('content' in body) {
         const { rows: settings2 } = await query('SELECT enable_video FROM wisdomintech.site_settings ORDER BY created_at DESC NULLS LAST LIMIT 1');
         const allowVideo2 = !!settings2[0]?.enable_video;
-        setField('content', body.content ? sanitize(body.content, { allowVideo: allowVideo2 }) : null);
+        if (body.content) {
+          let processed = sanitize(body.content, { allowVideo: allowVideo2 });
+          if (allowVideo2) {
+            processed = processed.replace(/<iframe([\s\S]*?)<\/iframe>/g, (m) => {
+              if (/class="[^"]*video-embed-container/.test(m)) return m;
+              return `<div class="video-embed-container">${m}</div>`;
+            });
+          }
+          setField('content', processed);
+        } else {
+          setField('content', null);
+        }
       }
       if ('featured_image' in body) setField('featured_image', body.featured_image);
       if ('source_url' in body) setField('source_url', body.source_url);
