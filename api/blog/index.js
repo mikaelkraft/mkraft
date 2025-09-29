@@ -68,6 +68,9 @@ module.exports = async function handler(req, res) {
         user = await requireAdmin(req, res); // legacy behavior before flag on
       }
       if (!user) return;
+      if (user.banned) {
+        return error(res, 'Account banned', 403, { reason: user.ban_reason || 'policy_violation' });
+      }
       await ensureUserProfile(user);
   const body = await getJsonBody(req);
   if (body.content) body.content = sanitize(body.content);

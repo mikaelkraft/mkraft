@@ -44,7 +44,9 @@ async function getUserWithRole(req) {
   const { user } = await verifyAuth(req);
   if (!user) return null;
   try {
-    const { rows } = await query('SELECT id, email, role, publisher_request_status FROM wisdomintech.user_profiles WHERE id = $1', [user.id]);
+  const { rows } = await query(`SELECT id, email, role, publisher_request_status,
+                     banned, ban_reason, warning_count, last_warning_at, banned_at
+                  FROM wisdomintech.user_profiles WHERE id = $1`, [user.id]);
     let role = rows[0]?.role || 'viewer';
     const adminEmail = process.env.ADMIN_EMAIL || process.env.VITE_ADMIN_EMAIL;
     // Auto-promote configured admin email for backward compatibility
@@ -52,7 +54,15 @@ async function getUserWithRole(req) {
       await query('UPDATE wisdomintech.user_profiles SET role = \'admin\', role_updated_at = now() WHERE id = $1', [user.id]);
       role = 'admin';
     }
-    return { ...user, role, publisher_request_status: rows[0]?.publisher_request_status || null };
+    return { ...user,
+      role,
+      publisher_request_status: rows[0]?.publisher_request_status || null,
+      banned: rows[0]?.banned || false,
+      ban_reason: rows[0]?.ban_reason || null,
+      warning_count: rows[0]?.warning_count || 0,
+      last_warning_at: rows[0]?.last_warning_at || null,
+      banned_at: rows[0]?.banned_at || null
+    };
   } catch {
     return { ...user, role: 'viewer' };
   }

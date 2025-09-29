@@ -67,6 +67,14 @@ app.all('/api/profile/avatar', wrap(withTransform(require('./api/profile/avatar.
 app.all('/api/media', wrap(withTransform(require('./api/media/index.js'), { camel: true })));
 app.all('/api/media/upload', wrap(withTransform(require('./api/media/upload.js'), { camel: true })));
 app.all('/api/health', wrap(require('./api/health/index.js')));
+// Publisher program related routes
+app.all('/api/profile/publisher-request', wrap(withTransform(require('./api/profile/publisher-request.js'), { camel: true })));
+app.all('/api/profile/publisher-requests', wrap(withTransform(require('./api/profile/publisher-requests.js'), { camel: true })));
+app.all('/api/profile/publisher-approval', wrap(withTransform(require('./api/profile/publisher-approval.js'), { camel: true })));
+// User management (admin)
+app.all('/api/admin/users', wrap(withTransform(require('./api/admin/users/index.js'), { camel: true })));
+app.all('/api/admin/users/warn', wrap(withTransform(require('./api/admin/users/warn.js'), { camel: true })));
+app.all('/api/admin/users/ban', wrap(withTransform(require('./api/admin/users/ban.js'), { camel: true })));
 
 // Health check
 app.get('/healthz', (req, res) => res.json({ ok: true }));

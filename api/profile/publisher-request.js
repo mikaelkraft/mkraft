@@ -13,9 +13,12 @@ module.exports = async function handler(req, res) {
     if (!enabled) return error(res, 'Not found', 404); // hide when disabled
 
     if (req.method === 'GET') {
-      return json(res, { role: user.role, publisher_request_status: user.publisher_request_status });
+      return json(res, { role: user.role, publisher_request_status: user.publisher_request_status, banned: user.banned, ban_reason: user.ban_reason });
     }
     if (req.method === 'POST') {
+      if (user.banned) {
+        return error(res, 'Account banned', 403, { reason: user.ban_reason || 'policy_violation' });
+      }
       if (user.role !== 'viewer') {
         return json(res, { role: user.role, publisher_request_status: user.publisher_request_status }, 200);
       }

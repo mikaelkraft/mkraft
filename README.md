@@ -792,7 +792,63 @@ Status: ✅ Completed. Proceeding to Track 9.
 - Advanced rate limiting / abuse signals (IP + account age) via Redis.
 - Optional editorial notes per approval.
 
-Status: 🚧 Backend + flag + minimal request widget implemented (UI surfacing request & status). Further admin UI pending.
+Status: ✅ Core publisher workflow & admin tooling implemented (requests panel, approval actions with optimistic UI, draft review queue, revision diff & restore, role badges). Further enhancements (notifications, metrics) remain optional.
+
+### Admin Workflows (Current Implementation)
+
+The admin dashboard (`/admin-dashboard-content-management`) now includes several workflows that enable safe multi‑author publishing while preserving editorial control.
+
+#### 1. Publisher Access Requests
+- Location: "Publisher Requests" section (visible only when `publisher_program` flag enabled and user is admin).
+- Contents: List of users with `publisher_request_status = 'pending'` including email and requested timestamp.
+- Actions: Approve or Reject.
+   - Approve: Sets `role = 'publisher'`, `publisher_request_status = 'approved'`.
+   - Reject: Sets `publisher_request_status = 'rejected'` (role unchanged).
+- UX Details: Optimistic removal of the row; per‑row loading overlay; fallback re-fetch if error.
+- Logging: Each action emits a structured JSON line (`publisher_request_moderated`) with moderator and target context.
+
+#### 2. Draft Review Queue
+- Purpose: Surface draft posts authored by publishers (never auto‑publish).
+- Data: Filters posts where `status = 'draft'` AND author role = `publisher`.
+- Intended Flow:
+   1. Publisher creates or edits draft.
+   2. Admin reviews in queue, optionally opens editor.
+   3. Admin publishes (standard blog publish path) after optional revision restore/diff.
+
+#### 3. Revision History & Diff
+- Side Panel: Within the blog editor, a revision panel lists prior versions (timestamp + truncated content hash/preview).
+- Diff Viewer: Selecting a revision opens an inline diff overlay (line‑level: added / removed / context).
+- Restore: Applies selected revision content back into the editor for further edits or publishing.
+- Backend: Revisions captured automatically on `PUT /api/blog` before overwriting existing content.
+
+#### 4. Role Badges
+- Component: `RoleBadge` centralizes styling and semantics (SUPER ADMIN gradient variant, ADMIN, PUBLISHER, VIEWER).
+- Visible In: Blog detail (author line), related posts list, admin tables (blog management, review queue), publisher requests list.
+- Logic: SUPER ADMIN rendered when email matches configured `ADMIN_EMAIL` / `VITE_ADMIN_EMAIL` (auto‑promotion handled in auth layer).
+
+#### 5. Structured Logging (Auditing)
+- Logger: `api/_lib/log.js` emits JSON lines with ISO timestamp.
+- Access: Each request logs an `access` event including requestId, latency, status.
+- Approval Events: `publisher_request_moderated` records moderation decisions with previous/new role and status.
+- Error Events: Standardized `handler_error` & domain-specific errors include `requestId` for correlation.
+- Future: These logs can be shipped to external sinks (e.g., Logtail, Datadog) without code change by redirecting stdout/stderr.
+
+#### 6. Feature Flag Integration
+- All publisher program UI surfaces gate on the `publisher_program` flag.
+- Disable flag to hide multi‑author UI while preserving data.
+
+### Operational Notes
+- Draft Safety: Publishers can only create drafts; server rejects attempts to publish directly unless role `admin`.
+- Revision Integrity: Revisions are append‑only; future pruning policy can be added (e.g., keep last N or last 30 days).
+- Optimistic UI Recovery: Failed approval calls revert UI state and surface a toast (implementation hook available—ensure toast provider running).
+- Security: Admin endpoints enforce `requireAdmin`; non‑admins receive 401 without leaking existence of other users.
+
+### Suggested Future Enhancements (Optional)
+- Email notification on approval/rejection (hook into structured log stream or inline in handler).
+- Publisher dashboard: personal draft metrics, approval history.
+- Audit log viewer in admin UI (filter by actor, action type, date range).
+- Soft delete & restoration for posts + revision diff on restore confirmation.
+- Automated quality signals (min content length, broken link scanner) integrated into review queue list with badges.
 
 ## 🤝 Contributing & Commit Conventions
 
