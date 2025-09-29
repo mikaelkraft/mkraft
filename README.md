@@ -943,30 +943,51 @@ const canonical = buildCanonicalUrl('/blog/my-post');
 - Trailing slash differences: helper trims trailing slash to avoid duplicate variants.
 - Inconsistent staging domains: set a distinct `SITE_BASE_URL` per environment to keep analytics/SEO isolated.
 
-## 🌐 Sitemap Generation
+## 🌐 Sitemap Architecture (Indexed)
 
-Dynamic sitemap available at `/sitemap.xml` (cache 5 minutes). It includes:
-- Home `/`
-- Blog hub `/blog-content-hub`
-- Projects hub `/projects-portfolio-grid`
-- Category filtered hub pages for each published post category (as `?category=...`)
-- Published blog posts (`/blog/:slug`)
-- Published projects (`/project/:id`)
+`/sitemap.xml` now serves a **sitemap index** referencing three specialized sitemaps:
 
-### Update Strategy
-- Posts & projects: `lastmod` uses `updated_at` fallback `created_at`.
-- Category pages: `lastmod` = current generation time (changes when content shifts).
-- Changefreq heuristic: hub/category = daily, posts/projects = weekly.
+| File | Purpose | Cache TTL |
+|------|---------|-----------|
+| `/sitemap-posts.xml` | Published blog posts with engagement‑weighted priority | 5 min |
+| `/sitemap-projects.xml` | Published projects | 10 min |
+| `/sitemap-categories.xml` | Category hub filtered pages | 30 min |
+
+### Priority Heuristics
+Posts use a lightweight engagement score: base 0.50 + log‑scaled views + likes (capped) → 0.50–0.90 range. Projects & categories use fixed mid‑range priorities (0.55, 0.50) to avoid diluting post focus.
+
+### Last Modified (`lastmod`)
+- Posts / Projects: `updated_at` fallback `created_at` per row.
+- Categories: current generation timestamp (reflects dynamic aggregation).
+- Index: current time (links act as freshness signal; downstream crawlers will fetch children respecting their own cache policies).
+
+### Robots.txt
+Dynamic endpoint at `/robots.txt` references the index:
+```
+User-agent: *
+Disallow:
+
+Sitemap: https://yourdomain.com/sitemap.xml
+```
+Base URL auto‑resolved (see Canonical section) – in production set `SITE_BASE_URL` / `VITE_SITE_BASE_URL`.
 
 ### Extending
-Add new static sections (e.g. `/documentation`) by editing `api/sitemap.xml.js` staticEntries array.
+Add a new type by creating `api/sitemap-<type>.xml.js` and referencing it inside `api/sitemap.xml.js` index array. Use distinct cache TTLs based on volatility (e.g. jobs listing hourly vs. documentation weekly).
 
 ### Testing
-Automated test `test/sitemap.test.js` asserts XML structure when server is reachable.
+`test/sitemap.test.js` now fetches the index and then validates the posts sitemap XML structure. Additional child sitemap validations can be added similarly (kept minimal for speed).
 
-### Notes
-- Limit safeguards (5000 posts, 2000 projects, 500 categories) to avoid bloat; adjust if needed.
-- For very large sites, consider index sitemaps (sitemap_index.xml) splitting by type.
+### Safeguards & Scale
+Row caps remain (posts 5000, projects 2000, categories 500) to prevent accidental payload explosion. Adjust limits as growth requires. If nearing caps, consider pagination (next sitemap file partitioning) or date partitioned sitemaps.
+
+### Future Enhancements (Optional)
+- Partition large post sets by year/month (e.g., `/sitemap-posts-2025.xml`).
+- Pre‑generate & cache warmers (cron) instead of on-demand computation under traffic spikes.
+- Include image/alternate language namespaces if i18n or image SEO become priorities.
+- Export priority + frequency heuristics to config for tuning without code changes.
+
+### Canonical Suppression for 404
+The `NotFound` route now sets a global suppression flag so the canonical tag isn’t emitted for soft 404s, reducing the risk of polluting the canonical graph with error states.
 
 
 
