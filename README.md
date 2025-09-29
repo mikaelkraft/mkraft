@@ -852,6 +852,124 @@ The admin dashboard (`/admin-dashboard-content-management`) now includes several
 
 ## 🤝 Contributing & Commit Conventions
 
+## 🛡️ User Management & Moderation
+
+The platform now supports basic user moderation primitives enabling progressive enforcement without deleting accounts.
+
+### Schema Additions
+Added to `user_profiles` (via patch migration):
+- `banned` boolean DEFAULT false
+- `ban_reason` text
+- `banned_at` timestamptz
+- `warning_count` integer DEFAULT 0
+- `last_warning_at` timestamptz
+
+### Admin Endpoints
+All require admin role:
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/admin/users` | GET | List users with moderation fields (searchable via `?search=`) |
+| `/api/admin/users/warn` | POST | Increment warning count; body: `{ user_id, reason? }` |
+| `/api/admin/users/ban` | POST | Ban or unban; body: `{ user_id, action: 'ban'|'unban', reason? }` |
+
+### Warning Logic
+`/api/admin/users/warn` increments `warning_count`, sets `last_warning_at = now()`, and logs `user_warned` structured event.
+
+### Ban Logic
+`/api/admin/users/ban` with `action = 'ban'` sets:
+```
+banned = true,
+ban_reason = <reason||null>,
+banned_at = now()
+```
+`action = 'unban'` resets `banned=false`, keeps historical `ban_reason` & `banned_at` for lightweight audit (future: separate audit table if needed).
+
+### Enforcement Points
+- Publisher Access Request endpoint rejects banned users (401/Forbidden style).
+- Blog create/update pathway blocks banned users from creating drafts.
+Additional enforcement (comments, likes) can be layered similarly by checking `user.banned` from auth context.
+
+### Structured Logging Events
+| Event | Fields (subset) | Description |
+|-------|-----------------|-------------|
+| `user_warned` | moderator_id, target_user_id, new_warning_count, reason | User received a warning |
+| `user_ban_status_change` | moderator_id, target_user_id, action, previous_banned, new_banned, reason | Ban/unban executed |
+
+All logs share requestId and ISO timestamp for correlation.
+
+### Future Extensions (Optional)
+- Escalation threshold (auto-ban after N warnings within window)
+- Separate `user_moderation_events` table for immutable audit trail
+- UI surfacing warning history & ban status in admin user panel
+- Email notifications on warn/ban/unban
+
+## 🔗 Canonical URLs & Deployment Base
+
+To ensure consistent absolute URLs (SEO canonical tags, sharing, sitemaps), configure a production origin.
+
+### Environment Variables (Server)
+Priority order for deriving base URL:
+1. `SITE_BASE_URL` (e.g. `https://example.com`)
+2. `VERCEL_URL` (auto set by Vercel; host only)
+3. `PUBLIC_BASE_URL` (future compatibility)
+4. Fallback `http://localhost`
+
+If `NODE_ENV=production` and the resolved base ends in `localhost`, a startup warning is logged:
+```
+[config-warning] SITE_BASE_URL/VERCEL_URL not set; canonical URLs will use localhost.
+```
+
+### Helpers
+- Server: `buildCanonicalUrl(path)` in `api/_lib/respond.js` returns absolute URL without trailing slash.
+- Client: `getCanonicalUrl(path)` in `src/utils/canonical.js` uses `VITE_SITE_BASE_URL` or `window.location.origin`.
+
+### Recommended Setup
+Set both for clarity:
+```
+SITE_BASE_URL=https://yourdomain.com
+VITE_SITE_BASE_URL=https://yourdomain.com
+```
+
+Use `VITE_SITE_BASE_URL` only for client bundle exposure; never expose secret server-only origins.
+
+### Usage Example (Server-side OG / future sitemap)
+```js
+const { buildCanonicalUrl } = require('./api/_lib/respond.js');
+const canonical = buildCanonicalUrl('/blog/my-post');
+```
+
+### Common Pitfalls
+- Missing protocol: always include `https://` in `SITE_BASE_URL`.
+- Trailing slash differences: helper trims trailing slash to avoid duplicate variants.
+- Inconsistent staging domains: set a distinct `SITE_BASE_URL` per environment to keep analytics/SEO isolated.
+
+## 🌐 Sitemap Generation
+
+Dynamic sitemap available at `/sitemap.xml` (cache 5 minutes). It includes:
+- Home `/`
+- Blog hub `/blog-content-hub`
+- Projects hub `/projects-portfolio-grid`
+- Category filtered hub pages for each published post category (as `?category=...`)
+- Published blog posts (`/blog/:slug`)
+- Published projects (`/project/:id`)
+
+### Update Strategy
+- Posts & projects: `lastmod` uses `updated_at` fallback `created_at`.
+- Category pages: `lastmod` = current generation time (changes when content shifts).
+- Changefreq heuristic: hub/category = daily, posts/projects = weekly.
+
+### Extending
+Add new static sections (e.g. `/documentation`) by editing `api/sitemap.xml.js` staticEntries array.
+
+### Testing
+Automated test `test/sitemap.test.js` asserts XML structure when server is reachable.
+
+### Notes
+- Limit safeguards (5000 posts, 2000 projects, 500 categories) to avoid bloat; adjust if needed.
+- For very large sites, consider index sitemaps (sitemap_index.xml) splitting by type.
+
+
+
 This project uses lightweight guardrails to keep the history clean and automatable.
 
 ### Git Hooks

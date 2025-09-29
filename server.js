@@ -12,6 +12,22 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
 
+// Host mismatch warning (production only)
+const { resolveBaseUrl } = require('./api/_lib/respond.js');
+if (process.env.NODE_ENV === 'production') {
+  const configured = (() => { try { return new URL(resolveBaseUrl()).host; } catch { return null; } })();
+  if (configured) {
+    app.use((req, res, next) => {
+      const host = (req.headers.host || '').split(',')[0].trim();
+      if (host && host !== configured) {
+        // eslint-disable-next-line no-console
+        console.warn(`[host-mismatch] incoming host "${host}" differs from configured base host "${configured}"`);
+      }
+      next();
+    });
+  }
+}
+
 // Request ID + metrics + access logging middleware (must precede routes)
 app.use((req, res, next) => {
   const start = Date.now();
@@ -67,6 +83,7 @@ app.all('/api/profile/avatar', wrap(withTransform(require('./api/profile/avatar.
 app.all('/api/media', wrap(withTransform(require('./api/media/index.js'), { camel: true })));
 app.all('/api/media/upload', wrap(withTransform(require('./api/media/upload.js'), { camel: true })));
 app.all('/api/health', wrap(require('./api/health/index.js')));
+app.get('/sitemap.xml', wrap(require('./api/sitemap.xml.js')));
 // Publisher program related routes
 app.all('/api/profile/publisher-request', wrap(withTransform(require('./api/profile/publisher-request.js'), { camel: true })));
 app.all('/api/profile/publisher-requests', wrap(withTransform(require('./api/profile/publisher-requests.js'), { camel: true })));
