@@ -73,7 +73,11 @@ module.exports = async function handler(req, res) {
       }
       await ensureUserProfile(user);
   const body = await getJsonBody(req);
-  if (body.content) body.content = sanitize(body.content);
+  if (body.content) {
+    const { rows: settings } = await query('SELECT enable_video FROM wisdomintech.site_settings ORDER BY created_at DESC NULLS LAST LIMIT 1');
+    const allowVideo = !!settings[0]?.enable_video;
+    body.content = sanitize(body.content, { allowVideo });
+  }
       const slug = (body.slug && String(body.slug).trim()) ? String(body.slug).trim().toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/(^-|-$)/g,'') : String(body.title || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
       let desiredStatus = body.status || 'draft';
       let publishedAt = body.published_at ? new Date(body.published_at) : (desiredStatus === 'published' ? new Date() : null);
@@ -129,7 +133,11 @@ module.exports = async function handler(req, res) {
       }
       if ('title' in body) setField('title', body.title);
       if ('excerpt' in body) setField('excerpt', body.excerpt);
-  if ('content' in body) setField('content', body.content ? sanitize(body.content) : null);
+  if ('content' in body) {
+        const { rows: settings2 } = await query('SELECT enable_video FROM wisdomintech.site_settings ORDER BY created_at DESC NULLS LAST LIMIT 1');
+        const allowVideo2 = !!settings2[0]?.enable_video;
+        setField('content', body.content ? sanitize(body.content, { allowVideo: allowVideo2 }) : null);
+      }
       if ('featured_image' in body) setField('featured_image', body.featured_image);
       if ('source_url' in body) setField('source_url', body.source_url);
       if ('tags' in body) setField('tags', body.tags);

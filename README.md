@@ -989,6 +989,67 @@ Row caps remain (posts 5000, projects 2000, categories 500) to prevent accidenta
 ### Canonical Suppression for 404
 The `NotFound` route now sets a global suppression flag so the canonical tag isn’t emitted for soft 404s, reducing the risk of polluting the canonical graph with error states.
 
+## 👤 Profile Editing System
+
+Users (and admins) can now enrich profile data beyond `full_name` & `avatar_url`.
+
+### Fields Added
+`bio`, `website_url`, `twitter_handle`, `github_handle`, `linkedin_handle`, `location`, `headline`, `profile_meta` (JSON container for future structured data like badges, pronouns, etc.).
+
+### Field Rules Configuration
+Governed by table `profile_field_rules`:
+| Column | Purpose |
+|--------|---------|
+| `field_name` | Profile field key |
+| `enabled` | Toggles visibility & updatability (non-admin users cannot see disabled fields) |
+| `editable_roles` | Array of roles allowed to modify (`admin`, `publisher`, `viewer`) |
+| `required` | (Reserved) Allows future validation enforcement |
+
+Default seed enables all new fields for all roles (idempotent migration).
+
+### Endpoints
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/profile` | GET | Returns current user profile (or `?userId=` when admin) filtering disabled fields for non-admins. |
+| `/api/profile` | PUT | Update allowed fields for self (or `userId` for admin). Skips disabled or disallowed fields silently. |
+| `/api/profile/fields` | GET | Public enabled field rules (admin may pass `?all=true` to view all). |
+| `/api/profile/fields` | POST (admin) | Batch upsert rules `{ rules: [{ field_name, enabled, editable_roles, required }] }`. |
+| `/api/profile/avatar` | PUT | (Existing) Update avatar; admin can target another user via `?userId=`. |
+
+### Permissions Model
+- Admin can edit any enabled field on any user, regardless of `editable_roles` (simplified policy).
+- Non-admin updates are restricted per-field by inclusion in `editable_roles` AND `enabled=true`.
+- Disabled fields are excluded from GET responses for non-admins (privacy by configuration).
+
+### Future Hardening Ideas
+- Enforce `required=true` on update (currently stored only).
+- Audit log table for profile field changes.
+- Rate limiting on profile mutations.
+- Normalization/validation (e.g., enforce `https://` on `website_url`).
+
+## 🎞 Blog Video Embedding (YouTube / Vimeo)
+
+Controlled by `site_settings.enable_video` flag.
+
+### Sanitization Behavior
+The HTML sanitizer (`api/_lib/sanitize.js`) now accepts `{ allowVideo: true }` and, when enabled:
+- Allows `<iframe>` with a restricted attribute set (`src`, `title`, `allow`, `allowfullscreen`, `width`, `height`, `frameborder`).
+- Whitelists only `https://www.youtube.com/`, `https://youtu.be/`, and `https://player.vimeo.com/` sources.
+- Strips any non-whitelisted iframe entirely.
+- When videos disabled: all iframes removed (including orphan closing tags).
+
+### Usage
+On blog post create/update the system detects `enable_video` and passes the flag to the sanitizer; existing stored content will not retroactively gain iframes unless re-saved.
+
+### Security Notes
+- No `allow` filtering beyond pass-through; consider whitelisting explicit capabilities (e.g., `allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"`).
+- Additional providers (e.g., Loom, Wistia) require expanding the regex whitelist.
+- Consider a future post-processing step to wrap iframes in a responsive container & lazy-load.
+
+### Testing
+`test/sanitize.video.test.js` validates whitelist acceptance & unapproved removal for defense-in-depth.
+
+
 
 
 This project uses lightweight guardrails to keep the history clean and automatable.
