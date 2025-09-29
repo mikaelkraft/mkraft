@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import OGMeta from 'components/seo/OGMeta';
 import HeaderNavigation from 'components/ui/HeaderNavigation';
 import blogService from 'utils/blogService';
 import Icon from 'components/AppIcon';
@@ -49,6 +50,7 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <OGMeta title={title + ' — Blog'} description={desc} image={post.featured_image || undefined} />
       <Helmet>
         <title>{title} — Blog</title>
         <meta name="description" content={desc} />

@@ -243,7 +243,7 @@ class SettingsService {
         logo_url: '',
     logo_light_url: '',
     logo_dark_url: '',
-  og_default_image_url: '/assets/images/mklogo.png',
+  og_default_image_url: '/assets/images/mkraft.png',
         favicon_url: '',
         social_media: {
           twitter: 'mikael_kraft',

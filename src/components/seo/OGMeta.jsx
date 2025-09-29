@@ -18,8 +18,8 @@ export default function OGMeta({
       setMeta({
         title: overrideTitle || s.site_title || 'Site',
         description: overrideDescription || s.site_description || '',
-        // Fallback chain: explicit override -> configured OG default -> configured logo -> static mklogo asset
-        image: overrideImage || s.og_default_image_url || s.logo_url || '/assets/images/mklogo.png'
+  // Fallback chain: explicit override -> configured OG default -> configured logo -> static mkraft asset
+  image: overrideImage || s.og_default_image_url || s.logo_url || '/assets/images/mkraft.png'
       });
     })();
     return () => { mounted = false; };

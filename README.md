@@ -364,7 +364,7 @@ New branding capabilities:
 - `site_logo_url` / `logo_url` continue to work; light/dark fall back to these if unset.
 - Direct upload endpoint (admin): `PUT /api/settings/logo-upload` with body `{ "light": "data:image/png;base64,...", "dark": "data:image/png;base64,..." }` or HTTPS URLs.
 - Simple URL set endpoint: `PUT /api/settings/logo` `{ "url": "https://..." }` (legacy / single variant).
-- OG meta fallback uses `og_default_image_url` (auto‑backfilled) or `logo_url`.
+- OG meta fallback uses `og_default_image_url` (auto‑backfilled) or `logo_url`; if neither set, a static `/assets/images/mkraft.png` is used.
 
 Example upload (base64 minimal):
 ```json
@@ -385,7 +385,9 @@ When creating a blog post (POST `/api/blog`) if `featured_image` is omitted, the
 The root app now injects OG meta tags with `<OGMeta />` component:
 - Title: `site_title` (overrideable per page in future).
 - Description: `site_description`.
-- Image: `og_default_image_url` → `logo_url` → `/assets/images/mklogo.png`.
+- Image: `og_default_image_url` → `logo_url` → `/assets/images/mkraft.png`.
+
+Per-blog-post pages now supply `featured_image` (when present) directly to `<OGMeta />` so social previews use the post-specific image automatically. If absent, the global fallback chain above applies.
 
 
 Blog post HTML is sanitized; when `site_settings.enable_video` is true:

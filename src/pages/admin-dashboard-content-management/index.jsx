@@ -9,6 +9,7 @@ import BlogManagement from './components/BlogManagement';
 import BlogEditor from './components/BlogEditor';
 import SlidesManagement from './components/SlidesManagement';
 import SiteSettings from './components/SiteSettings';
+import BrandingHints from '../../components/admin/BrandingHints';
 import projectService from '../../utils/projectService';
 import blogService from '../../utils/blogService';
 import slideService from '../../utils/slideService';
@@ -706,10 +707,13 @@ const AdminDashboardContentManagement = () => {
         );
       case 'settings':
         return (
-          <SiteSettings
-            settings={normalizedSettings || defaultUiSettings}
-            onSettingsUpdate={handleSettingsUpdate}
-          />
+          <div className="space-y-8">
+            <SiteSettings
+              settings={normalizedSettings || defaultUiSettings}
+              onSettingsUpdate={handleSettingsUpdate}
+            />
+            <BrandingHints settings={settings || {}} />
+          </div>
         );
       case 'tech':
         return (

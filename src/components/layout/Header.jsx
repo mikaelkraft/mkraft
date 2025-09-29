@@ -10,8 +10,10 @@ function Header() {
     (async () => {
       const res = await settingsService.getSettings();
       if (!mounted || !res.success) return;
-      const data = res.data || {};
-      setLogo(data.site_logo_url || data.logo_url || null);
+  const data = res.data || {};
+  // Prefer explicit variant logos, then legacy fields, then static mklogo asset
+  const chosen = data.logo_light_url || data.logo_dark_url || data.site_logo_url || data.logo_url || '/assets/images/mklogo.png';
+  setLogo(chosen);
       setTitle(data.site_title || 'Site');
     })();
     return () => { mounted = false; };
