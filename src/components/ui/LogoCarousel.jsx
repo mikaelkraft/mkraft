@@ -1,13 +1,18 @@
-import React, { useEffect, useState, useRef } from 'react';
-import Image from '../AppImage';
+import { useEffect, useState, useRef } from "react";
 
-const LogoCarousel = ({ images = [], autoPlay = true, speed = 3000, showDots = true }) => {
+const LogoCarousel = ({
+  images = [],
+  autoPlay = true,
+  speed = 3000,
+  showDots = true,
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const carouselRef = useRef(null);
 
   // Create infinite loop by duplicating images
-  const infiniteImages = images.length > 0 ? [...images, ...images, ...images] : [];
+  const infiniteImages =
+    images.length > 0 ? [...images, ...images, ...images] : [];
   const startIndex = images.length; // Start from the middle set
 
   useEffect(() => {
@@ -21,9 +26,9 @@ const LogoCarousel = ({ images = [], autoPlay = true, speed = 3000, showDots = t
 
     const interval = setInterval(() => {
       setIsTransitioning(true);
-      setCurrentIndex(prevIndex => {
+      setCurrentIndex((prevIndex) => {
         const nextIndex = prevIndex + 1;
-        
+
         // If we've reached the end of the last set, reset to the beginning of the middle set
         if (nextIndex >= infiniteImages.length) {
           setTimeout(() => {
@@ -32,7 +37,7 @@ const LogoCarousel = ({ images = [], autoPlay = true, speed = 3000, showDots = t
           }, 50);
           return startIndex;
         }
-        
+
         // If we've completed the middle set, smoothly transition
         if (nextIndex >= startIndex + images.length) {
           setTimeout(() => {
@@ -40,7 +45,7 @@ const LogoCarousel = ({ images = [], autoPlay = true, speed = 3000, showDots = t
             setCurrentIndex(startIndex);
           }, speed);
         }
-        
+
         return nextIndex;
       });
     }, speed);
@@ -74,12 +79,12 @@ const LogoCarousel = ({ images = [], autoPlay = true, speed = 3000, showDots = t
     <div className="relative overflow-hidden rounded-lg bg-surface/20 border border-border-accent/20">
       {/* Infinite scroll container */}
       <div className="flex h-32 items-center">
-        <div 
+        <div
           ref={carouselRef}
-          className={`flex transition-transform duration-1000 ease-in-out ${isTransitioning ? '' : 'transition-none'}`}
+          className={`flex transition-transform duration-1000 ease-in-out ${isTransitioning ? "" : "transition-none"}`}
           style={{
             transform: `translateX(-${currentIndex * itemWidth}%)`,
-            width: `${infiniteImages.length * itemWidth}%`
+            width: `${infiniteImages.length * itemWidth}%`,
           }}
         >
           {infiniteImages.map((image, index) => (
@@ -110,8 +115,8 @@ const LogoCarousel = ({ images = [], autoPlay = true, speed = 3000, showDots = t
               }}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 (currentIndex - startIndex) % images.length === index
-                  ? 'bg-primary scale-125'
-                  : 'bg-border-accent/40 hover:bg-border-accent/60'
+                  ? "bg-primary scale-125"
+                  : "bg-border-accent/40 hover:bg-border-accent/60"
               }`}
               aria-label={`View logo ${index + 1}`}
             />

@@ -1,42 +1,60 @@
-import React, { useState } from 'react';
-import { validateSlide, isValidUrl } from '../../../utils/validation';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
-import Image from '../../../components/AppImage';
-import FileUpload from '../../../components/ui/FileUpload';
+import { useState } from "react";
+import { validateSlide } from "../../../utils/validation";
 
-const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate, onSlideReorder }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+const SlidesManagement = ({
+  slides,
+  onSlideUpdate,
+  onSlideDelete,
+  onSlideCreate,
+  onSlideReorder,
+}) => {
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedSlides, setSelectedSlides] = useState([]);
   const [editingSlide, setEditingSlide] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [draggedSlide, setDraggedSlide] = useState(null);
   const [createForm, setCreateForm] = useState({
-    title: '',
-    subtitle: '',
-    backgroundImage: '',
-    ctaText: '',
-    ctaLink: '',
+    title: "",
+    subtitle: "",
+    backgroundImage: "",
+    ctaText: "",
+    ctaLink: "",
     duration: 5,
-    status: 'active',
+    status: "active",
     order: (slides?.length || 0) + 1,
   });
   const [editForm, setEditForm] = useState({});
   const [formErrors, setFormErrors] = useState({});
 
-  const Modal = ({ title, onClose, onSubmit, submitText = 'Save', children }) => (
+  const Modal = ({
+    title,
+    onClose,
+    onSubmit,
+    submitText = "Save",
+    children,
+  }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
       <div className="bg-surface border border-border-accent/20 rounded-lg shadow-glow-primary w-full max-w-2xl">
         <div className="px-6 py-4 border-b border-border-accent/20 flex items-center justify-between">
-          <h3 className="text-lg font-heading font-semibold text-text-primary">{title}</h3>
-          <button onClick={onClose} className="text-text-secondary hover:text-primary">✕</button>
+          <h3 className="text-lg font-heading font-semibold text-text-primary">
+            {title}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-text-secondary hover:text-primary"
+          >
+            ✕
+          </button>
         </div>
         <form onSubmit={onSubmit} className="p-6 space-y-4">
           {children}
           <div className="flex items-center justify-end space-x-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" variant="primary">{submitText}</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              {submitText}
+            </Button>
           </div>
         </form>
       </div>
@@ -46,13 +64,13 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
   const openEdit = (slide) => {
     setEditingSlide(slide);
     setEditForm({
-      title: slide.title || '',
-      subtitle: slide.subtitle || '',
-      backgroundImage: slide.backgroundImage || '',
-      ctaText: slide.ctaText || '',
-      ctaLink: slide.ctaLink || '',
+      title: slide.title || "",
+      subtitle: slide.subtitle || "",
+      backgroundImage: slide.backgroundImage || "",
+      ctaText: slide.ctaText || "",
+      ctaLink: slide.ctaLink || "",
       duration: slide.duration || 5,
-      status: slide.status || 'active',
+      status: slide.status || "active",
       order: slide.order || 1,
     });
   };
@@ -64,7 +82,16 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
     if (Object.keys(errs).length) return;
     onSlideCreate({ ...createForm });
     setShowCreateModal(false);
-    setCreateForm({ title: '', subtitle: '', backgroundImage: '', ctaText: '', ctaLink: '', duration: 5, status: 'active', order: (slides?.length || 0) + 1 });
+    setCreateForm({
+      title: "",
+      subtitle: "",
+      backgroundImage: "",
+      ctaText: "",
+      ctaLink: "",
+      duration: 5,
+      status: "active",
+      order: (slides?.length || 0) + 1,
+    });
   };
 
   const submitEdit = (e) => {
@@ -78,43 +105,44 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
   };
 
   const filteredSlides = slides
-    .filter(slide => 
-      slide.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      slide.subtitle.toLowerCase().includes(searchTerm.toLowerCase())
+    .filter(
+      (slide) =>
+        slide.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        slide.subtitle.toLowerCase().includes(searchTerm.toLowerCase()),
     )
     .sort((a, b) => a.order - b.order);
 
   const handleSelectSlide = (slideId) => {
-    setSelectedSlides(prev => 
-      prev.includes(slideId) 
-        ? prev.filter(id => id !== slideId)
-        : [...prev, slideId]
+    setSelectedSlides((prev) =>
+      prev.includes(slideId)
+        ? prev.filter((id) => id !== slideId)
+        : [...prev, slideId],
     );
   };
 
   const handleSelectAll = () => {
     setSelectedSlides(
-      selectedSlides.length === filteredSlides.length 
-        ? [] 
-        : filteredSlides.map(s => s.id)
+      selectedSlides.length === filteredSlides.length
+        ? []
+        : filteredSlides.map((s) => s.id),
     );
   };
 
   const handleBulkDelete = () => {
     if (window.confirm(`Delete ${selectedSlides.length} selected slides?`)) {
-      selectedSlides.forEach(id => onSlideDelete(id));
+      selectedSlides.forEach((id) => onSlideDelete(id));
       setSelectedSlides([]);
     }
   };
 
   const handleDragStart = (e, slide) => {
     setDraggedSlide(slide);
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = "move";
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = "move";
   };
 
   const handleDrop = (e, targetSlide) => {
@@ -132,13 +160,13 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
       onDragOver={handleDragOver}
       onDrop={(e) => handleDrop(e, slide)}
       className={`bg-surface rounded-lg border border-border-accent/20 overflow-hidden hover:shadow-glow-primary transition-all duration-fast cursor-move ${
-        draggedSlide?.id === slide.id ? 'opacity-50' : ''
+        draggedSlide?.id === slide.id ? "opacity-50" : ""
       }`}
     >
       {/* Slide Preview */}
       <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20">
-        <Image 
-          src={slide.backgroundImage} 
+        <Image
+          src={slide.backgroundImage}
           alt={slide.title}
           className="w-full h-full object-cover"
         />
@@ -152,9 +180,13 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
           />
         </div>
         <div className="absolute top-4 right-4 flex items-center space-x-2">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            slide.status === 'active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
-          }`}>
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${
+              slide.status === "active"
+                ? "bg-success/10 text-success"
+                : "bg-warning/10 text-warning"
+            }`}
+          >
             {slide.status}
           </span>
           <div className="bg-background/80 rounded-full px-2 py-1 text-xs font-caption text-text-primary">
@@ -191,7 +223,9 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
         {/* CTA Button Preview */}
         {slide.ctaText && (
           <div className="mb-3">
-            <div className="text-xs text-text-secondary font-caption mb-1">Call to Action:</div>
+            <div className="text-xs text-text-secondary font-caption mb-1">
+              Call to Action:
+            </div>
             <div className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-lg text-sm">
               {slide.ctaText}
               <Icon name="ArrowRight" size={14} className="ml-1" />
@@ -214,7 +248,7 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
               variant="ghost"
               size="sm"
               onClick={() => {
-                if (window.confirm('Delete this slide?')) {
+                if (window.confirm("Delete this slide?")) {
                   onSlideDelete(slide.id);
                 }
               }}
@@ -224,8 +258,14 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             />
           </div>
           <div className="flex items-center space-x-1">
-            <Icon name="GripVertical" size={16} className="text-text-secondary" />
-            <span className="text-xs text-text-secondary font-caption">Drag to reorder</span>
+            <Icon
+              name="GripVertical"
+              size={16}
+              className="text-text-secondary"
+            />
+            <span className="text-xs text-text-secondary font-caption">
+              Drag to reorder
+            </span>
           </div>
         </div>
       </div>
@@ -237,7 +277,9 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-primary">Hero Slides Management</h1>
+          <h1 className="text-3xl font-heading font-bold text-primary">
+            Hero Slides Management
+          </h1>
           <p className="text-text-secondary font-caption mt-2">
             Manage carousel slides and hero section content
           </p>
@@ -290,7 +332,10 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
-              checked={selectedSlides.length === filteredSlides.length && filteredSlides.length > 0}
+              checked={
+                selectedSlides.length === filteredSlides.length &&
+                filteredSlides.length > 0
+              }
               onChange={handleSelectAll}
               className="w-4 h-4 text-primary bg-surface border-border-accent rounded focus:ring-primary focus:ring-2"
             />
@@ -299,7 +344,8 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
             </span>
           </div>
           <div className="text-sm text-text-secondary font-caption">
-            {filteredSlides.filter(s => s.status === 'active').length} active slides
+            {filteredSlides.filter((s) => s.status === "active").length} active
+            slides
           </div>
         </div>
 
@@ -311,9 +357,13 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
 
         {filteredSlides.length === 0 && (
           <div className="text-center py-12">
-            <Icon name="Image" size={48} className="text-text-secondary/50 mx-auto mb-4" />
+            <Icon
+              name="Image"
+              size={48}
+              className="text-text-secondary/50 mx-auto mb-4"
+            />
             <div className="text-text-secondary font-caption">
-              {searchTerm ? 'No slides match your search' : 'No slides found'}
+              {searchTerm ? "No slides match your search" : "No slides found"}
             </div>
           </div>
         )}
@@ -322,33 +372,45 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-surface rounded-lg p-4 border border-border-accent/20">
-          <div className="text-2xl font-heading font-bold text-primary">{slides.length}</div>
-          <div className="text-sm text-text-secondary font-caption">Total Slides</div>
+          <div className="text-2xl font-heading font-bold text-primary">
+            {slides.length}
+          </div>
+          <div className="text-sm text-text-secondary font-caption">
+            Total Slides
+          </div>
         </div>
         <div className="bg-surface rounded-lg p-4 border border-border-accent/20">
           <div className="text-2xl font-heading font-bold text-success">
-            {slides.filter(s => s.status === 'active').length}
+            {slides.filter((s) => s.status === "active").length}
           </div>
           <div className="text-sm text-text-secondary font-caption">Active</div>
         </div>
         <div className="bg-surface rounded-lg p-4 border border-border-accent/20">
           <div className="text-2xl font-heading font-bold text-warning">
-            {slides.filter(s => s.status === 'inactive').length}
+            {slides.filter((s) => s.status === "inactive").length}
           </div>
-          <div className="text-sm text-text-secondary font-caption">Inactive</div>
+          <div className="text-sm text-text-secondary font-caption">
+            Inactive
+          </div>
         </div>
         <div className="bg-surface rounded-lg p-4 border border-border-accent/20">
           <div className="text-2xl font-heading font-bold text-text-primary">
-            {slides.reduce((sum, slide) => sum + slide.views, 0).toLocaleString()}
+            {slides
+              .reduce((sum, slide) => sum + slide.views, 0)
+              .toLocaleString()}
           </div>
-          <div className="text-sm text-text-secondary font-caption">Total Views</div>
+          <div className="text-sm text-text-secondary font-caption">
+            Total Views
+          </div>
         </div>
       </div>
 
       {/* Carousel Preview */}
       <div className="bg-surface rounded-lg p-6 border border-border-accent/20">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-heading font-semibold text-text-primary">Carousel Preview</h3>
+          <h3 className="text-lg font-heading font-semibold text-text-primary">
+            Carousel Preview
+          </h3>
           <Button
             variant="outline"
             size="sm"
@@ -360,7 +422,11 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
         </div>
         <div className="h-32 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg flex items-center justify-center">
           <div className="text-center">
-            <Icon name="Play" size={32} className="text-text-secondary/50 mx-auto mb-2" />
+            <Icon
+              name="Play"
+              size={32}
+              className="text-text-secondary/50 mx-auto mb-2"
+            />
             <div className="text-sm text-text-secondary font-caption">
               Click "Preview Carousel" to see slides in action
             </div>
@@ -370,54 +436,134 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
 
       {/* Create Modal */}
       {showCreateModal && (
-        <Modal title="Create Slide" onClose={() => setShowCreateModal(false)} onSubmit={submitCreate} submitText="Create">
+        <Modal
+          title="Create Slide"
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={submitCreate}
+          submitText="Create"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Title</label>
-              <Input value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} required />
-              {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                Title
+              </label>
+              <Input
+                value={createForm.title}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, title: e.target.value })
+                }
+                required
+              />
+              {formErrors.title && (
+                <p className="mt-1 text-xs text-error">{formErrors.title}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Subtitle</label>
-              <Input value={createForm.subtitle} onChange={(e) => setCreateForm({ ...createForm, subtitle: e.target.value })} />
+              <label className="block text-sm text-text-secondary mb-1">
+                Subtitle
+              </label>
+              <Input
+                value={createForm.subtitle}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, subtitle: e.target.value })
+                }
+              />
             </div>
             <div className="md:col-span-2">
               <FileUpload
                 label="Background Image"
                 value={createForm.backgroundImage}
-                onChange={(url) => setCreateForm({ ...createForm, backgroundImage: url })}
+                onChange={(url) =>
+                  setCreateForm({ ...createForm, backgroundImage: url })
+                }
                 bucket="media"
                 pathPrefix="slides"
                 accept="image"
                 helperText="Upload a background image for this slide."
               />
-              {formErrors.backgroundImage && <p className="mt-1 text-xs text-error">{formErrors.backgroundImage}</p>}
+              {formErrors.backgroundImage && (
+                <p className="mt-1 text-xs text-error">
+                  {formErrors.backgroundImage}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">CTA Text</label>
-              <Input value={createForm.ctaText} onChange={(e) => setCreateForm({ ...createForm, ctaText: e.target.value })} />
+              <label className="block text-sm text-text-secondary mb-1">
+                CTA Text
+              </label>
+              <Input
+                value={createForm.ctaText}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, ctaText: e.target.value })
+                }
+              />
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">CTA Link</label>
-              <Input value={createForm.ctaLink} onChange={(e) => setCreateForm({ ...createForm, ctaLink: e.target.value })} />
-              {formErrors.ctaLink && <p className="mt-1 text-xs text-error">{formErrors.ctaLink}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                CTA Link
+              </label>
+              <Input
+                value={createForm.ctaLink}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, ctaLink: e.target.value })
+                }
+              />
+              {formErrors.ctaLink && (
+                <p className="mt-1 text-xs text-error">{formErrors.ctaLink}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Duration (seconds)</label>
-              <Input type="number" min="1" value={createForm.duration} onChange={(e) => setCreateForm({ ...createForm, duration: Number(e.target.value) || 5 })} />
-              {formErrors.duration && <p className="mt-1 text-xs text-error">{formErrors.duration}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                Duration (seconds)
+              </label>
+              <Input
+                type="number"
+                min="1"
+                value={createForm.duration}
+                onChange={(e) =>
+                  setCreateForm({
+                    ...createForm,
+                    duration: Number(e.target.value) || 5,
+                  })
+                }
+              />
+              {formErrors.duration && (
+                <p className="mt-1 text-xs text-error">{formErrors.duration}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Status</label>
-              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}>
+              <label className="block text-sm text-text-secondary mb-1">
+                Status
+              </label>
+              <select
+                className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm"
+                value={createForm.status}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, status: e.target.value })
+                }
+              >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Order</label>
-              <Input type="number" min="1" value={createForm.order} onChange={(e) => setCreateForm({ ...createForm, order: Number(e.target.value) || 1 })} />
-              {formErrors.order && <p className="mt-1 text-xs text-error">{formErrors.order}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                Order
+              </label>
+              <Input
+                type="number"
+                min="1"
+                value={createForm.order}
+                onChange={(e) =>
+                  setCreateForm({
+                    ...createForm,
+                    order: Number(e.target.value) || 1,
+                  })
+                }
+              />
+              {formErrors.order && (
+                <p className="mt-1 text-xs text-error">{formErrors.order}</p>
+              )}
             </div>
           </div>
         </Modal>
@@ -425,54 +571,134 @@ const SlidesManagement = ({ slides, onSlideUpdate, onSlideDelete, onSlideCreate,
 
       {/* Edit Modal */}
       {editingSlide && (
-        <Modal title="Edit Slide" onClose={() => setEditingSlide(null)} onSubmit={submitEdit} submitText="Update">
+        <Modal
+          title="Edit Slide"
+          onClose={() => setEditingSlide(null)}
+          onSubmit={submitEdit}
+          submitText="Update"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Title</label>
-              <Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required />
-              {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                Title
+              </label>
+              <Input
+                value={editForm.title}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, title: e.target.value })
+                }
+                required
+              />
+              {formErrors.title && (
+                <p className="mt-1 text-xs text-error">{formErrors.title}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Subtitle</label>
-              <Input value={editForm.subtitle} onChange={(e) => setEditForm({ ...editForm, subtitle: e.target.value })} />
+              <label className="block text-sm text-text-secondary mb-1">
+                Subtitle
+              </label>
+              <Input
+                value={editForm.subtitle}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, subtitle: e.target.value })
+                }
+              />
             </div>
             <div className="md:col-span-2">
               <FileUpload
                 label="Background Image"
                 value={editForm.backgroundImage}
-                onChange={(url) => setEditForm({ ...editForm, backgroundImage: url })}
+                onChange={(url) =>
+                  setEditForm({ ...editForm, backgroundImage: url })
+                }
                 bucket="media"
                 pathPrefix="slides"
                 accept="image"
                 helperText="Upload a background image for this slide."
               />
-              {formErrors.backgroundImage && <p className="mt-1 text-xs text-error">{formErrors.backgroundImage}</p>}
+              {formErrors.backgroundImage && (
+                <p className="mt-1 text-xs text-error">
+                  {formErrors.backgroundImage}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">CTA Text</label>
-              <Input value={editForm.ctaText} onChange={(e) => setEditForm({ ...editForm, ctaText: e.target.value })} />
+              <label className="block text-sm text-text-secondary mb-1">
+                CTA Text
+              </label>
+              <Input
+                value={editForm.ctaText}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, ctaText: e.target.value })
+                }
+              />
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">CTA Link</label>
-              <Input value={editForm.ctaLink} onChange={(e) => setEditForm({ ...editForm, ctaLink: e.target.value })} />
-              {formErrors.ctaLink && <p className="mt-1 text-xs text-error">{formErrors.ctaLink}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                CTA Link
+              </label>
+              <Input
+                value={editForm.ctaLink}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, ctaLink: e.target.value })
+                }
+              />
+              {formErrors.ctaLink && (
+                <p className="mt-1 text-xs text-error">{formErrors.ctaLink}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Duration (seconds)</label>
-              <Input type="number" min="1" value={editForm.duration} onChange={(e) => setEditForm({ ...editForm, duration: Number(e.target.value) || 5 })} />
-              {formErrors.duration && <p className="mt-1 text-xs text-error">{formErrors.duration}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                Duration (seconds)
+              </label>
+              <Input
+                type="number"
+                min="1"
+                value={editForm.duration}
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    duration: Number(e.target.value) || 5,
+                  })
+                }
+              />
+              {formErrors.duration && (
+                <p className="mt-1 text-xs text-error">{formErrors.duration}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Status</label>
-              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
+              <label className="block text-sm text-text-secondary mb-1">
+                Status
+              </label>
+              <select
+                className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm"
+                value={editForm.status}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, status: e.target.value })
+                }
+              >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Order</label>
-              <Input type="number" min="1" value={editForm.order} onChange={(e) => setEditForm({ ...editForm, order: Number(e.target.value) || 1 })} />
-              {formErrors.order && <p className="mt-1 text-xs text-error">{formErrors.order}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                Order
+              </label>
+              <Input
+                type="number"
+                min="1"
+                value={editForm.order}
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    order: Number(e.target.value) || 1,
+                  })
+                }
+              />
+              {formErrors.order && (
+                <p className="mt-1 text-xs text-error">{formErrors.order}</p>
+              )}
             </div>
           </div>
         </Modal>

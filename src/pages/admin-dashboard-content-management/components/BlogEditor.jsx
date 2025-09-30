@@ -1,50 +1,57 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
-import Icon from '../../../components/AppIcon';
-import { validateBlog } from '../../../utils/validation';
-import FileUpload from '../../../components/ui/FileUpload';
-import storageService from '../../../utils/storageService';
+import { useMemo, useRef, useState, useEffect } from "react";
+import { validateBlog } from "../../../utils/validation";
+import storageService from "../../../utils/storageService";
 
-const MarkdownEditor = ({ id = 'md-editor', value, onChange, placeholder = 'Write your post in Markdown...' }) => {
+const MarkdownEditor = ({
+  id = "md-editor",
+  value,
+  onChange,
+  placeholder = "Write your post in Markdown...",
+}) => {
   const fileInputRef = useRef(null);
   const applyWrap = (prefix, suffix = prefix) => {
     const ta = document.getElementById(id);
-    if (!ta) return onChange((value || '') + `${prefix}${suffix}`);
+    if (!ta) return onChange((value || "") + `${prefix}${suffix}`);
     const start = ta.selectionStart ?? 0;
     const end = ta.selectionEnd ?? 0;
     const before = value.slice(0, start);
     const selected = value.slice(start, end);
     const after = value.slice(end);
-    const next = `${before}${prefix}${selected || 'text'}${suffix}${after}`;
+    const next = `${before}${prefix}${selected || "text"}${suffix}${after}`;
     onChange(next);
-    setTimeout(() => { ta.focus(); }, 0);
+    setTimeout(() => {
+      ta.focus();
+    }, 0);
   };
   const insertLink = () => {
-    const url = prompt('Enter URL');
-    if (url) applyWrap('[', `](${url})`);
+    const url = prompt("Enter URL");
+    if (url) applyWrap("[", `](${url})`);
   };
   const insertCodeBlock = () => {
     const ta = document.getElementById(id);
-    const lang = prompt('Language (optional)') || '';
+    const lang = prompt("Language (optional)") || "";
     const start = ta?.selectionStart ?? 0;
     const end = ta?.selectionEnd ?? 0;
     const before = value.slice(0, start);
-    const selected = value.slice(start, end) || 'code';
+    const selected = value.slice(start, end) || "code";
     const after = value.slice(end);
-    const block = '\n\n```' + lang + '\n' + selected + '\n```\n\n';
+    const block = "\n\n```" + lang + "\n" + selected + "\n```\n\n";
     onChange(before + block + after);
-    setTimeout(() => { ta?.focus(); }, 0);
+    setTimeout(() => {
+      ta?.focus();
+    }, 0);
   };
   const insertList = (ordered = false) => {
     const ta = document.getElementById(id);
-    const bullet = ordered ? '1.' : '-';
-    if (!ta) return onChange(`${value || ''}\n${bullet} item`);
+    const bullet = ordered ? "1." : "-";
+    if (!ta) return onChange(`${value || ""}\n${bullet} item`);
     const start = ta.selectionStart ?? 0;
     const end = ta.selectionEnd ?? 0;
     const before = value.slice(0, start);
-    const selected = (value.slice(start, end) || 'item').replace(/^/gm, `${bullet} `);
+    const selected = (value.slice(start, end) || "item").replace(
+      /^/gm,
+      `${bullet} `,
+    );
     const after = value.slice(end);
     const next = `${before}\n${selected}${after}`;
     onChange(next);
@@ -53,7 +60,10 @@ const MarkdownEditor = ({ id = 'md-editor', value, onChange, placeholder = 'Writ
   const onFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const res = await storageService.uploadFile(file, { bucket: 'media', pathPrefix: 'blog/content' });
+    const res = await storageService.uploadFile(file, {
+      bucket: "media",
+      pathPrefix: "blog/content",
+    });
     if (res.success) {
       const url = res.data.url;
       const ta = document.getElementById(id);
@@ -64,21 +74,86 @@ const MarkdownEditor = ({ id = 'md-editor', value, onChange, placeholder = 'Writ
       const md = `![image](${url})`;
       onChange(before + md + after);
     }
-    e.target.value = '';
+    e.target.value = "";
   };
   return (
     <div>
       <div className="flex flex-wrap gap-2 mb-2">
-        <Button type="button" size="sm" variant="outline" onClick={() => applyWrap('**')}>Bold</Button>
-        <Button type="button" size="sm" variant="outline" onClick={() => applyWrap('*')}>Italic</Button>
-        <Button type="button" size="sm" variant="outline" onClick={() => applyWrap('`')}>Code</Button>
-        <Button type="button" size="sm" variant="outline" onClick={insertCodeBlock}>Code Block</Button>
-        <Button type="button" size="sm" variant="outline" onClick={() => applyWrap('> ' , '')}>Quote</Button>
-        <Button type="button" size="sm" variant="outline" onClick={() => insertList(false)}>• List</Button>
-        <Button type="button" size="sm" variant="outline" onClick={() => insertList(true)}>1. List</Button>
-        <Button type="button" size="sm" variant="outline" onClick={insertLink}>Link</Button>
-        <Button type="button" size="sm" variant="outline" onClick={onPickImage} iconName="Image">Image</Button>
-        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => applyWrap("**")}
+        >
+          Bold
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => applyWrap("*")}
+        >
+          Italic
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => applyWrap("`")}
+        >
+          Code
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={insertCodeBlock}
+        >
+          Code Block
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => applyWrap("> ", "")}
+        >
+          Quote
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => insertList(false)}
+        >
+          • List
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => insertList(true)}
+        >
+          1. List
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={insertLink}>
+          Link
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={onPickImage}
+          iconName="Image"
+        >
+          Image
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={onFileChange}
+        />
       </div>
       <textarea
         id={id}
@@ -91,24 +166,35 @@ const MarkdownEditor = ({ id = 'md-editor', value, onChange, placeholder = 'Writ
   );
 };
 
-const BlogEditor = ({ mode = 'create', initialData = {}, onCancel, onSave }) => {
+const BlogEditor = ({
+  mode = "create",
+  initialData = {},
+  onCancel,
+  onSave,
+}) => {
   const [form, setForm] = useState(() => ({
-    title: '',
-    excerpt: '',
-    content: '',
-    category: '',
-    tags: '',
-    featuredImage: '',
-    status: 'draft',
+    title: "",
+    excerpt: "",
+    content: "",
+    category: "",
+    tags: "",
+    featuredImage: "",
+    status: "draft",
     readTime: 5,
-    slug: '',
+    slug: "",
     featured: false,
-    sourceUrl: '',
-    metaTitle: '',
-    metaDescription: '',
-    publishedAt: '',
+    sourceUrl: "",
+    metaTitle: "",
+    metaDescription: "",
+    publishedAt: "",
     ...initialData,
-    ...(initialData?.tags !== undefined ? { tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : (initialData.tags || '') } : {}),
+    ...(initialData?.tags !== undefined
+      ? {
+          tags: Array.isArray(initialData.tags)
+            ? initialData.tags.join(", ")
+            : initialData.tags || "",
+        }
+      : {}),
   }));
   const [errors, setErrors] = useState({});
   const [preview, setPreview] = useState(false);
@@ -116,42 +202,54 @@ const BlogEditor = ({ mode = 'create', initialData = {}, onCancel, onSave }) => 
   const [revLoading, setRevLoading] = useState(false);
   const [diffRevisionId, setDiffRevisionId] = useState(null);
   const [showRevisionsPanel, setShowRevisionsPanel] = useState(false);
-  const base = import.meta.env.VITE_API_BASE_URL || '/api';
+  const base = import.meta.env.VITE_API_BASE_URL || "/api";
 
   useEffect(() => {
     let mounted = true;
     const loadRevisions = async () => {
-      if (mode !== 'edit' || !initialData?.id) return;
+      if (mode !== "edit" || !initialData?.id) return;
       setRevLoading(true);
       try {
-        const res = await fetch(base + '/blog/revisions?postId=' + initialData.id + '&limit=20');
+        const res = await fetch(
+          base + "/blog/revisions?postId=" + initialData.id + "&limit=20",
+        );
         if (res.ok) {
           const data = await res.json();
           if (mounted) setRevisions(data);
         }
-      } catch {}
-      finally { if (mounted) setRevLoading(false); }
+      } catch {
+      } finally {
+        if (mounted) setRevLoading(false);
+      }
     };
     loadRevisions();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [mode, initialData?.id]);
 
-  const headerTitle = useMemo(() => mode === 'edit' ? 'Edit Blog Post' : 'Create Blog Post', [mode]);
+  const headerTitle = useMemo(
+    () => (mode === "edit" ? "Edit Blog Post" : "Create Blog Post"),
+    [mode],
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validateBlog(form);
     setErrors(errs);
     if (Object.keys(errs).length) return;
-    const tags = (form.tags || '')
-      .split(',')
+    const tags = (form.tags || "")
+      .split(",")
       .map((t) => t.trim())
       .filter(Boolean);
-    const slug = (form.slug || form.title || '')
+    const slug = (form.slug || form.title || "")
       .toLowerCase()
-      .replace(/[^a-z0-9-]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-    const words = (form.content || '').trim().split(/\s+/).filter(Boolean).length;
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    const words = (form.content || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length;
     const estRead = Math.max(1, Math.ceil(words / 200));
     await onSave({
       title: form.title,
@@ -167,7 +265,9 @@ const BlogEditor = ({ mode = 'create', initialData = {}, onCancel, onSave }) => 
       sourceUrl: form.sourceUrl || undefined,
       metaTitle: form.metaTitle || undefined,
       metaDescription: form.metaDescription || undefined,
-      publishDate: form.publishedAt || (form.status === 'published' ? new Date().toISOString() : null),
+      publishDate:
+        form.publishedAt ||
+        (form.status === "published" ? new Date().toISOString() : null),
     });
   };
 
@@ -177,184 +277,365 @@ const BlogEditor = ({ mode = 'create', initialData = {}, onCancel, onSave }) => 
       <div className="sticky top-0 z-30 bg-surface/95 backdrop-blur-sm border-b border-border-accent/20 p-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-heading font-semibold text-text-primary">{headerTitle}</h2>
-            <p className="text-xs text-text-secondary font-caption">Write comfortably with full-page editor</p>
+            <h2 className="text-xl font-heading font-semibold text-text-primary">
+              {headerTitle}
+            </h2>
+            <p className="text-xs text-text-secondary font-caption">
+              Write comfortably with full-page editor
+            </p>
           </div>
           <div className="flex items-center gap-2">
-            {mode === 'edit' && (
+            {mode === "edit" && (
               <Button
                 type="button"
                 size="sm"
-                variant={showRevisionsPanel ? 'solid' : 'outline'}
+                variant={showRevisionsPanel ? "solid" : "outline"}
                 iconName="History"
-                onClick={() => setShowRevisionsPanel(v => !v)}
+                onClick={() => setShowRevisionsPanel((v) => !v)}
               >
-                {showRevisionsPanel ? 'Hide Revisions' : 'Revisions'}
+                {showRevisionsPanel ? "Hide Revisions" : "Revisions"}
               </Button>
             )}
-            <Button variant="outline" onClick={onCancel} iconName="ArrowLeft" iconPosition="left">Back</Button>
-            <Button onClick={handleSubmit} iconName="Save" iconPosition="left">{mode === 'edit' ? 'Save Changes' : 'Create Post'}</Button>
+            <Button
+              variant="outline"
+              onClick={onCancel}
+              iconName="ArrowLeft"
+              iconPosition="left"
+            >
+              Back
+            </Button>
+            <Button onClick={handleSubmit} iconName="Save" iconPosition="left">
+              {mode === "edit" ? "Save Changes" : "Create Post"}
+            </Button>
           </div>
         </div>
       </div>
 
       {/* Body with optional side panel */}
       <div className="flex-1 overflow-hidden flex">
-        {showRevisionsPanel && mode === 'edit' && (
+        {showRevisionsPanel && mode === "edit" && (
           <aside className="w-72 border-r border-border-accent/20 bg-background/60 backdrop-blur-sm flex flex-col">
             <div className="p-3 border-b border-border-accent/10 flex items-center justify-between">
-              <span className="text-xs font-semibold tracking-wide uppercase text-text-secondary">Revisions</span>
-              <button type="button" className="text-text-secondary hover:text-text-primary" onClick={() => setShowRevisionsPanel(false)}>
+              <span className="text-xs font-semibold tracking-wide uppercase text-text-secondary">
+                Revisions
+              </span>
+              <button
+                type="button"
+                className="text-text-secondary hover:text-text-primary"
+                onClick={() => setShowRevisionsPanel(false)}
+              >
                 <Icon name="X" size={14} />
               </button>
             </div>
             <div className="flex-1 overflow-auto p-2 space-y-1">
-              {revLoading && <div className="text-xs text-text-secondary py-2">Loading…</div>}
-              {!revLoading && revisions.length === 0 && <div className="text-xs text-text-secondary py-2">No revisions yet.</div>}
-              {!revLoading && revisions.map(r => (
-                <div key={r.id} className="group border border-border-accent/10 rounded-md px-2 py-1 hover:border-primary/50 transition flex flex-col gap-0.5">
-                  <button type="button" onClick={() => setDiffRevisionId(r.id)} className="text-left text-xs font-medium text-text-primary/90 hover:text-primary truncate">
-                    {new Date(r.created_at).toLocaleString()}
-                  </button>
-                  <div className="text-[10px] text-text-secondary line-clamp-2">{r.title}</div>
-                  <div className="flex gap-1 mt-1">
+              {revLoading && (
+                <div className="text-xs text-text-secondary py-2">Loading…</div>
+              )}
+              {!revLoading && revisions.length === 0 && (
+                <div className="text-xs text-text-secondary py-2">
+                  No revisions yet.
+                </div>
+              )}
+              {!revLoading &&
+                revisions.map((r) => (
+                  <div
+                    key={r.id}
+                    className="group border border-border-accent/10 rounded-md px-2 py-1 hover:border-primary/50 transition flex flex-col gap-0.5"
+                  >
                     <button
                       type="button"
                       onClick={() => setDiffRevisionId(r.id)}
-                      className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20"
-                    >Diff</button>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!confirm('Restore this revision? This will overwrite the current content.')) return;
-                        try {
-                          const resp = await fetch(base + '/blog/revisions/restore', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ revisionId: r.id }) });
-                          if (resp.ok) {
-                            // Reload revisions (new revision should be created on next save anyway) and maybe refetch post? For now update local form.
-                            setDiffRevisionId(null);
-                            setShowRevisionsPanel(false);
-                            // We could fetch the post again; assuming parent refresh after onSave not available yet.
-                          } else {
-                            console.error('Failed to restore');
+                      className="text-left text-xs font-medium text-text-primary/90 hover:text-primary truncate"
+                    >
+                      {new Date(r.created_at).toLocaleString()}
+                    </button>
+                    <div className="text-[10px] text-text-secondary line-clamp-2">
+                      {r.title}
+                    </div>
+                    <div className="flex gap-1 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => setDiffRevisionId(r.id)}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20"
+                      >
+                        Diff
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (
+                            !confirm(
+                              "Restore this revision? This will overwrite the current content.",
+                            )
+                          )
+                            return;
+                          try {
+                            const resp = await fetch(
+                              base + "/blog/revisions/restore",
+                              {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ revisionId: r.id }),
+                              },
+                            );
+                            if (resp.ok) {
+                              // Reload revisions (new revision should be created on next save anyway) and maybe refetch post? For now update local form.
+                              setDiffRevisionId(null);
+                              setShowRevisionsPanel(false);
+                              // We could fetch the post again; assuming parent refresh after onSave not available yet.
+                            } else {
+                              console.error("Failed to restore");
+                            }
+                          } catch (e) {
+                            console.error(e);
                           }
-                        } catch (e) { console.error(e); }
-                      }}
-                      className="text-[10px] px-1.5 py-0.5 rounded bg-warning/10 text-warning hover:bg-warning/20"
-                    >Restore</button>
+                        }}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-warning/10 text-warning hover:bg-warning/20"
+                      >
+                        Restore
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </aside>
         )}
         <div className="flex-1 overflow-auto">
-        <form onSubmit={handleSubmit} className="max-w-5xl mx-auto p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Title</label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
-              {errors.title && <p className="mt-1 text-xs text-error">{errors.title}</p>}
-            </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Slug</label>
-              <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-generated from title" />
-              {errors.slug && <p className="mt-1 text-xs text-error">{errors.slug}</p>}
-            </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Status</label>
-              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-2">
-              <input id="featured" type="checkbox" className="w-4 h-4" checked={!!form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
-              <label htmlFor="featured" className="text-sm text-text-secondary">Featured</label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-text-secondary mb-1">Excerpt</label>
-            <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={3} value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between">
-              <label className="block text-sm text-text-secondary mb-1">Content</label>
-              <Button type="button" size="sm" variant="outline" onClick={() => setPreview(v => !v)}>
-                {preview ? 'Hide Preview' : 'Preview Markdown'}
-              </Button>
-            </div>
-            <MarkdownEditor id="blog-md-editor" value={form.content} onChange={(val) => setForm({ ...form, content: val })} />
-            {errors.content && <p className="mt-1 text-xs text-error">{errors.content}</p>}
-            {preview && (
-              <div className="mt-3 p-3 border border-border-accent/20 rounded bg-background/40 prose prose-invert max-w-none">
-                <ReactMarkdown>{form.content || ''}</ReactMarkdown>
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-5xl mx-auto p-6 space-y-6"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">
+                  Title
+                </label>
+                <Input
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  required
+                />
+                {errors.title && (
+                  <p className="mt-1 text-xs text-error">{errors.title}</p>
+                )}
               </div>
-            )}
-          </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">
+                  Slug
+                </label>
+                <Input
+                  value={form.slug}
+                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                  placeholder="auto-generated from title"
+                />
+                {errors.slug && (
+                  <p className="mt-1 text-xs text-error">{errors.slug}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">
+                  Status
+                </label>
+                <select
+                  className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm"
+                  value={form.status}
+                  onChange={(e) => setForm({ ...form, status: e.target.value })}
+                >
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  id="featured"
+                  type="checkbox"
+                  className="w-4 h-4"
+                  checked={!!form.featured}
+                  onChange={(e) =>
+                    setForm({ ...form, featured: e.target.checked })
+                  }
+                />
+                <label
+                  htmlFor="featured"
+                  className="text-sm text-text-secondary"
+                >
+                  Featured
+                </label>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Category</label>
-              <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
-            </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Tags (comma-separated)</label>
-              <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
-            </div>
-            <div className="md:col-span-2">
-              <FileUpload
-                label="Featured Image"
-                value={form.featuredImage}
-                onChange={(url) => setForm({ ...form, featuredImage: url })}
-                bucket="media"
-                pathPrefix="blog/featured"
-                accept="image"
-                helperText="Select or drop an image to upload."
-              />
-              {errors.featuredImage && <p className="mt-1 text-xs text-error">{errors.featuredImage}</p>}
-            </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Source URL (optional)</label>
-              <Input 
-                type="url" 
-                value={form.sourceUrl || ''} 
-                onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })}
-                placeholder="https://example.com/original-source"
-                helperText="Reference link if content is based on or inspired by another source"
+              <label className="block text-sm text-text-secondary mb-1">
+                Excerpt
+              </label>
+              <textarea
+                className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg"
+                rows={3}
+                value={form.excerpt}
+                onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
               />
             </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Read Time (minutes)</label>
-              <Input type="number" min="1" value={form.readTime} onChange={(e) => setForm({ ...form, readTime: e.target.value })} />
-              {errors.readTime && <p className="mt-1 text-xs text-error">{errors.readTime}</p>}
-            </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1">Publish Date</label>
-              <Input type="datetime-local" value={form.publishedAt || ''} onChange={(e) => setForm({ ...form, publishedAt: e.target.value })} />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-sm text-text-secondary mb-1">Meta Title</label>
-              <Input value={form.metaTitle} onChange={(e) => setForm({ ...form, metaTitle: e.target.value })} />
-              {errors.metaTitle && <p className="mt-1 text-xs text-error">{errors.metaTitle}</p>}
+            <div>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm text-text-secondary mb-1">
+                  Content
+                </label>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setPreview((v) => !v)}
+                >
+                  {preview ? "Hide Preview" : "Preview Markdown"}
+                </Button>
+              </div>
+              <MarkdownEditor
+                id="blog-md-editor"
+                value={form.content}
+                onChange={(val) => setForm({ ...form, content: val })}
+              />
+              {errors.content && (
+                <p className="mt-1 text-xs text-error">{errors.content}</p>
+              )}
+              {preview && (
+                <div className="mt-3 p-3 border border-border-accent/20 rounded bg-background/40 prose prose-invert max-w-none">
+                  <ReactMarkdown>{form.content || ""}</ReactMarkdown>
+                </div>
+              )}
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm text-text-secondary mb-1">Meta Description</label>
-              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={3} value={form.metaDescription} onChange={(e) => setForm({ ...form, metaDescription: e.target.value })} />
-              {errors.metaDescription && <p className="mt-1 text-xs text-error">{errors.metaDescription}</p>}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">
+                  Category
+                </label>
+                <Input
+                  value={form.category}
+                  onChange={(e) =>
+                    setForm({ ...form, category: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">
+                  Tags (comma-separated)
+                </label>
+                <Input
+                  value={form.tags}
+                  onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <FileUpload
+                  label="Featured Image"
+                  value={form.featuredImage}
+                  onChange={(url) => setForm({ ...form, featuredImage: url })}
+                  bucket="media"
+                  pathPrefix="blog/featured"
+                  accept="image"
+                  helperText="Select or drop an image to upload."
+                />
+                {errors.featuredImage && (
+                  <p className="mt-1 text-xs text-error">
+                    {errors.featuredImage}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">
+                  Source URL (optional)
+                </label>
+                <Input
+                  type="url"
+                  value={form.sourceUrl || ""}
+                  onChange={(e) =>
+                    setForm({ ...form, sourceUrl: e.target.value })
+                  }
+                  placeholder="https://example.com/original-source"
+                  helperText="Reference link if content is based on or inspired by another source"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">
+                  Read Time (minutes)
+                </label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={form.readTime}
+                  onChange={(e) =>
+                    setForm({ ...form, readTime: e.target.value })
+                  }
+                />
+                {errors.readTime && (
+                  <p className="mt-1 text-xs text-error">{errors.readTime}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">
+                  Publish Date
+                </label>
+                <Input
+                  type="datetime-local"
+                  value={form.publishedAt || ""}
+                  onChange={(e) =>
+                    setForm({ ...form, publishedAt: e.target.value })
+                  }
+                />
+              </div>
             </div>
-          </div>
-        </form>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm text-text-secondary mb-1">
+                  Meta Title
+                </label>
+                <Input
+                  value={form.metaTitle}
+                  onChange={(e) =>
+                    setForm({ ...form, metaTitle: e.target.value })
+                  }
+                />
+                {errors.metaTitle && (
+                  <p className="mt-1 text-xs text-error">{errors.metaTitle}</p>
+                )}
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm text-text-secondary mb-1">
+                  Meta Description
+                </label>
+                <textarea
+                  className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg"
+                  rows={3}
+                  value={form.metaDescription}
+                  onChange={(e) =>
+                    setForm({ ...form, metaDescription: e.target.value })
+                  }
+                />
+                {errors.metaDescription && (
+                  <p className="mt-1 text-xs text-error">
+                    {errors.metaDescription}
+                  </p>
+                )}
+              </div>
+            </div>
+          </form>
         </div>
       </div>
       {diffRevisionId && (
-        <React.Suspense fallback={<div className="fixed inset-0 flex items-center justify-center bg-background/80 text-sm">Loading diff…</div>}>
+        <React.Suspense
+          fallback={
+            <div className="fixed inset-0 flex items-center justify-center bg-background/80 text-sm">
+              Loading diff…
+            </div>
+          }
+        >
           {/* Inline import fallback if code splitting added later */}
-          <RevisionDiffPortal revisionId={diffRevisionId} onClose={() => setDiffRevisionId(null)} />
+          <RevisionDiffPortal
+            revisionId={diffRevisionId}
+            onClose={() => setDiffRevisionId(null)}
+          />
         </React.Suspense>
       )}
     </div>
@@ -364,7 +645,6 @@ const BlogEditor = ({ mode = 'create', initialData = {}, onCancel, onSave }) => 
 export default BlogEditor;
 
 // Local portal component referencing already bundled viewer
-import RevisionDiffViewer from '../../../components/admin/RevisionDiffViewer';
 function RevisionDiffPortal({ revisionId, onClose }) {
   return <RevisionDiffViewer revisionId={revisionId} onClose={onClose} />;
 }

@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { X } from 'lucide-react';
-import Login from './Login';
+import { useState } from "react";
 
-const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }) => {
-  const [mode, setMode] = useState('login');
+const AuthModal = ({ isOpen, onClose, defaultMode = "login" }) => {
+  const [mode, setMode] = useState("login");
 
   if (!isOpen) return null;
 
@@ -15,11 +13,11 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }) => {
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-full p-4">
         {/* Backdrop */}
-        <div 
+        <div
           className="fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity"
           onClick={onClose}
         />
-        
+
         {/* Modal Content */}
         <div className="relative w-full max-w-md">
           {/* Close Button */}
@@ -35,7 +33,8 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'login' }) => {
 
           {/* Mode Switch */}
           <div className="mt-4 text-center text-sm text-text-secondary">
-            Signup is disabled. Only the site owner can access the admin dashboard.
+            Signup is disabled. Only the site owner can access the admin
+            dashboard.
           </div>
         </div>
       </div>

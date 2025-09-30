@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import { LogIn, Mail, Lock, AlertCircle, Github } from 'lucide-react';
-import { useToast } from '../../contexts/ToastContext';
-import { ADMIN_EMAIL } from '../../utils/authService';
+import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "../../contexts/ToastContext";
+import { ADMIN_EMAIL } from "../../utils/authService";
 
 const Login = ({ onClose, onSuccess }) => {
   const [email, setEmail] = useState(ADMIN_EMAIL);
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const { signIn, signInWithOAuth } = useAuth();
   const { show: showToast } = useToast();
@@ -21,22 +18,22 @@ const Login = ({ onClose, onSuccess }) => {
   const handleSignIn = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
     try {
       const result = await signIn(email, password);
       if (result.success) {
         onSuccess?.();
         onClose?.();
-        navigate('/admin-dashboard-content-management');
-        showToast('Login successful', { type: 'success' });
+        navigate("/admin-dashboard-content-management");
+        showToast("Login successful", { type: "success" });
       } else {
-        setError(result.error || 'Invalid credentials');
-        showToast(result.error || 'Invalid credentials', { type: 'error' });
+        setError(result.error || "Invalid credentials");
+        showToast(result.error || "Invalid credentials", { type: "error" });
       }
     } catch (err) {
-      setError('An unexpected error occurred');
-      console.log('Sign in error:', err);
-      showToast('An unexpected error occurred', { type: 'error' });
+      setError("An unexpected error occurred");
+      console.log("Sign in error:", err);
+      showToast("An unexpected error occurred", { type: "error" });
     } finally {
       setIsLoading(false);
     }
@@ -44,20 +41,26 @@ const Login = ({ onClose, onSuccess }) => {
 
   const handleOAuthSignIn = async (provider) => {
     setOauthLoading(provider);
-    setError('');
+    setError("");
     try {
       const result = await signInWithOAuth(provider);
       if (result.success) {
-        showToast(`Redirecting to ${provider} authentication...`, { type: 'info' });
+        showToast(`Redirecting to ${provider} authentication...`, {
+          type: "info",
+        });
         // OAuth will redirect, so we don't close the modal here
       } else {
-        setError(result.error || 'OAuth authentication failed');
-        showToast(result.error || 'OAuth authentication failed', { type: 'error' });
+        setError(result.error || "OAuth authentication failed");
+        showToast(result.error || "OAuth authentication failed", {
+          type: "error",
+        });
       }
     } catch (err) {
-      setError('An unexpected error occurred during OAuth authentication');
-      console.log('OAuth sign in error:', err);
-      showToast('An unexpected error occurred during OAuth authentication', { type: 'error' });
+      setError("An unexpected error occurred during OAuth authentication");
+      console.log("OAuth sign in error:", err);
+      showToast("An unexpected error occurred during OAuth authentication", {
+        type: "error",
+      });
     } finally {
       setOauthLoading(null);
     }
@@ -109,31 +112,35 @@ const Login = ({ onClose, onSuccess }) => {
         {/* OAuth Buttons */}
         <div className="space-y-3 mb-6">
           <Button
-            onClick={() => handleOAuthSignIn('google')}
-            disabled={oauthLoading === 'google' || isLoading}
+            onClick={() => handleOAuthSignIn("google")}
+            disabled={oauthLoading === "google" || isLoading}
             className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300"
             iconPosition="left"
           >
-            {oauthLoading === 'google' ? (
+            {oauthLoading === "google" ? (
               <div className="w-5 h-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-900" />
             ) : (
               <GoogleIcon />
             )}
-            {oauthLoading === 'google' ? 'Connecting...' : 'Continue with Google'}
+            {oauthLoading === "google"
+              ? "Connecting..."
+              : "Continue with Google"}
           </Button>
 
           <Button
-            onClick={() => handleOAuthSignIn('github')}
-            disabled={oauthLoading === 'github' || isLoading}
+            onClick={() => handleOAuthSignIn("github")}
+            disabled={oauthLoading === "github" || isLoading}
             className="w-full bg-gray-900 hover:bg-gray-800 text-white"
             iconPosition="left"
           >
-            {oauthLoading === 'github' ? (
+            {oauthLoading === "github" ? (
               <div className="w-5 h-5 animate-spin rounded-full border-2 border-gray-600 border-t-white" />
             ) : (
               <Github className="w-5 h-5" />
             )}
-            {oauthLoading === 'github' ? 'Connecting...' : 'Continue with GitHub'}
+            {oauthLoading === "github"
+              ? "Connecting..."
+              : "Continue with GitHub"}
           </Button>
         </div>
 
@@ -143,13 +150,18 @@ const Login = ({ onClose, onSuccess }) => {
             <div className="w-full border-t border-border-accent"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-surface text-text-secondary">Or continue with email</span>
+            <span className="px-2 bg-surface text-text-secondary">
+              Or continue with email
+            </span>
           </div>
         </div>
 
         <form onSubmit={handleSignIn} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-text-primary mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-text-primary mb-2"
+            >
               Admin Email
             </label>
             <div className="relative">
@@ -169,7 +181,10 @@ const Login = ({ onClose, onSuccess }) => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-text-primary mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-text-primary mb-2"
+            >
               Password
             </label>
             <div className="relative">
@@ -193,10 +208,10 @@ const Login = ({ onClose, onSuccess }) => {
             variant="primary"
             className="w-full shadow-glow-primary"
             disabled={isLoading || oauthLoading}
-            iconName={isLoading ? 'Loader2' : 'LogIn'}
+            iconName={isLoading ? "Loader2" : "LogIn"}
             iconPosition="left"
           >
-            {isLoading ? 'Signing In…' : 'Sign In'}
+            {isLoading ? "Signing In…" : "Sign In"}
           </Button>
         </form>
 

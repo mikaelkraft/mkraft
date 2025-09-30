@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, waitFor } from "@testing-library/react";
+import { HelmetProvider } from "react-helmet-async";
+import OGMeta from "../src/components/seo/OGMeta.jsx";
 
 // Mock settingsService to control returned settings and avoid network
 vi.mock("../src/utils/settingsService.js", () => ({

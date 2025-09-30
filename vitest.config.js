@@ -4,7 +4,12 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    include: ["src/**/*.test.{js,jsx}", "test/**/*.test.{js,jsx}"],
-    exclude: ["test/ogmeta.perpost.test.js"],
+    setupFiles: ["./test/setupTests.js"],
+    include: [
+      "src/**/*.test.{js,jsx}",
+      "test/**/*.test.{js,jsx}",
+      "test/**/*.{spec,test}.{js,jsx}",
+      "test/ogmeta.perpost.test.jsx",
+    ],
   },
 });

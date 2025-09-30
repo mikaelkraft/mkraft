@@ -1,5 +1,7 @@
 function json(res, body, status = 200) {
-  res.status(status).setHeader('content-type', 'application/json; charset=utf-8');
+  res
+    .status(status)
+    .setHeader("content-type", "application/json; charset=utf-8");
   res.end(JSON.stringify(body));
 }
 
@@ -13,10 +15,13 @@ function resolveBaseUrl() {
   // 2. VERCEL_URL (host only) -> https://VERCEL_URL
   // 3. Render/Netlify style PUBLIC_BASE_URL if later added
   // 4. Fallback localhost (protocol required by URL API)
-  if (process.env.SITE_BASE_URL) return process.env.SITE_BASE_URL.replace(/\/$/, '');
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL.replace(/\/$/, '')}`;
-  if (process.env.PUBLIC_BASE_URL) return process.env.PUBLIC_BASE_URL.replace(/\/$/, '');
-  return 'http://localhost';
+  if (process.env.SITE_BASE_URL)
+    return process.env.SITE_BASE_URL.replace(/\/$/, "");
+  if (process.env.VERCEL_URL)
+    return `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`;
+  if (process.env.PUBLIC_BASE_URL)
+    return process.env.PUBLIC_BASE_URL.replace(/\/$/, "");
+  return "http://localhost";
 }
 
 function getUrl(req) {
@@ -35,9 +40,9 @@ function buildCanonicalUrl(pathOrUrl) {
   const base = resolveBaseUrl();
   let target;
   try {
-    if (typeof pathOrUrl === 'string' && !/^https?:\/\//i.test(pathOrUrl)) {
+    if (typeof pathOrUrl === "string" && !/^https?:\/\//i.test(pathOrUrl)) {
       // Ensure leading slash for relative paths
-      const p = pathOrUrl.startsWith('/') ? pathOrUrl : '/' + pathOrUrl;
+      const p = pathOrUrl.startsWith("/") ? pathOrUrl : "/" + pathOrUrl;
       target = new URL(p, base).toString();
     } else {
       target = new URL(pathOrUrl, base).toString();
@@ -45,15 +50,16 @@ function buildCanonicalUrl(pathOrUrl) {
   } catch {
     target = base; // fallback
   }
-  return target.replace(/\/$/, '');
+  return target.replace(/\/$/, "");
 }
 
 // Emit a runtime warning if production uses localhost base (misconfiguration)
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   const b = resolveBaseUrl();
   if (/localhost(:\d+)?$/.test(b)) {
-    // eslint-disable-next-line no-console
-    console.warn('[config-warning] SITE_BASE_URL/VERCEL_URL not set; canonical URLs will use localhost.');
+    console.warn(
+      "[config-warning] SITE_BASE_URL/VERCEL_URL not set; canonical URLs will use localhost.",
+    );
   }
 }
 

@@ -1,52 +1,55 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import Icon from '../AppIcon';
-import Button from './Button';
-import { useAuth } from '../../contexts/AuthContext';
-import AuthModal from '../auth/AuthModal';
-import SearchModal from './SearchModal';
-import useFeature from 'hooks/useFeature';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import useFeature from "hooks/useFeature";
+import { useNavigate } from "react-router-dom";
 
-const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeControlsToggle, currentTheme = 'cyberpunk' }) => {
+const HeaderNavigation = ({
+  isAuthenticated = false,
+  onAuthToggle,
+  onThemeControlsToggle,
+  currentTheme = "cyberpunk",
+}) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const searchEnabled = useFeature('full_text_search', true);
-  const [searchVal, setSearchVal] = useState('');
+  const searchEnabled = useFeature("full_text_search", true);
+  const [searchVal, setSearchVal] = useState("");
   const searchDebounceRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { userProfile, signOut } = useAuth();
-  const isAdmin = userProfile?.role === 'admin';
-  const isDevAdmin = typeof window !== 'undefined' && window.localStorage.getItem('dev_admin') === 'true';
+  const isAdmin = userProfile?.role === "admin";
+  const isDevAdmin =
+    typeof window !== "undefined" &&
+    window.localStorage.getItem("dev_admin") === "true";
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const navigationItems = [
     {
-      label: 'Home',
-      path: '/portfolio-home-hero',
-      icon: 'Home',
-      tooltip: 'Portfolio home and hero showcase'
+      label: "Home",
+      path: "/portfolio-home-hero",
+      icon: "Home",
+      tooltip: "Portfolio home and hero showcase",
     },
     {
-      label: 'Projects',
-      path: '/projects-portfolio-grid',
-      icon: 'FolderOpen',
-      tooltip: 'Browse project portfolio'
+      label: "Projects",
+      path: "/projects-portfolio-grid",
+      icon: "FolderOpen",
+      tooltip: "Browse project portfolio",
     },
     {
-      label: 'Blog',
-      path: '/blog-content-hub',
-      icon: 'BookOpen',
-      tooltip: 'Read latest blog posts'
+      label: "Blog",
+      path: "/blog-content-hub",
+      icon: "BookOpen",
+      tooltip: "Read latest blog posts",
     },
     {
-      label: 'Dashboard',
-      path: '/admin-dashboard-content-management',
-      icon: 'Settings',
-      tooltip: 'Admin content management',
-      adminOnly: true
-    }
+      label: "Dashboard",
+      path: "/admin-dashboard-content-management",
+      icon: "Settings",
+      tooltip: "Admin content management",
+      adminOnly: true,
+    },
   ];
 
   const isActivePath = (path) => {
@@ -69,21 +72,21 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
   // Close mobile menu on escape key
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         closeMobileMenu();
       }
     };
 
     if (isMobileMenuOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [isMobileMenuOpen]);
 
@@ -95,8 +98,8 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
         <nav className="max-w-9xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-18">
             {/* Logo */}
-            <Link 
-              to="/portfolio-home-hero" 
+            <Link
+              to="/portfolio-home-hero"
               className="flex items-center space-x-3 group"
               aria-label="WisdomInTech Portfolio Home"
             >
@@ -131,9 +134,10 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
                   className={`
                     relative px-4 py-2 rounded-lg font-medium text-sm transition-all duration-fast
                     flex items-center space-x-2 min-h-[44px]
-                    ${isActivePath(item.path)
-                      ? 'text-primary bg-primary/10 shadow-glow-primary'
-                      : 'text-text-secondary hover:text-primary hover:bg-primary/5'
+                    ${
+                      isActivePath(item.path)
+                        ? "text-primary bg-primary/10 shadow-glow-primary"
+                        : "text-text-secondary hover:text-primary hover:bg-primary/5"
                     }
                   `}
                   title={item.tooltip}
@@ -155,13 +159,23 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
                     type="text"
                     value={searchVal}
                     onChange={(e) => {
-                      const v = e.target.value; setSearchVal(v); clearTimeout(searchDebounceRef.current); searchDebounceRef.current = setTimeout(()=>{ if (v.trim().length>1) navigate(`/search?q=${encodeURIComponent(v.trim())}`); }, 300);
+                      const v = e.target.value;
+                      setSearchVal(v);
+                      clearTimeout(searchDebounceRef.current);
+                      searchDebounceRef.current = setTimeout(() => {
+                        if (v.trim().length > 1)
+                          navigate(`/search?q=${encodeURIComponent(v.trim())}`);
+                      }, 300);
                     }}
                     placeholder="Search posts…"
                     className="w-56 px-3 py-2 rounded-lg bg-background/60 border border-border-accent/30 focus:border-primary focus:outline-none text-sm placeholder-text-secondary/50 transition"
                     aria-label="Search posts"
                   />
-                  <Icon name="Search" size={14} className="absolute top-1/2 -translate-y-1/2 right-2 text-text-secondary/60" />
+                  <Icon
+                    name="Search"
+                    size={14}
+                    className="absolute top-1/2 -translate-y-1/2 right-2 text-text-secondary/60"
+                  />
                 </div>
               )}
               <Button
@@ -266,20 +280,19 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40 lg:hidden"
-          onClick={closeMobileMenu}
-        >
+        <div className="fixed inset-0 z-40 lg:hidden" onClick={closeMobileMenu}>
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
         </div>
       )}
 
       {/* Mobile Menu Drawer */}
-      <div className={`
+      <div
+        className={`
         fixed top-16 right-0 bottom-0 z-50 w-80 max-w-[85vw] bg-surface border-l border-border-accent/20
         transform transition-transform duration-normal lg:hidden
-        ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
-      `}>
+        ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}
+      `}
+      >
         <div className="flex flex-col h-full">
           <div className="flex-1 overflow-y-auto py-6">
             <nav className="px-6 space-y-2">
@@ -298,9 +311,10 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
                   className={`
                     flex items-center space-x-3 px-4 py-3 rounded-lg font-medium
                     transition-all duration-fast min-h-[48px]
-                    ${isActivePath(item.path)
-                      ? 'text-primary bg-primary/10 shadow-glow-primary'
-                      : 'text-text-secondary hover:text-primary hover:bg-primary/5'
+                    ${
+                      isActivePath(item.path)
+                        ? "text-primary bg-primary/10 shadow-glow-primary"
+                        : "text-text-secondary hover:text-primary hover:bg-primary/5"
                     }
                   `}
                 >
@@ -334,14 +348,18 @@ const HeaderNavigation = ({ isAuthenticated = false, onAuthToggle, onThemeContro
       </div>
 
       {/* Search Modal */}
-      <SearchModal 
-        isOpen={searchModalOpen} 
-        onClose={() => setSearchModalOpen(false)} 
+      <SearchModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
         currentTheme={currentTheme}
       />
 
       {/* Auth Modal */}
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} defaultMode="login" />
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        defaultMode="login"
+      />
 
       {/* Floating Admin badge */}
       {!isAdmin && (

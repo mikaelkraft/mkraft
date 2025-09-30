@@ -1,31 +1,48 @@
-import React, { useState } from 'react';
-import { validateProject, isValidUrl } from '../../../utils/validation';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
-import Image from '../../../components/AppImage';
-import FileUpload from '../../../components/ui/FileUpload';
+import { useState } from "react";
+import { validateProject } from "../../../utils/validation";
 
-const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProjectCreate }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+const ProjectsManagement = ({
+  projects,
+  onProjectUpdate,
+  onProjectDelete,
+  onProjectCreate,
+}) => {
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([]);
   const [editingProject, setEditingProject] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [sortBy, setSortBy] = useState('date');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortBy, setSortBy] = useState("date");
+  const [sortOrder, setSortOrder] = useState("desc");
 
-  const Modal = ({ title, onClose, onSubmit, submitText = 'Save', children }) => (
+  const Modal = ({
+    title,
+    onClose,
+    onSubmit,
+    submitText = "Save",
+    children,
+  }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
       <div className="bg-surface border border-border-accent/20 rounded-lg shadow-glow-primary w-full max-w-2xl">
         <div className="px-6 py-4 border-b border-border-accent/20 flex items-center justify-between">
-          <h3 className="text-lg font-heading font-semibold text-text-primary">{title}</h3>
-          <button onClick={onClose} className="text-text-secondary hover:text-primary">✕</button>
+          <h3 className="text-lg font-heading font-semibold text-text-primary">
+            {title}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-text-secondary hover:text-primary"
+          >
+            ✕
+          </button>
         </div>
         <form onSubmit={onSubmit} className="p-6 space-y-4">
           {children}
           <div className="flex items-center justify-end space-x-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" variant="primary">{submitText}</Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              {submitText}
+            </Button>
           </div>
         </form>
       </div>
@@ -33,17 +50,17 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
   );
 
   const [createForm, setCreateForm] = useState({
-    title: '',
-    description: '',
-    featured_image: '',
+    title: "",
+    description: "",
+    featured_image: "",
     gallery_images: [],
-    type: 'image',
-    video_url: '',
-    video_poster: '',
-    technologies: '',
-    status: 'draft',
-    github_url: '',
-    live_url: '',
+    type: "image",
+    video_url: "",
+    video_poster: "",
+    technologies: "",
+    status: "draft",
+    github_url: "",
+    live_url: "",
   });
 
   const [editForm, setEditForm] = useState({});
@@ -52,17 +69,17 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
   const openEdit = (project) => {
     setEditingProject(project);
     setEditForm({
-      title: project.title || '',
-      description: project.description || '',
-      featured_image: project.featured_image || '',
+      title: project.title || "",
+      description: project.description || "",
+      featured_image: project.featured_image || "",
       gallery_images: project.gallery_images || [],
-      type: project.type || 'image',
-      video_url: project.video_url || '',
-      video_poster: project.video_poster || '',
-      technologies: (project.technologies || []).join(', '),
-      status: project.status || 'draft',
-      github_url: project.github_url || '',
-      live_url: project.live_url || '',
+      type: project.type || "image",
+      video_url: project.video_url || "",
+      video_poster: project.video_poster || "",
+      technologies: (project.technologies || []).join(", "),
+      status: project.status || "draft",
+      github_url: project.github_url || "",
+      live_url: project.live_url || "",
     });
   };
 
@@ -71,8 +88,8 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
     const errs = validateProject(createForm);
     setFormErrors(errs);
     if (Object.keys(errs).length) return;
-    const technologies = (createForm.technologies || '')
-      .split(',')
+    const technologies = (createForm.technologies || "")
+      .split(",")
       .map((t) => t.trim())
       .filter(Boolean);
     onProjectCreate({
@@ -90,18 +107,18 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
       date: new Date().toISOString(),
     });
     setShowCreateModal(false);
-    setCreateForm({ 
-      title: '', 
-      description: '', 
-      featured_image: '', 
-      gallery_images: [], 
-      type: 'image',
-      video_url: '',
-      video_poster: '',
-      technologies: '', 
-      status: 'draft', 
-      github_url: '', 
-      live_url: '' 
+    setCreateForm({
+      title: "",
+      description: "",
+      featured_image: "",
+      gallery_images: [],
+      type: "image",
+      video_url: "",
+      video_poster: "",
+      technologies: "",
+      status: "draft",
+      github_url: "",
+      live_url: "",
     });
   };
 
@@ -111,8 +128,8 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
     const errs = validateProject(editForm);
     setFormErrors(errs);
     if (Object.keys(errs).length) return;
-    const technologies = (editForm.technologies || '')
-      .split(',')
+    const technologies = (editForm.technologies || "")
+      .split(",")
       .map((t) => t.trim())
       .filter(Boolean);
     onProjectUpdate(editingProject.id, {
@@ -132,48 +149,55 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
   };
 
   const filteredProjects = projects
-    .filter(project => 
-      project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.technologies.some(tech => tech.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(
+      (project) =>
+        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.technologies.some((tech) =>
+          tech.toLowerCase().includes(searchTerm.toLowerCase()),
+        ),
     )
     .sort((a, b) => {
-      const modifier = sortOrder === 'asc' ? 1 : -1;
-      if (sortBy === 'date') return (new Date(a.date) - new Date(b.date)) * modifier;
-      if (sortBy === 'title') return a.title.localeCompare(b.title) * modifier;
-      if (sortBy === 'status') return a.status.localeCompare(b.status) * modifier;
+      const modifier = sortOrder === "asc" ? 1 : -1;
+      if (sortBy === "date")
+        return (new Date(a.date) - new Date(b.date)) * modifier;
+      if (sortBy === "title") return a.title.localeCompare(b.title) * modifier;
+      if (sortBy === "status")
+        return a.status.localeCompare(b.status) * modifier;
       return 0;
     });
 
   const handleSelectProject = (projectId) => {
-    setSelectedProjects(prev => 
-      prev.includes(projectId) 
-        ? prev.filter(id => id !== projectId)
-        : [...prev, projectId]
+    setSelectedProjects((prev) =>
+      prev.includes(projectId)
+        ? prev.filter((id) => id !== projectId)
+        : [...prev, projectId],
     );
   };
 
   const handleSelectAll = () => {
     setSelectedProjects(
-      selectedProjects.length === filteredProjects.length 
-        ? [] 
-        : filteredProjects.map(p => p.id)
+      selectedProjects.length === filteredProjects.length
+        ? []
+        : filteredProjects.map((p) => p.id),
     );
   };
 
   const handleBulkDelete = () => {
-    if (window.confirm(`Delete ${selectedProjects.length} selected projects?`)) {
-      selectedProjects.forEach(id => onProjectDelete(id));
+    if (
+      window.confirm(`Delete ${selectedProjects.length} selected projects?`)
+    ) {
+      selectedProjects.forEach((id) => onProjectDelete(id));
       setSelectedProjects([]);
     }
   };
 
   const handleSort = (field) => {
     if (sortBy === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortBy(field);
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
   };
 
@@ -190,8 +214,8 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
       <td className="px-4 py-4">
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 rounded-lg overflow-hidden bg-surface">
-            <Image 
-              src={project.image} 
+            <Image
+              src={project.image}
               alt={project.title}
               className="w-full h-full object-cover"
             />
@@ -207,7 +231,10 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
       <td className="px-4 py-4">
         <div className="flex flex-wrap gap-1">
           {project.technologies.slice(0, 3).map((tech, index) => (
-            <span key={index} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full font-caption">
+            <span
+              key={index}
+              className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full font-caption"
+            >
               {tech}
             </span>
           ))}
@@ -219,10 +246,15 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
         </div>
       </td>
       <td className="px-4 py-4">
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          project.status === 'published' ? 'bg-success/10 text-success' :
-          project.status === 'draft'? 'bg-warning/10 text-warning' : 'bg-error/10 text-error'
-        }`}>
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            project.status === "published"
+              ? "bg-success/10 text-success"
+              : project.status === "draft"
+                ? "bg-warning/10 text-warning"
+                : "bg-error/10 text-error"
+          }`}
+        >
           {project.status}
         </span>
       </td>
@@ -243,7 +275,7 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
             variant="ghost"
             size="sm"
             onClick={() => {
-              if (window.confirm('Delete this project?')) {
+              if (window.confirm("Delete this project?")) {
                 onProjectDelete(project.id);
               }
             }}
@@ -261,7 +293,9 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-primary">Projects Management</h1>
+          <h1 className="text-3xl font-heading font-bold text-primary">
+            Projects Management
+          </h1>
           <p className="text-text-secondary font-caption mt-2">
             Manage your portfolio projects and showcase content
           </p>
@@ -290,7 +324,9 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
           </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-text-secondary font-caption">Sort by:</span>
+              <span className="text-sm text-text-secondary font-caption">
+                Sort by:
+              </span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -303,8 +339,10 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                iconName={sortOrder === 'asc' ? 'ArrowUp' : 'ArrowDown'}
+                onClick={() =>
+                  setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                }
+                iconName={sortOrder === "asc" ? "ArrowUp" : "ArrowDown"}
                 className="p-2"
               />
             </div>
@@ -332,14 +370,17 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
                 <th className="px-4 py-4 text-left">
                   <input
                     type="checkbox"
-                    checked={selectedProjects.length === filteredProjects.length && filteredProjects.length > 0}
+                    checked={
+                      selectedProjects.length === filteredProjects.length &&
+                      filteredProjects.length > 0
+                    }
                     onChange={handleSelectAll}
                     className="w-4 h-4 text-primary bg-surface border-border-accent rounded focus:ring-primary focus:ring-2"
                   />
                 </th>
                 <th className="px-4 py-4 text-left">
                   <button
-                    onClick={() => handleSort('title')}
+                    onClick={() => handleSort("title")}
                     className="flex items-center space-x-2 text-sm font-heading font-semibold text-text-primary hover:text-primary transition-colors duration-fast"
                   >
                     <span>Project</span>
@@ -351,7 +392,7 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
                 </th>
                 <th className="px-4 py-4 text-left">
                   <button
-                    onClick={() => handleSort('status')}
+                    onClick={() => handleSort("status")}
                     className="flex items-center space-x-2 text-sm font-heading font-semibold text-text-primary hover:text-primary transition-colors duration-fast"
                   >
                     <span>Status</span>
@@ -360,7 +401,7 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
                 </th>
                 <th className="px-4 py-4 text-left">
                   <button
-                    onClick={() => handleSort('date')}
+                    onClick={() => handleSort("date")}
                     className="flex items-center space-x-2 text-sm font-heading font-semibold text-text-primary hover:text-primary transition-colors duration-fast"
                   >
                     <span>Date</span>
@@ -379,12 +420,18 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
             </tbody>
           </table>
         </div>
-        
+
         {filteredProjects.length === 0 && (
           <div className="text-center py-12">
-            <Icon name="FolderOpen" size={48} className="text-text-secondary/50 mx-auto mb-4" />
+            <Icon
+              name="FolderOpen"
+              size={48}
+              className="text-text-secondary/50 mx-auto mb-4"
+            />
             <div className="text-text-secondary font-caption">
-              {searchTerm ? 'No projects match your search' : 'No projects found'}
+              {searchTerm
+                ? "No projects match your search"
+                : "No projects found"}
             </div>
           </div>
         )}
@@ -393,39 +440,72 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-surface rounded-lg p-4 border border-border-accent/20">
-          <div className="text-2xl font-heading font-bold text-primary">{projects.length}</div>
-          <div className="text-sm text-text-secondary font-caption">Total Projects</div>
+          <div className="text-2xl font-heading font-bold text-primary">
+            {projects.length}
+          </div>
+          <div className="text-sm text-text-secondary font-caption">
+            Total Projects
+          </div>
         </div>
         <div className="bg-surface rounded-lg p-4 border border-border-accent/20">
           <div className="text-2xl font-heading font-bold text-success">
-            {projects.filter(p => p.status === 'published').length}
+            {projects.filter((p) => p.status === "published").length}
           </div>
-          <div className="text-sm text-text-secondary font-caption">Published</div>
+          <div className="text-sm text-text-secondary font-caption">
+            Published
+          </div>
         </div>
         <div className="bg-surface rounded-lg p-4 border border-border-accent/20">
           <div className="text-2xl font-heading font-bold text-warning">
-            {projects.filter(p => p.status === 'draft').length}
+            {projects.filter((p) => p.status === "draft").length}
           </div>
           <div className="text-sm text-text-secondary font-caption">Drafts</div>
         </div>
         <div className="bg-surface rounded-lg p-4 border border-border-accent/20">
-          <div className="text-2xl font-heading font-bold text-text-primary">{filteredProjects.length}</div>
-          <div className="text-sm text-text-secondary font-caption">Filtered Results</div>
+          <div className="text-2xl font-heading font-bold text-text-primary">
+            {filteredProjects.length}
+          </div>
+          <div className="text-sm text-text-secondary font-caption">
+            Filtered Results
+          </div>
         </div>
       </div>
 
       {/* Create Modal */}
       {showCreateModal && (
-        <Modal title="Create Project" onClose={() => setShowCreateModal(false)} onSubmit={submitCreate} submitText="Create">
+        <Modal
+          title="Create Project"
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={submitCreate}
+          submitText="Create"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Title</label>
-              <Input value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} required />
-              {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                Title
+              </label>
+              <Input
+                value={createForm.title}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, title: e.target.value })
+                }
+                required
+              />
+              {formErrors.title && (
+                <p className="mt-1 text-xs text-error">{formErrors.title}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Project Type</label>
-              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={createForm.type} onChange={(e) => setCreateForm({ ...createForm, type: e.target.value })}>
+              <label className="block text-sm text-text-secondary mb-1">
+                Project Type
+              </label>
+              <select
+                className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm"
+                value={createForm.type}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, type: e.target.value })
+                }
+              >
                 <option value="image">Image Project</option>
                 <option value="video">Video Project</option>
                 <option value="gallery">Image Gallery</option>
@@ -433,35 +513,60 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
               </select>
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Status</label>
-              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}>
+              <label className="block text-sm text-text-secondary mb-1">
+                Status
+              </label>
+              <select
+                className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm"
+                value={createForm.status}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, status: e.target.value })
+                }
+              >
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
               </select>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-text-secondary mb-1">Description</label>
-              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={4} value={createForm.description} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })} />
+              <label className="block text-sm text-text-secondary mb-1">
+                Description
+              </label>
+              <textarea
+                className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg"
+                rows={4}
+                value={createForm.description}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, description: e.target.value })
+                }
+              />
             </div>
             <div className="md:col-span-2">
               <FileUpload
                 label="Featured Image"
                 value={createForm.featured_image}
-                onChange={(url) => setCreateForm({ ...createForm, featured_image: url })}
+                onChange={(url) =>
+                  setCreateForm({ ...createForm, featured_image: url })
+                }
                 bucket="media"
                 pathPrefix="projects"
                 accept="image"
                 helperText="Upload a representative image for this project."
               />
-              {formErrors.featured_image && <p className="mt-1 text-xs text-error">{formErrors.featured_image}</p>}
+              {formErrors.featured_image && (
+                <p className="mt-1 text-xs text-error">
+                  {formErrors.featured_image}
+                </p>
+              )}
             </div>
-            {(createForm.type === 'video') && (
+            {createForm.type === "video" && (
               <>
                 <div className="md:col-span-2">
                   <FileUpload
                     label="Video File"
                     value={createForm.video_url}
-                    onChange={(url) => setCreateForm({ ...createForm, video_url: url })}
+                    onChange={(url) =>
+                      setCreateForm({ ...createForm, video_url: url })
+                    }
                     bucket="media"
                     pathPrefix="videos"
                     accept="video"
@@ -472,7 +577,9 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
                   <FileUpload
                     label="Video Poster Image"
                     value={createForm.video_poster}
-                    onChange={(url) => setCreateForm({ ...createForm, video_poster: url })}
+                    onChange={(url) =>
+                      setCreateForm({ ...createForm, video_poster: url })
+                    }
                     bucket="media"
                     pathPrefix="videos"
                     accept="image"
@@ -481,31 +588,75 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
                 </div>
               </>
             )}
-            {(createForm.type === 'gallery' || createForm.type === 'logo_gallery') && (
+            {(createForm.type === "gallery" ||
+              createForm.type === "logo_gallery") && (
               <div className="md:col-span-2">
-                <label className="block text-sm text-text-secondary mb-1">Gallery Images (comma-separated URLs)</label>
-                <textarea 
-                  className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" 
-                  rows={3} 
-                  value={Array.isArray(createForm.gallery_images) ? createForm.gallery_images.join(', ') : createForm.gallery_images} 
-                  onChange={(e) => setCreateForm({ ...createForm, gallery_images: e.target.value.split(',').map(url => url.trim()).filter(Boolean) })}
+                <label className="block text-sm text-text-secondary mb-1">
+                  Gallery Images (comma-separated URLs)
+                </label>
+                <textarea
+                  className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg"
+                  rows={3}
+                  value={
+                    Array.isArray(createForm.gallery_images)
+                      ? createForm.gallery_images.join(", ")
+                      : createForm.gallery_images
+                  }
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      gallery_images: e.target.value
+                        .split(",")
+                        .map((url) => url.trim())
+                        .filter(Boolean),
+                    })
+                  }
                   placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
                 />
               </div>
             )}
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Technologies (comma-separated)</label>
-              <Input value={createForm.technologies} onChange={(e) => setCreateForm({ ...createForm, technologies: e.target.value })} />
+              <label className="block text-sm text-text-secondary mb-1">
+                Technologies (comma-separated)
+              </label>
+              <Input
+                value={createForm.technologies}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, technologies: e.target.value })
+                }
+              />
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">GitHub URL</label>
-              <Input type="url" value={createForm.github_url} onChange={(e) => setCreateForm({ ...createForm, github_url: e.target.value })} />
-              {formErrors.github_url && <p className="mt-1 text-xs text-error">{formErrors.github_url}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                GitHub URL
+              </label>
+              <Input
+                type="url"
+                value={createForm.github_url}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, github_url: e.target.value })
+                }
+              />
+              {formErrors.github_url && (
+                <p className="mt-1 text-xs text-error">
+                  {formErrors.github_url}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Live URL</label>
-              <Input type="url" value={createForm.live_url} onChange={(e) => setCreateForm({ ...createForm, live_url: e.target.value })} />
-              {formErrors.live_url && <p className="mt-1 text-xs text-error">{formErrors.live_url}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                Live URL
+              </label>
+              <Input
+                type="url"
+                value={createForm.live_url}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, live_url: e.target.value })
+                }
+              />
+              {formErrors.live_url && (
+                <p className="mt-1 text-xs text-error">{formErrors.live_url}</p>
+              )}
             </div>
           </div>
         </Modal>
@@ -513,16 +664,39 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
 
       {/* Edit Modal */}
       {editingProject && (
-        <Modal title="Edit Project" onClose={() => setEditingProject(null)} onSubmit={submitEdit} submitText="Update">
+        <Modal
+          title="Edit Project"
+          onClose={() => setEditingProject(null)}
+          onSubmit={submitEdit}
+          submitText="Update"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Title</label>
-              <Input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} required />
-              {formErrors.title && <p className="mt-1 text-xs text-error">{formErrors.title}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                Title
+              </label>
+              <Input
+                value={editForm.title}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, title: e.target.value })
+                }
+                required
+              />
+              {formErrors.title && (
+                <p className="mt-1 text-xs text-error">{formErrors.title}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Project Type</label>
-              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}>
+              <label className="block text-sm text-text-secondary mb-1">
+                Project Type
+              </label>
+              <select
+                className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm"
+                value={editForm.type}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, type: e.target.value })
+                }
+              >
                 <option value="image">Image Project</option>
                 <option value="video">Video Project</option>
                 <option value="gallery">Image Gallery</option>
@@ -530,35 +704,60 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
               </select>
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Status</label>
-              <select className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm" value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
+              <label className="block text-sm text-text-secondary mb-1">
+                Status
+              </label>
+              <select
+                className="w-full bg-surface border border-border-accent/20 rounded-lg px-3 py-2 text-sm"
+                value={editForm.status}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, status: e.target.value })
+                }
+              >
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
               </select>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-text-secondary mb-1">Description</label>
-              <textarea className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" rows={4} value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
+              <label className="block text-sm text-text-secondary mb-1">
+                Description
+              </label>
+              <textarea
+                className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg"
+                rows={4}
+                value={editForm.description}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, description: e.target.value })
+                }
+              />
             </div>
             <div className="md:col-span-2">
               <FileUpload
                 label="Featured Image"
                 value={editForm.featured_image}
-                onChange={(url) => setEditForm({ ...editForm, featured_image: url })}
+                onChange={(url) =>
+                  setEditForm({ ...editForm, featured_image: url })
+                }
                 bucket="media"
                 pathPrefix="projects"
                 accept="image"
                 helperText="Upload a representative image for this project."
               />
-              {formErrors.featured_image && <p className="mt-1 text-xs text-error">{formErrors.featured_image}</p>}
+              {formErrors.featured_image && (
+                <p className="mt-1 text-xs text-error">
+                  {formErrors.featured_image}
+                </p>
+              )}
             </div>
-            {(editForm.type === 'video') && (
+            {editForm.type === "video" && (
               <>
                 <div className="md:col-span-2">
                   <FileUpload
                     label="Video File"
                     value={editForm.video_url}
-                    onChange={(url) => setEditForm({ ...editForm, video_url: url })}
+                    onChange={(url) =>
+                      setEditForm({ ...editForm, video_url: url })
+                    }
                     bucket="media"
                     pathPrefix="videos"
                     accept="video"
@@ -569,7 +768,9 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
                   <FileUpload
                     label="Video Poster Image"
                     value={editForm.video_poster}
-                    onChange={(url) => setEditForm({ ...editForm, video_poster: url })}
+                    onChange={(url) =>
+                      setEditForm({ ...editForm, video_poster: url })
+                    }
                     bucket="media"
                     pathPrefix="videos"
                     accept="image"
@@ -578,31 +779,75 @@ const ProjectsManagement = ({ projects, onProjectUpdate, onProjectDelete, onProj
                 </div>
               </>
             )}
-            {(editForm.type === 'gallery' || editForm.type === 'logo_gallery') && (
+            {(editForm.type === "gallery" ||
+              editForm.type === "logo_gallery") && (
               <div className="md:col-span-2">
-                <label className="block text-sm text-text-secondary mb-1">Gallery Images (comma-separated URLs)</label>
-                <textarea 
-                  className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg" 
-                  rows={3} 
-                  value={Array.isArray(editForm.gallery_images) ? editForm.gallery_images.join(', ') : editForm.gallery_images} 
-                  onChange={(e) => setEditForm({ ...editForm, gallery_images: e.target.value.split(',').map(url => url.trim()).filter(Boolean) })}
+                <label className="block text-sm text-text-secondary mb-1">
+                  Gallery Images (comma-separated URLs)
+                </label>
+                <textarea
+                  className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg"
+                  rows={3}
+                  value={
+                    Array.isArray(editForm.gallery_images)
+                      ? editForm.gallery_images.join(", ")
+                      : editForm.gallery_images
+                  }
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      gallery_images: e.target.value
+                        .split(",")
+                        .map((url) => url.trim())
+                        .filter(Boolean),
+                    })
+                  }
                   placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
                 />
               </div>
             )}
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Technologies (comma-separated)</label>
-              <Input value={editForm.technologies} onChange={(e) => setEditForm({ ...editForm, technologies: e.target.value })} />
+              <label className="block text-sm text-text-secondary mb-1">
+                Technologies (comma-separated)
+              </label>
+              <Input
+                value={editForm.technologies}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, technologies: e.target.value })
+                }
+              />
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">GitHub URL</label>
-              <Input type="url" value={editForm.github_url} onChange={(e) => setEditForm({ ...editForm, github_url: e.target.value })} />
-              {formErrors.github_url && <p className="mt-1 text-xs text-error">{formErrors.github_url}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                GitHub URL
+              </label>
+              <Input
+                type="url"
+                value={editForm.github_url}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, github_url: e.target.value })
+                }
+              />
+              {formErrors.github_url && (
+                <p className="mt-1 text-xs text-error">
+                  {formErrors.github_url}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Live URL</label>
-              <Input type="url" value={editForm.live_url} onChange={(e) => setEditForm({ ...editForm, live_url: e.target.value })} />
-              {formErrors.live_url && <p className="mt-1 text-xs text-error">{formErrors.live_url}</p>}
+              <label className="block text-sm text-text-secondary mb-1">
+                Live URL
+              </label>
+              <Input
+                type="url"
+                value={editForm.live_url}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, live_url: e.target.value })
+                }
+              />
+              {formErrors.live_url && (
+                <p className="mt-1 text-xs text-error">{formErrors.live_url}</p>
+              )}
             </div>
           </div>
         </Modal>

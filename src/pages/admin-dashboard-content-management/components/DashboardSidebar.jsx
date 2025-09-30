@@ -1,78 +1,74 @@
-import React from 'react';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
-
 const DashboardSidebar = ({ activeSection, onSectionChange, stats }) => {
   const navigationItems = [
     {
-      id: 'overview',
-      label: 'Dashboard Overview',
-      icon: 'BarChart3',
-      description: 'Analytics & metrics'
+      id: "overview",
+      label: "Dashboard Overview",
+      icon: "BarChart3",
+      description: "Analytics & metrics",
     },
     {
-      id: 'analytics',
-      label: 'Analytics',
-      icon: 'TrendingUp',
-      description: 'Visit tracking & stats'
+      id: "analytics",
+      label: "Analytics",
+      icon: "TrendingUp",
+      description: "Visit tracking & stats",
     },
     {
-      id: 'projects',
-      label: 'Projects',
-      icon: 'FolderOpen',
-      description: 'Portfolio management',
-      count: stats.projects
+      id: "projects",
+      label: "Projects",
+      icon: "FolderOpen",
+      description: "Portfolio management",
+      count: stats.projects,
     },
     {
-      id: 'blog',
-      label: 'Blog Posts',
-      icon: 'BookOpen',
-      description: 'Content publishing',
-      count: stats.blogPosts
+      id: "blog",
+      label: "Blog Posts",
+      icon: "BookOpen",
+      description: "Content publishing",
+      count: stats.blogPosts,
     },
     {
-      id: 'moderation',
-      label: 'Moderation',
-      icon: 'ShieldCheck',
-      description: 'Comments review'
+      id: "moderation",
+      label: "Moderation",
+      icon: "ShieldCheck",
+      description: "Comments review",
     },
     {
-      id: 'slides',
-      label: 'Hero Slides',
-      icon: 'Image',
-      description: 'Carousel content',
-      count: stats.slides
+      id: "slides",
+      label: "Hero Slides",
+      icon: "Image",
+      description: "Carousel content",
+      count: stats.slides,
     },
     {
-      id: 'settings',
-      label: 'Site Settings',
-      icon: 'Settings',
-      description: 'Configuration'
-    }
+      id: "settings",
+      label: "Site Settings",
+      icon: "Settings",
+      description: "Configuration",
+    },
   ];
 
   const quickActions = [
     {
-      id: 'new-project',
-      label: 'New Project',
-      icon: 'Plus',
-      variant: 'primary',
-      action: () => onSectionChange('projects', 'create')
+      id: "new-project",
+      label: "New Project",
+      icon: "Plus",
+      variant: "primary",
+      action: () => onSectionChange("projects", "create"),
     },
     {
-      id: 'new-post',
-      label: 'New Blog Post',
-      icon: 'PenTool',
-      variant: 'secondary',
-      action: () => onSectionChange('blog', 'create')
+      id: "new-post",
+      label: "New Blog Post",
+      icon: "PenTool",
+      variant: "secondary",
+      action: () => onSectionChange("blog", "create"),
     },
     {
-      id: 'new-slide',
-      label: 'New Slide',
-      icon: 'ImagePlus',
-      variant: 'outline',
-      action: () => onSectionChange('slides', 'create')
-    }
+      id: "new-slide",
+      label: "New Slide",
+      icon: "ImagePlus",
+      variant: "outline",
+      action: () => onSectionChange("slides", "create"),
+    },
   ];
 
   return (
@@ -84,8 +80,12 @@ const DashboardSidebar = ({ activeSection, onSectionChange, stats }) => {
             <Icon name="Shield" size={20} className="text-background" />
           </div>
           <div>
-            <h2 className="font-heading font-bold text-lg text-primary">Admin Panel</h2>
-            <p className="text-xs text-text-secondary font-caption">Content Management</p>
+            <h2 className="font-heading font-bold text-lg text-primary">
+              Admin Panel
+            </h2>
+            <p className="text-xs text-text-secondary font-caption">
+              Content Management
+            </p>
           </div>
         </div>
       </div>
@@ -100,16 +100,21 @@ const DashboardSidebar = ({ activeSection, onSectionChange, stats }) => {
               className={`
                 w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left
                 transition-all duration-fast group min-h-[52px]
-                ${activeSection === item.id
-                  ? 'bg-primary/10 text-primary shadow-glow-primary'
-                  : 'text-text-secondary hover:text-primary hover:bg-primary/5'
+                ${
+                  activeSection === item.id
+                    ? "bg-primary/10 text-primary shadow-glow-primary"
+                    : "text-text-secondary hover:text-primary hover:bg-primary/5"
                 }
               `}
             >
-              <Icon 
-                name={item.icon} 
-                size={20} 
-                className={activeSection === item.id ? 'text-primary' : 'text-text-secondary group-hover:text-primary'} 
+              <Icon
+                name={item.icon}
+                size={20}
+                className={
+                  activeSection === item.id
+                    ? "text-primary"
+                    : "text-text-secondary group-hover:text-primary"
+                }
               />
               <div className="flex-1 min-w-0">
                 <div className="font-medium truncate">{item.label}</div>
@@ -118,12 +123,16 @@ const DashboardSidebar = ({ activeSection, onSectionChange, stats }) => {
                 </div>
               </div>
               {item.count !== undefined && (
-                <div className={`
+                <div
+                  className={`
                   px-2 py-1 rounded-full text-xs font-medium
-                  ${activeSection === item.id
-                    ? 'bg-primary/20 text-primary' :'bg-surface text-text-secondary'
+                  ${
+                    activeSection === item.id
+                      ? "bg-primary/20 text-primary"
+                      : "bg-surface text-text-secondary"
                   }
-                `}>
+                `}
+                >
                   {item.count}
                 </div>
               )}
@@ -133,7 +142,9 @@ const DashboardSidebar = ({ activeSection, onSectionChange, stats }) => {
 
         {/* Quick Actions */}
         <div className="px-4 mt-8">
-          <h3 className="text-sm font-heading font-semibold text-text-primary mb-4">Quick Actions</h3>
+          <h3 className="text-sm font-heading font-semibold text-text-primary mb-4">
+            Quick Actions
+          </h3>
           <div className="space-y-2">
             {quickActions.map((action) => (
               <Button

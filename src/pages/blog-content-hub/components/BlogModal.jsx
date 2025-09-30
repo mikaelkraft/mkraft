@@ -1,42 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
-import { useAuth } from '../../../contexts/AuthContext';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
-import Image from '../../../components/AppImage';
-import commentService from '../../../utils/commentService';
-import newsletterService from '../../../utils/newsletterService';
+import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet";
+import { useAuth } from "../../../contexts/AuthContext";
+import Icon from "../../../components/AppIcon";
+import Button from "../../../components/ui/Button";
+import Input from "../../../components/ui/Input";
+import Image from "../../../components/AppImage";
+import commentService from "../../../utils/commentService";
+import newsletterService from "../../../utils/newsletterService";
 
 // Environment configuration (Vite)
-const SITE_URL = (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SITE_URL) || 'https://mkraft.tech';
-const TWITTER_HANDLE = (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_TWITTER_HANDLE) || '@mikael_kraft';
+const SITE_URL =
+  (typeof import.meta !== "undefined" && import.meta?.env?.VITE_SITE_URL) ||
+  "https://mkraft.tech";
+const TWITTER_HANDLE =
+  (typeof import.meta !== "undefined" &&
+    import.meta?.env?.VITE_TWITTER_HANDLE) ||
+  "@mikael_kraft";
 
 const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
   const { user, userProfile } = useAuth();
   const [formData, setFormData] = useState({
-    title: '',
-    excerpt: '',
-    content: '',
-    category: '',
-    tags: '',
-    featured_image: '',
-    status: 'draft',
-    meta_title: '',
-    meta_description: ''
+    title: "",
+    excerpt: "",
+    content: "",
+    category: "",
+    tags: "",
+    featured_image: "",
+    status: "draft",
+    meta_title: "",
+    meta_description: "",
   });
 
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState({
-    author_name: '',
-    author_email: '',
-    content: ''
+    author_name: "",
+    author_email: "",
+    content: "",
   });
   const [replyTo, setReplyTo] = useState(null);
   const [replyData, setReplyData] = useState({
-    author_name: '',
-    author_email: '',
-    content: ''
+    author_name: "",
+    author_email: "",
+    content: "",
   });
   const [loading, setLoading] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
@@ -45,19 +50,19 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
   useEffect(() => {
     if (post) {
       setFormData({
-        title: post.title || '',
-        excerpt: post.excerpt || '',
-        content: post.content || '',
-        category: post.category || '',
-        tags: Array.isArray(post.tags) ? post.tags.join(', ') : (post.tags || ''),
-        featured_image: post.featured_image || post.featuredImage || '',
-        status: post.status || 'draft',
-        meta_title: post.meta_title || '',
-        meta_description: post.meta_description || ''
+        title: post.title || "",
+        excerpt: post.excerpt || "",
+        content: post.content || "",
+        category: post.category || "",
+        tags: Array.isArray(post.tags) ? post.tags.join(", ") : post.tags || "",
+        featured_image: post.featured_image || post.featuredImage || "",
+        status: post.status || "draft",
+        meta_title: post.meta_title || "",
+        meta_description: post.meta_description || "",
       });
 
       // Load comments if viewing a published post
-      if (post.id && post.status === 'published') {
+      if (post.id && post.status === "published") {
         loadComments();
       } else {
         setComments(post.comments || []);
@@ -71,12 +76,12 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
     try {
       setCommentLoading(true);
       const result = await commentService.getComments(post.id);
-      
+
       if (result.success) {
         setComments(result.data || []);
       }
     } catch (error) {
-      console.log('Failed to load comments:', error);
+      console.error("Failed to load comments:", error);
     } finally {
       setCommentLoading(false);
     }
@@ -84,9 +89,9 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -97,14 +102,17 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
       const updatedPost = {
         ...post,
         ...formData,
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        tags: formData.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag),
         author_id: user?.id,
-        author: userProfile?.full_name || 'Admin'
+        author: userProfile?.full_name || "Admin",
       };
 
       await onSave(updatedPost);
     } catch (error) {
-      console.log('Failed to save post:', error);
+      console.error("Failed to save post:", error);
     } finally {
       setLoading(false);
     }
@@ -112,7 +120,7 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!newComment.content.trim() || !newComment.author_name.trim()) {
       return;
     }
@@ -125,39 +133,42 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
         author_name: newComment.author_name,
         author_email: newComment.author_email,
         content: newComment.content,
-        parent_comment_id: null
+        parent_comment_id: null,
       };
 
       const result = await commentService.createComment(commentData);
-      
+
       if (result.success) {
         // Add comment to local state
-        setComments(prev => [result.data, ...prev]);
-        
+        setComments((prev) => [result.data, ...prev]);
+
         // Reset form
         setNewComment({
-          author_name: '',
-          author_email: '',
-          content: ''
+          author_name: "",
+          author_email: "",
+          content: "",
         });
 
         // Handle newsletter signup
         if (newsletterSignup && newComment.author_email) {
           try {
-            const result = await newsletterService.subscribe(newComment.author_email, newComment.author_name);
+            const result = await newsletterService.subscribe(
+              newComment.author_email,
+              newComment.author_name,
+            );
             if (result.success) {
-              console.log('Successfully subscribed to newsletter:', newComment.author_email);
+              console.warn("Newsletter subscribed:", newComment.author_email);
             } else {
-              console.log('Newsletter signup error:', result.error);
+              console.warn("Newsletter signup error:", result.error);
             }
           } catch (error) {
-            console.log('Newsletter signup failed:', error);
+            console.error("Newsletter signup failed:", error);
           }
         }
         setNewsletterSignup(false);
       }
     } catch (error) {
-      console.log('Failed to add comment:', error);
+      console.error("Failed to add comment:", error);
     } finally {
       setCommentLoading(false);
     }
@@ -176,25 +187,25 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
         parent_comment_id: parentCommentId,
         author_name: replyData.author_name,
         author_email: replyData.author_email,
-        content: replyData.content
+        content: replyData.content,
       };
 
       const result = await commentService.createComment(commentData);
-      
+
       if (result.success) {
         // Reload comments to get updated structure
         await loadComments();
-        
+
         // Reset reply form
         setReplyData({
-          author_name: '',
-          author_email: '',
-          content: ''
+          author_name: "",
+          author_email: "",
+          content: "",
         });
         setReplyTo(null);
       }
     } catch (error) {
-      console.log('Failed to add reply:', error);
+      console.error("Failed to add reply:", error);
     } finally {
       setCommentLoading(false);
     }
@@ -204,49 +215,53 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
     try {
       // Get visitor IP for like tracking
       const visitorIp = await getVisitorIp();
-      const userAgent = navigator.userAgent || '';
+      const userAgent = navigator.userAgent || "";
 
-      const result = await commentService.toggleLike(commentId, visitorIp, userAgent);
-      
+      const result = await commentService.toggleLike(
+        commentId,
+        visitorIp,
+        userAgent,
+      );
+
       if (result.success) {
         // Update local comment state
-        setComments(prev => 
-          prev.map(comment => 
-            comment.id === commentId 
-              ? { 
-                  ...comment, 
-                  like_count: result.liked 
-                    ? (comment.like_count || 0) + 1 
-                    : Math.max((comment.like_count || 0) - 1, 0)
+        setComments((prev) =>
+          prev.map((comment) =>
+            comment.id === commentId
+              ? {
+                  ...comment,
+                  like_count: result.liked
+                    ? (comment.like_count || 0) + 1
+                    : Math.max((comment.like_count || 0) - 1, 0),
                 }
-              : comment
-          )
+              : comment,
+          ),
         );
       }
     } catch (error) {
-      console.log('Failed to toggle comment like:', error);
+      console.error("Failed to toggle comment like:", error);
     }
   };
 
   // Get visitor IP helper function
   const getVisitorIp = async () => {
     try {
-      const response = await fetch('https://api.ipify.org?format=json');
+      const response = await fetch("https://api.ipify.org?format=json");
       const data = await response.json();
-      return data.ip || 'unknown';
+      return data.ip || "unknown";
     } catch (error) {
       return `fallback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Unknown date';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    if (!dateString) return "Unknown date";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -258,9 +273,18 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
         {!isAdmin && (
           <Helmet>
             <title>{formData.meta_title || post.title}</title>
-            <meta name="description" content={formData.meta_description || post.excerpt || ''} />
-            <meta property="og:title" content={formData.meta_title || post.title} />
-            <meta property="og:description" content={formData.meta_description || post.excerpt || ''} />
+            <meta
+              name="description"
+              content={formData.meta_description || post.excerpt || ""}
+            />
+            <meta
+              property="og:title"
+              content={formData.meta_title || post.title}
+            />
+            <meta
+              property="og:description"
+              content={formData.meta_description || post.excerpt || ""}
+            />
             <meta property="og:url" content={`${SITE_URL}/blog/${post.slug}`} />
             <link rel="canonical" href={`${SITE_URL}/blog/${post.slug}`} />
             <meta name="twitter:card" content="summary_large_image" />
@@ -269,7 +293,7 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
           </Helmet>
         )}
         {/* Backdrop */}
-        <div 
+        <div
           className="fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity"
           onClick={onClose}
         ></div>
@@ -279,7 +303,11 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-border-accent/20">
             <h2 className="font-heading font-bold text-xl text-text-primary">
-              {isAdmin ? (post.id ? 'Edit Blog Post' : 'Create Blog Post') : post.title}
+              {isAdmin
+                ? post.id
+                  ? "Edit Blog Post"
+                  : "Create Blog Post"
+                : post.title}
             </h2>
             <Button
               variant="ghost"
@@ -400,15 +428,23 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                   <Button variant="ghost" onClick={onClose} disabled={loading}>
                     Cancel
                   </Button>
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     onClick={handleSave}
-                    disabled={loading || !formData.title.trim() || !formData.content.trim()}
+                    disabled={
+                      loading ||
+                      !formData.title.trim() ||
+                      !formData.content.trim()
+                    }
                     iconName={loading ? "Loader2" : "Save"}
                     iconPosition="left"
                     className={loading ? "animate-spin" : ""}
                   >
-                    {loading ? 'Saving...' : (post.id ? 'Update Post' : 'Create Post')}
+                    {loading
+                      ? "Saving..."
+                      : post.id
+                        ? "Update Post"
+                        : "Create Post"}
                   </Button>
                 </div>
               </div>
@@ -431,11 +467,17 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-1">
                       <Icon name="Calendar" size={16} />
-                      <span>{formatDate(post.published_at || post.created_at)}</span>
+                      <span>
+                        {formatDate(post.published_at || post.created_at)}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Icon name="User" size={16} />
-                      <span>{post.author?.full_name || post.author || 'Unknown Author'}</span>
+                      <span>
+                        {post.author?.full_name ||
+                          post.author ||
+                          "Unknown Author"}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Icon name="Clock" size={16} />
@@ -464,7 +506,7 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                 {/* Tags */}
                 {formData.tags && (
                   <div className="flex flex-wrap gap-2 mb-8">
-                    {formData.tags.split(',').map((tag, index) => (
+                    {formData.tags.split(",").map((tag, index) => (
                       <span
                         key={index}
                         className="px-3 py-1 bg-accent/10 text-accent text-sm rounded-full"
@@ -481,9 +523,9 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                     <div className="flex items-center space-x-2 text-sm text-text-secondary">
                       <Icon name="ExternalLink" size={16} />
                       <span>Source:</span>
-                      <a 
-                        href={post.source_url} 
-                        target="_blank" 
+                      <a
+                        href={post.source_url}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:text-secondary underline"
                       >
@@ -494,35 +536,55 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                 )}
 
                 {/* Comments Section - Only for published posts */}
-                {post.status === 'published' && (
+                {post.status === "published" && (
                   <div className="border-t border-border-accent/20 pt-8">
                     <h3 className="font-heading font-semibold text-lg text-text-primary mb-6">
                       Comments ({comments.length})
                     </h3>
 
                     {/* Add Comment Form */}
-                    <form onSubmit={handleCommentSubmit} className="mb-8 p-4 bg-background/50 rounded-lg">
-                      <h4 className="font-medium text-text-primary mb-4">Leave a Comment</h4>
-                      
+                    <form
+                      onSubmit={handleCommentSubmit}
+                      className="mb-8 p-4 bg-background/50 rounded-lg"
+                    >
+                      <h4 className="font-medium text-text-primary mb-4">
+                        Leave a Comment
+                      </h4>
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <Input
                           type="text"
                           placeholder="Your name *"
                           value={newComment.author_name}
-                          onChange={(e) => setNewComment(prev => ({ ...prev, author_name: e.target.value }))}
+                          onChange={(e) =>
+                            setNewComment((prev) => ({
+                              ...prev,
+                              author_name: e.target.value,
+                            }))
+                          }
                           required
                         />
                         <Input
                           type="email"
                           placeholder="Your email"
                           value={newComment.author_email}
-                          onChange={(e) => setNewComment(prev => ({ ...prev, author_email: e.target.value }))}
+                          onChange={(e) =>
+                            setNewComment((prev) => ({
+                              ...prev,
+                              author_email: e.target.value,
+                            }))
+                          }
                         />
                       </div>
 
                       <textarea
                         value={newComment.content}
-                        onChange={(e) => setNewComment(prev => ({ ...prev, content: e.target.value }))}
+                        onChange={(e) =>
+                          setNewComment((prev) => ({
+                            ...prev,
+                            content: e.target.value,
+                          }))
+                        }
                         placeholder="Share your thoughts..."
                         rows={4}
                         className="w-full px-3 py-2 bg-background border border-border-accent/40 rounded-lg text-text-primary placeholder-text-secondary focus:border-primary/60 focus:outline-none resize-none mb-4"
@@ -535,10 +597,15 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                           type="checkbox"
                           id="newsletter"
                           checked={newsletterSignup}
-                          onChange={(e) => setNewsletterSignup(e.target.checked)}
+                          onChange={(e) =>
+                            setNewsletterSignup(e.target.checked)
+                          }
                           className="rounded border-border-accent/40 text-primary focus:ring-primary"
                         />
-                        <label htmlFor="newsletter" className="text-sm text-text-secondary">
+                        <label
+                          htmlFor="newsletter"
+                          className="text-sm text-text-secondary"
+                        >
                           Subscribe to our newsletter for updates
                         </label>
                       </div>
@@ -547,12 +614,16 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                         <Button
                           type="submit"
                           variant="primary"
-                          disabled={commentLoading || !newComment.content.trim() || !newComment.author_name.trim()}
+                          disabled={
+                            commentLoading ||
+                            !newComment.content.trim() ||
+                            !newComment.author_name.trim()
+                          }
                           iconName={commentLoading ? "Loader2" : "Send"}
                           iconPosition="left"
                           className={commentLoading ? "animate-spin" : ""}
                         >
-                          {commentLoading ? 'Posting...' : 'Post Comment'}
+                          {commentLoading ? "Posting..." : "Post Comment"}
                         </Button>
                       </div>
                     </form>
@@ -561,16 +632,29 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                     <div className="space-y-6">
                       {commentLoading ? (
                         <div className="flex items-center justify-center py-8">
-                          <Icon name="Loader2" size={24} className="animate-spin text-primary" />
-                          <span className="ml-2 text-text-secondary">Loading comments...</span>
+                          <Icon
+                            name="Loader2"
+                            size={24}
+                            className="animate-spin text-primary"
+                          />
+                          <span className="ml-2 text-text-secondary">
+                            Loading comments...
+                          </span>
                         </div>
                       ) : comments.length > 0 ? (
                         comments.map((comment) => (
-                          <div key={comment.id} className="bg-background/50 rounded-lg p-4">
+                          <div
+                            key={comment.id}
+                            className="bg-background/50 rounded-lg p-4"
+                          >
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center space-x-2">
                                 <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                                  <Icon name="User" size={16} className="text-primary" />
+                                  <Icon
+                                    name="User"
+                                    size={16}
+                                    className="text-primary"
+                                  />
                                 </div>
                                 <span className="font-medium text-text-primary text-sm">
                                   {comment.author_name}
@@ -580,7 +664,7 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                                 {formatDate(comment.created_at)}
                               </span>
                             </div>
-                            
+
                             <p className="text-text-primary text-sm mb-3 leading-relaxed">
                               {comment.content}
                             </p>
@@ -595,7 +679,7 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                               >
                                 {comment.like_count || 0}
                               </Button>
-                              
+
                               <Button
                                 variant="ghost"
                                 size="xs"
@@ -615,33 +699,52 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                                     type="text"
                                     placeholder="Your name *"
                                     value={replyData.author_name}
-                                    onChange={(e) => setReplyData(prev => ({ ...prev, author_name: e.target.value }))}
+                                    onChange={(e) =>
+                                      setReplyData((prev) => ({
+                                        ...prev,
+                                        author_name: e.target.value,
+                                      }))
+                                    }
                                     size="sm"
                                   />
                                   <Input
                                     type="email"
                                     placeholder="Your email"
                                     value={replyData.author_email}
-                                    onChange={(e) => setReplyData(prev => ({ ...prev, author_email: e.target.value }))}
+                                    onChange={(e) =>
+                                      setReplyData((prev) => ({
+                                        ...prev,
+                                        author_email: e.target.value,
+                                      }))
+                                    }
                                     size="sm"
                                   />
                                 </div>
-                                
+
                                 <textarea
                                   value={replyData.content}
-                                  onChange={(e) => setReplyData(prev => ({ ...prev, content: e.target.value }))}
+                                  onChange={(e) =>
+                                    setReplyData((prev) => ({
+                                      ...prev,
+                                      content: e.target.value,
+                                    }))
+                                  }
                                   placeholder="Write a reply..."
                                   rows={3}
                                   className="w-full px-3 py-2 bg-background border border-border-accent/40 rounded-lg text-text-primary placeholder-text-secondary focus:border-primary/60 focus:outline-none resize-none text-sm mb-3"
                                 />
-                                
+
                                 <div className="flex justify-end space-x-2">
                                   <Button
                                     variant="ghost"
                                     size="xs"
                                     onClick={() => {
                                       setReplyTo(null);
-                                      setReplyData({ author_name: '', author_email: '', content: '' });
+                                      setReplyData({
+                                        author_name: "",
+                                        author_email: "",
+                                        content: "",
+                                      });
                                     }}
                                   >
                                     Cancel
@@ -649,8 +752,14 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                                   <Button
                                     variant="primary"
                                     size="xs"
-                                    onClick={() => handleReplySubmit(comment.id)}
-                                    disabled={commentLoading || !replyData.content.trim() || !replyData.author_name.trim()}
+                                    onClick={() =>
+                                      handleReplySubmit(comment.id)
+                                    }
+                                    disabled={
+                                      commentLoading ||
+                                      !replyData.content.trim() ||
+                                      !replyData.author_name.trim()
+                                    }
                                   >
                                     Reply
                                   </Button>
@@ -660,11 +769,18 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
 
                             {/* Replies */}
                             {comment.replies?.map((reply) => (
-                              <div key={reply.id} className="ml-6 mt-4 bg-surface/50 rounded-lg p-3">
+                              <div
+                                key={reply.id}
+                                className="ml-6 mt-4 bg-surface/50 rounded-lg p-3"
+                              >
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center space-x-2">
                                     <div className="w-6 h-6 bg-secondary/20 rounded-full flex items-center justify-center">
-                                      <Icon name="User" size={12} className="text-secondary" />
+                                      <Icon
+                                        name="User"
+                                        size={12}
+                                        className="text-secondary"
+                                      />
                                     </div>
                                     <span className="font-medium text-text-primary text-xs">
                                       {reply.author_name}
@@ -683,9 +799,14 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                         ))
                       ) : (
                         <div className="text-center py-8">
-                          <Icon name="MessageCircle" size={32} className="mx-auto mb-2 text-text-secondary" />
+                          <Icon
+                            name="MessageCircle"
+                            size={32}
+                            className="mx-auto mb-2 text-text-secondary"
+                          />
                           <p className="text-text-secondary text-sm">
-                            No comments yet. Be the first to share your thoughts!
+                            No comments yet. Be the first to share your
+                            thoughts!
                           </p>
                         </div>
                       )}

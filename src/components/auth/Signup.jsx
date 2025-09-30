@@ -1,44 +1,46 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
+import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Signup = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    fullName: ''
+    email: "",
+    password: "",
+    confirmPassword: "",
+    fullName: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    setError(''); // Clear error when user types
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setError(""); // Clear error when user types
   };
 
   const validateForm = () => {
-    if (!formData.email || !formData.password || !formData.confirmPassword || !formData.fullName) {
-      setError('All fields are required');
+    if (
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword ||
+      !formData.fullName
+    ) {
+      setError("All fields are required");
       return false;
     }
 
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long');
+      setError("Password must be at least 8 characters long");
       return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return false;
     }
 
@@ -47,18 +49,18 @@ const Signup = ({ onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const result = await signUp(formData.email, formData.password, {
         full_name: formData.fullName,
-        role: 'admin'
+        role: "admin",
       });
 
       if (result.success) {
@@ -66,14 +68,14 @@ const Signup = ({ onClose, onSuccess }) => {
         setTimeout(() => {
           onSuccess?.();
           onClose?.();
-          navigate('/admin-dashboard-content-management');
+          navigate("/admin-dashboard-content-management");
         }, 2000);
       } else {
-        setError(result.error || 'Signup failed');
+        setError(result.error || "Signup failed");
       }
     } catch (error) {
-      setError('An unexpected error occurred');
-      console.log('Signup error:', error);
+      setError("An unexpected error occurred");
+      console.log("Signup error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -121,14 +123,17 @@ const Signup = ({ onClose, onSuccess }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-text-primary mb-2">
+            <label
+              htmlFor="fullName"
+              className="block text-sm font-medium text-text-primary mb-2"
+            >
               Full Name
             </label>
             <Input
               id="fullName"
               type="text"
               value={formData.fullName}
-              onChange={(e) => handleChange('fullName', e.target.value)}
+              onChange={(e) => handleChange("fullName", e.target.value)}
               placeholder="Mikael Kraft"
               required
               autoComplete="name"
@@ -138,14 +143,17 @@ const Signup = ({ onClose, onSuccess }) => {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-text-primary mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-text-primary mb-2"
+            >
               Email Address
             </label>
             <Input
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
+              onChange={(e) => handleChange("email", e.target.value)}
               placeholder="admin@wisdomintech.dev"
               required
               autoComplete="email"
@@ -155,15 +163,18 @@ const Signup = ({ onClose, onSuccess }) => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-text-primary mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-text-primary mb-2"
+            >
               Password
             </label>
             <div className="relative">
               <Input
                 id="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
+                onChange={(e) => handleChange("password", e.target.value)}
                 placeholder="Create a strong password"
                 required
                 autoComplete="new-password"
@@ -189,15 +200,20 @@ const Signup = ({ onClose, onSuccess }) => {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-primary mb-2">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-text-primary mb-2"
+            >
               Confirm Password
             </label>
             <div className="relative">
               <Input
                 id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
+                type={showConfirmPassword ? "text" : "password"}
                 value={formData.confirmPassword}
-                onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                onChange={(e) =>
+                  handleChange("confirmPassword", e.target.value)
+                }
                 placeholder="Confirm your password"
                 required
                 autoComplete="new-password"
@@ -228,7 +244,8 @@ const Signup = ({ onClose, onSuccess }) => {
                 disabled={isLoading}
               />
               <span className="ml-2 text-text-secondary">
-                I agree to the terms of service and privacy policy for this portfolio admin system
+                I agree to the terms of service and privacy policy for this
+                portfolio admin system
               </span>
             </label>
           </div>
@@ -238,10 +255,10 @@ const Signup = ({ onClose, onSuccess }) => {
             variant="primary"
             className="w-full shadow-glow-primary"
             disabled={isLoading}
-            iconName={isLoading ? 'Loader2' : 'UserPlus'}
+            iconName={isLoading ? "Loader2" : "UserPlus"}
             iconPosition="left"
           >
-            {isLoading ? 'Creating Account...' : 'Create Admin Account'}
+            {isLoading ? "Creating Account..." : "Create Admin Account"}
           </Button>
         </form>
 

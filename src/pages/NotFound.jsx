@@ -1,21 +1,19 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Button from 'components/ui/Button';
-import Icon from 'components/AppIcon';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const NotFound = () => {
   const navigate = useNavigate();
 
   const handleGoHome = () => {
-    navigate('/');
+    navigate("/");
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       window.__SUPPRESS_CANONICAL = true;
     }
     return () => {
-      if (typeof window !== 'undefined') delete window.__SUPPRESS_CANONICAL;
+      if (typeof window !== "undefined") delete window.__SUPPRESS_CANONICAL;
     };
   }, []);
 
@@ -28,7 +26,9 @@ const NotFound = () => {
           </div>
         </div>
 
-        <h2 className="text-2xl font-medium text-onBackground mb-2">Page Not Found</h2>
+        <h2 className="text-2xl font-medium text-onBackground mb-2">
+          Page Not Found
+        </h2>
         <p className="text-onBackground/70 mb-8">
           The page you're looking for doesn't exist. Let's get you back!
         </p>

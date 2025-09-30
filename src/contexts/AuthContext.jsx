@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import authService from "../utils/authService";
 
 const AuthContext = createContext();
@@ -20,11 +20,26 @@ export function AuthProvider({ children }) {
 
         // Dev-only admin bootstrap: if dev_admin flag is present, synthesize admin user/profile
         try {
-          const isDev = typeof import.meta !== 'undefined' && import.meta && import.meta.env && import.meta.env.DEV;
-          if (isDev && typeof window !== 'undefined' && window.localStorage.getItem('dev_admin') === 'true') {
-            const email = window.localStorage.getItem('dev_admin_email') || 'admin@local.dev';
-            const syntheticUser = { id: 'dev-admin', email };
-            const syntheticProfile = { id: 'dev-admin', email, full_name: 'Dev Admin', role: 'admin' };
+          const isDev =
+            typeof import.meta !== "undefined" &&
+            import.meta &&
+            import.meta.env &&
+            import.meta.env.DEV;
+          if (
+            isDev &&
+            typeof window !== "undefined" &&
+            window.localStorage.getItem("dev_admin") === "true"
+          ) {
+            const email =
+              window.localStorage.getItem("dev_admin_email") ||
+              "admin@local.dev";
+            const syntheticUser = { id: "dev-admin", email };
+            const syntheticProfile = {
+              id: "dev-admin",
+              email,
+              full_name: "Dev Admin",
+              role: "admin",
+            };
             if (isMounted) {
               setUser(syntheticUser);
               setUserProfile(syntheticProfile);
@@ -56,7 +71,7 @@ export function AuthProvider({ children }) {
       } catch (error) {
         if (isMounted) {
           setAuthError("Failed to initialize authentication");
-          console.log("Auth initialization error:", error);
+          console.error("Auth initialization error:", error);
         }
       } finally {
         if (isMounted) {
@@ -115,7 +130,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       const errorMsg = "Something went wrong during login. Please try again.";
       setAuthError(errorMsg);
-      console.log("Sign in error:", error);
+      console.error("Sign in error:", error);
       return { success: false, error: errorMsg };
     }
   };
@@ -137,7 +152,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       const errorMsg = "Something went wrong during signup. Please try again.";
       setAuthError(errorMsg);
-      console.log("Sign up error:", error);
+      console.error("Sign up error:", error);
       return { success: false, error: errorMsg };
     }
   };
@@ -155,9 +170,10 @@ export function AuthProvider({ children }) {
 
       return { success: true, data: result.data };
     } catch (error) {
-      const errorMsg = "Something went wrong during OAuth login. Please try again.";
+      const errorMsg =
+        "Something went wrong during OAuth login. Please try again.";
       setAuthError(errorMsg);
-      console.log("OAuth sign in error:", error);
+      console.error("OAuth sign in error:", error);
       return { success: false, error: errorMsg };
     }
   };
@@ -177,7 +193,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       const errorMsg = "Something went wrong during logout. Please try again.";
       setAuthError(errorMsg);
-      console.log("Sign out error:", error);
+      console.error("Sign out error:", error);
       return { success: false, error: errorMsg };
     }
   };
@@ -206,7 +222,7 @@ export function AuthProvider({ children }) {
       const errorMsg =
         "Something went wrong updating profile. Please try again.";
       setAuthError(errorMsg);
-      console.log("Update profile error:", error);
+      console.error("Update profile error:", error);
       return { success: false, error: errorMsg };
     }
   };
@@ -227,7 +243,7 @@ export function AuthProvider({ children }) {
       const errorMsg =
         "Something went wrong sending reset email. Please try again.";
       setAuthError(errorMsg);
-      console.log("Reset password error:", error);
+      console.error("Reset password error:", error);
       return { success: false, error: errorMsg };
     }
   };
