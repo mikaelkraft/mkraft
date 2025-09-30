@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import projectService from "../../utils/projectService";
 import blogService from "../../utils/blogService";
 import slideService from "../../utils/slideService";
@@ -210,7 +210,7 @@ const AdminDashboardContentManagement = () => {
 
   const [moderationFilter, setModerationFilter] = useState("pending");
 
-  const loadModeration = async () => {
+  const loadModeration = useCallback(async () => {
     try {
       setModerationLoading(true);
       const base = import.meta.env.VITE_API_BASE_URL || "/api";
@@ -226,7 +226,12 @@ const AdminDashboardContentManagement = () => {
     } finally {
       setModerationLoading(false);
     }
-  };
+  }, [moderationFilter]);
+
+  useEffect(() => {
+    // Load moderation whenever filter changes (initial + subsequent)
+    loadModeration();
+  }, [loadModeration]);
 
   const handleModerationApproveToggle = async (id, next) => {
     try {
@@ -640,7 +645,6 @@ const AdminDashboardContentManagement = () => {
                   value={moderationFilter}
                   onChange={(e) => {
                     setModerationFilter(e.target.value);
-                    setTimeout(loadModeration, 0);
                   }}
                   className="bg-surface border border-border-accent/30 rounded px-2 py-1 text-sm"
                 >

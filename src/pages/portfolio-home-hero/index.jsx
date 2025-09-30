@@ -1,39 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
-import HeaderNavigation from '../../components/ui/HeaderNavigation';
-import HeroSection from './components/HeroSection';
-import ProjectCarousel from './components/ProjectCarousel';
-import ProjectShowcase from './components/ProjectShowcase';
-import TechStackGrid from './components/TechStackGrid';
-import VisitorInfoPanel from './components/VisitorInfoPanel';
-import SocialMediaGrid from './components/SocialMediaGrid';
-import FeaturedBlogPosts from './components/FeaturedBlogPosts';
-import NewsletterSubscription from './components/NewsletterSubscription';
-import ThemeControls from './components/ThemeControls';
-import DynamicFooter from './components/DynamicFooter';
-import settingsService from '../../utils/settingsService';
+import { useState, useEffect } from "react";
+// import HeaderNavigation from '../../components/ui/HeaderNavigation';
+// import HeroSection from './components/HeroSection';
+// import ProjectCarousel from './components/ProjectCarousel';
+// import ProjectShowcase from './components/ProjectShowcase';
+// import TechStackGrid from './components/TechStackGrid';
+// import VisitorInfoPanel from './components/VisitorInfoPanel';
+// import SocialMediaGrid from './components/SocialMediaGrid';
+// import FeaturedBlogPosts from './components/FeaturedBlogPosts';
+// import NewsletterSubscription from './components/NewsletterSubscription';
+// import ThemeControls from './components/ThemeControls';
+// import DynamicFooter from './components/DynamicFooter';
+import settingsService from "../../utils/settingsService";
 
 const PortfolioHomeHero = () => {
-  const [currentTheme, setCurrentTheme] = useState('cyberpunk');
-  const [fontSize, setFontSize] = useState('medium');
+  const [currentTheme, setCurrentTheme] = useState("cyberpunk");
+  const [fontSize, setFontSize] = useState("medium");
   const [isThemeControlsOpen, setIsThemeControlsOpen] = useState(false);
-  const [heroVideoUrl, setHeroVideoUrl] = useState('');
+  const [heroVideoUrl, setHeroVideoUrl] = useState("");
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [techStack, setTechStack] = useState([]);
 
   // Apply theme and font size to document
   useEffect(() => {
     const root = document.documentElement;
-    
+
     // Apply theme classes
     root.className = `theme-${currentTheme}`;
-    
+
     // Apply font size
     const fontSizeMap = {
-      small: '14px',
-      medium: '16px',
-      large: '18px',
-      xlarge: '20px'
+      small: "14px",
+      medium: "16px",
+      large: "18px",
+      xlarge: "20px",
     };
     root.style.fontSize = fontSizeMap[fontSize];
   }, [currentTheme, fontSize]);
@@ -46,13 +45,15 @@ const PortfolioHomeHero = () => {
       if (!mounted || !res.success) return;
       const stg = res.data || {};
       const ui = stg.ui_settings || {};
-  if (stg.default_theme) setCurrentTheme(stg.default_theme);
-  if (stg.default_font_size) setFontSize(stg.default_font_size);
-  setVideoEnabled(stg.enable_video !== false);
-  if (ui.hero_video_url) setHeroVideoUrl(ui.hero_video_url);
-  if (Array.isArray(ui.tech_stack)) setTechStack(ui.tech_stack);
+      if (stg.default_theme) setCurrentTheme(stg.default_theme);
+      if (stg.default_font_size) setFontSize(stg.default_font_size);
+      setVideoEnabled(stg.enable_video !== false);
+      if (ui.hero_video_url) setHeroVideoUrl(ui.hero_video_url);
+      if (Array.isArray(ui.tech_stack)) setTechStack(ui.tech_stack);
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleThemeChange = (theme) => {
@@ -72,38 +73,25 @@ const PortfolioHomeHero = () => {
   };
 
   const getBackgroundClass = () => {
-    switch(currentTheme) {
-      case 'dark':
-        return 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800';
-      case 'neural':
-        return 'bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900';
-      case 'futuristic':
-        return 'bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900';
-      case 'light':
-        return 'bg-gradient-to-br from-gray-50 via-white to-blue-50';
+    switch (currentTheme) {
+      case "dark":
+        return "bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800";
+      case "neural":
+        return "bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900";
+      case "futuristic":
+        return "bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900";
+      case "light":
+        return "bg-gradient-to-br from-gray-50 via-white to-blue-50";
       default: // cyberpunk
-        return 'bg-gradient-to-br from-background via-surface to-background';
+        return "bg-gradient-to-br from-background via-surface to-background";
     }
   };
 
   return (
     <>
-      <Helmet>
-  <title>Mikael Kraft - Full Stack Developer & Cybersecurity Expert | WisdomInTech</title>
-        <meta name="description" content="Explore Mikael Kraft's portfolio showcasing expertise in full-stack development, blockchain, AI/ML, and cybersecurity. Discover innovative projects and cutting-edge solutions." />
-        <meta name="keywords" content="Mikael Kraft, Full Stack Developer, Cybersecurity, Blockchain, React, Node.js, Python, Portfolio, Web Development" />
-        <meta name="author" content="Mikael Kraft" />
-  <meta property="og:title" content="Mikael Kraft - WisdomInTech" />
-        <meta property="og:description" content="Full Stack Developer & Cybersecurity Expert crafting digital experiences at the intersection of innovation and security." />
-    <meta property="og:image" content="/assets/images/no_image.png" />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://mkraft.tech" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:creator" content="@mikael_kraft" />
-        <link rel="canonical" href="https://mkraft.tech/portfolio-home-hero" />
-      </Helmet>
-
-      <div className={`min-h-screen ${getBackgroundClass()} relative overflow-x-hidden`}>
+      <div
+        className={`min-h-screen ${getBackgroundClass()} relative overflow-x-hidden`}
+      >
         {/* Optional Hero Background Video */}
         {videoEnabled && heroVideoUrl && (
           <video
@@ -116,8 +104,8 @@ const PortfolioHomeHero = () => {
           />
         )}
         {/* Header Navigation */}
-        <HeaderNavigation 
-          onThemeControlsToggle={handleThemeControlsToggle} 
+        <HeaderNavigation
+          onThemeControlsToggle={handleThemeControlsToggle}
           currentTheme={currentTheme}
         />
 
@@ -162,7 +150,7 @@ const PortfolioHomeHero = () => {
         <DynamicFooter currentTheme={currentTheme} />
 
         {/* Background Effects */}
-        {currentTheme !== 'light' && (
+        {currentTheme !== "light" && (
           <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
             <div className="absolute top-0 left-0 w-full h-full cyber-grid opacity-5"></div>
             <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
@@ -178,7 +166,10 @@ const PortfolioHomeHero = () => {
             onClick={handleThemeControlsToggle}
             className={`
               w-12 h-12 rounded-full flex items-center justify-center transition-all duration-fast
-              ${currentTheme === 'light' ?'bg-blue-600 text-white hover:bg-blue-700 shadow-lg' :'bg-primary text-background hover:bg-primary/90 glow-primary'
+              ${
+                currentTheme === "light"
+                  ? "bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
+                  : "bg-primary text-background hover:bg-primary/90 glow-primary"
               }
               hover:scale-110 opacity-80 hover:opacity-100
             `}
@@ -201,10 +192,13 @@ const PortfolioHomeHero = () => {
 
           {/* Scroll to Top Button */}
           <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className={`
               w-12 h-12 rounded-full flex items-center justify-center transition-all duration-fast
-              ${currentTheme === 'light' ?'bg-gray-600 text-white hover:bg-gray-700 shadow-lg' :'bg-surface text-primary hover:bg-surface/90 border border-primary/30'
+              ${
+                currentTheme === "light"
+                  ? "bg-gray-600 text-white hover:bg-gray-700 shadow-lg"
+                  : "bg-surface text-primary hover:bg-surface/90 border border-primary/30"
               }
               hover:scale-110 opacity-80 hover:opacity-100
             `}

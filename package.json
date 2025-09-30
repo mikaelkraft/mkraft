@@ -55,7 +55,9 @@
     "commit:lint": "node scripts/verify-commit-msg.js",
     "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s || true",
     "changelog:minor": "npm run changelog",
-    "release:preview": "npm run changelog && tail -n 40 CHANGELOG.md"
+    "release:preview": "npm run changelog && tail -n 40 CHANGELOG.md",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js,.jsx --fix"
   },
   "eslintConfig": {
     "extends": [

@@ -1,5 +1,9 @@
+echo "husky - DEPRECATED
+
+Please remove the following two lines from $0:
+
 #!/usr/bin/env sh
-# This file kept intentionally minimal for backward compatibility.
-# Hooks have been updated to NOT source this file anymore.
-# Safe no-op (prevents accidental "DEPRECATED" echo when legacy reference remains).
-exit 0
+. \"\$(dirname -- \"\$0\")/_/husky.sh\"
+
+They WILL FAIL in v10.0.0
+"

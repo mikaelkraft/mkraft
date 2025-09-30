@@ -1,3 +1,4 @@
+// needed for potential older JSX transform
 import { describe, it, expect, vi } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 
@@ -18,7 +19,7 @@ vi.mock("../src/utils/settingsService.js", () => ({
 
 describe("OGMeta per-post override", () => {
   it("prefers override image over settings fallback", async () => {
-    const { container } = render(
+    render(
       <HelmetProvider>
         <OGMeta
           title="Example"
