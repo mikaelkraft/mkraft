@@ -30,7 +30,7 @@ const DevOtpBanner = () => {
       const value = window.localStorage.getItem("dev_admin_code") || code || "";
       if (!value) return;
       await navigator.clipboard.writeText(value);
-      console.log("Copied dev OTP code to clipboard");
+      console.warn("Copied dev OTP code to clipboard");
     } catch (error) {
       console.error("Error copying OTP code:", error);
     }

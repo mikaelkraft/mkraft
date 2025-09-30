@@ -34,7 +34,8 @@ class CommentService {
       );
 
       return { success: true, data: commentsWithReplies };
-    } catch (error) {
+    } catch (_error) {
+      const error = _error; // alias for readability when constructing messages
       if (
         error?.message?.includes("Failed to fetch") ||
         error?.message?.includes("NetworkError") ||
@@ -65,7 +66,8 @@ class CommentService {
       }
 
       return { success: true, data: data || [] };
-    } catch (error) {
+    } catch (_error) {
+      const error = _error;
       if (
         error?.message?.includes("Failed to fetch") ||
         error?.message?.includes("NetworkError") ||
@@ -124,7 +126,8 @@ class CommentService {
       await this.updateCommentCount(commentData.blog_post_id);
 
       return { success: true, data };
-    } catch (error) {
+    } catch (_error) {
+      const error = _error;
       if (
         error?.message?.includes("Failed to fetch") ||
         error?.message?.includes("NetworkError") ||
@@ -350,11 +353,11 @@ class CommentService {
       }
 
       return { success: true, data };
-    } catch (error) {
+    } catch (_error) {
       if (
-        error?.message?.includes("Failed to fetch") ||
-        error?.message?.includes("NetworkError") ||
-        (error?.name === "TypeError" && error?.message?.includes("fetch"))
+        _error?.message?.includes("Failed to fetch") ||
+        _error?.message?.includes("NetworkError") ||
+        (_error?.name === "TypeError" && _error?.message?.includes("fetch"))
       ) {
         return {
           success: false,
@@ -388,8 +391,7 @@ class CommentService {
         .update({ comment_count: commentCount })
         .eq("id", blogPostId);
     } catch (_error) {
-      // Silently fail comment count update (non critical)
-      console.warn("Failed to update comment count:", _error);
+      console.warn("Failed to update comment count:", _error); // Removed unused variable
     }
   }
 
@@ -400,7 +402,7 @@ class CommentService {
       const response = await fetch("https://api.ipify.org?format=json");
       const data = await response.json();
       return data.ip || "unknown";
-    } catch (error) {
+    } catch {
       // Fallback to a simple hash of user agent and timestamp
       const fallback = `${navigator.userAgent || "unknown"}-${Date.now()}`;
       return btoa(fallback).substring(0, 15);

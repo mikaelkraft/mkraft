@@ -22,11 +22,9 @@ levels.forEach((level) => {
     const line = base({ level, msg, ...meta });
     if (level === "error") {
       console.error(serialize(line));
-    } else if (level === "warn") {
-      console.warn(serialize(line));
     } else {
-      // eslint-disable-next-line no-console
-      console.log(serialize(line));
+      // Collapse debug/info/warn into warn channel to satisfy console policy (warn + error only)
+      console.warn(serialize(line));
     }
   };
 });

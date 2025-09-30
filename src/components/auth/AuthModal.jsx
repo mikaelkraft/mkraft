@@ -1,8 +1,6 @@
-import { useState } from "react";
+// Auth modal (login only)
 
-const AuthModal = ({ isOpen, onClose, defaultMode = "login" }) => {
-  const [mode, setMode] = useState("login");
-
+const AuthModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const handleSuccess = () => {

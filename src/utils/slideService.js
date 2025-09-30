@@ -278,7 +278,7 @@ class SlideService {
         return { success: false, error: "Slide not found" };
       }
 
-      const currentOrder = currentSlide.display_order;
+      const _currentOrder = currentSlide.display_order; // prefixed underscore to signal intentional non-use
 
       // Get all slides to reorder
       const { data: allSlides } = await supabase

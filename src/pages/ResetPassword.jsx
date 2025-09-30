@@ -28,7 +28,7 @@ const ResetPassword = () => {
           return;
         }
         if (mounted) setStatus("ready");
-      } catch (e) {
+      } catch {
         if (mounted) {
           setStatus("error");
           setError("Something went wrong initializing password reset.");
@@ -59,7 +59,7 @@ const ResetPassword = () => {
       }
       setStatus("done");
       setTimeout(() => navigate("/admin-dashboard-content-management"), 1500);
-    } catch (e) {
+    } catch {
       setError("Unexpected error while updating password.");
     }
   };
@@ -75,7 +75,7 @@ const ResetPassword = () => {
             Reset Password
           </h1>
           <p className="text-text-secondary text-sm mt-1">
-            Set a new password for your admin account.
+            Set a new password for your account.
           </p>
         </div>
 

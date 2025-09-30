@@ -19,7 +19,7 @@ class BlogService {
         search: q,
         limit: options.limit || 10,
       });
-    } catch (e) {
+    } catch {
       return { success: false, error: "Search failed" };
     }
   }
@@ -729,7 +729,7 @@ class BlogService {
         .sort((a, b) => b.__score - a.__score)
         .slice(0, 3);
       return { success: true, data: related };
-    } catch (e) {
+    } catch {
       return { success: false, error: "Failed to load related posts" };
     }
   }

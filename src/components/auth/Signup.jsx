@@ -75,7 +75,7 @@ const Signup = ({ onClose, onSuccess }) => {
       }
     } catch (error) {
       setError("An unexpected error occurred");
-      console.log("Signup error:", error);
+      console.error("Signup error:", error);
     } finally {
       setIsLoading(false);
     }

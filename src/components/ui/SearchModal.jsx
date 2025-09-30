@@ -142,7 +142,7 @@ const SearchModal = ({ isOpen, onClose, currentTheme }) => {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, [searchQuery, searchableContent]);
 
   const handleClose = () => {
     setSearchQuery("");

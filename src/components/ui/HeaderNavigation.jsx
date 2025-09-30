@@ -5,8 +5,6 @@ import useFeature from "hooks/useFeature";
 import { useNavigate } from "react-router-dom";
 
 const HeaderNavigation = ({
-  isAuthenticated = false,
-  onAuthToggle,
   onThemeControlsToggle,
   currentTheme = "cyberpunk",
 }) => {

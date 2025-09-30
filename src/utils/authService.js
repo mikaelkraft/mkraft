@@ -15,7 +15,7 @@ class AuthService {
         typeof window !== "undefined" &&
         ["localhost", "127.0.0.1"].includes(window.location.hostname);
       return !!(viteDev || isLocalhost);
-    } catch (_) {
+    } catch {
       return false;
     }
   }
@@ -126,7 +126,9 @@ class AuthService {
           window.localStorage.removeItem("dev_admin_email");
           window.localStorage.removeItem("dev_admin_code");
         }
-      } catch (_) {}
+      } catch {
+        // ignore dev cleanup errors
+      }
 
       return { success: true };
     } catch (error) {

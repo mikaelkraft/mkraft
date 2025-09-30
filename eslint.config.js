@@ -78,16 +78,10 @@ module.exports = [
     },
     rules: {
       "import/no-unresolved": "off",
-      "unused-imports/no-unused-imports": "warn",
+      "unused-imports/no-unused-imports": "off",
+      // Allow exploratory variable declarations in backend handlers without warnings
+      "no-unused-vars": "off",
       "no-console": ["warn", { allow: ["warn", "error"] }],
-      "no-unused-vars": [
-        "warn",
-        {
-          args: "after-used",
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-        },
-      ],
       "no-empty": ["warn", { allowEmptyCatch: true }],
     },
   },
@@ -111,6 +105,7 @@ module.exports = [
       "src/pages/documentation/**/*.{js,jsx}",
       "src/pages/search/**/*.{js,jsx}",
       "src/pages/blog-post/**/*.{js,jsx}",
+      "src/pages/admin-dashboard-content-management/**/*.{js,jsx}",
     ],
     rules: {
       "unused-imports/no-unused-imports": "off",

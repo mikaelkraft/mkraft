@@ -6,21 +6,21 @@ class ErrorBoundary extends React.Component {
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(_error) {
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
+    // Mark and forward to global handler if provided.
     error.__ErrorBoundary = true;
     window.__COMPONENT_ERROR__?.(error, errorInfo);
-    // console.log("Error caught by ErrorBoundary:", error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-          <div cl assName="text-center p-8 max-w-md">
+          <div className="text-center p-8 max-w-md">
             <div className="flex justify-center items-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

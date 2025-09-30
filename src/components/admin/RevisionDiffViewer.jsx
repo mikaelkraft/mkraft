@@ -33,7 +33,7 @@ export default function RevisionDiffViewer({ revisionId, onClose }) {
     return () => {
       mounted = false;
     };
-  }, [revisionId]);
+  }, [revisionId, base]); // include base for correct effect dependency completeness
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background/90 backdrop-blur p-6 overflow-hidden">

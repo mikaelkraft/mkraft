@@ -47,7 +47,9 @@ export function AuthProvider({ children }) {
               return; // Skip Supabase check
             }
           }
-        } catch (_) {}
+        } catch {
+          // ignore dev bootstrap errors
+        }
 
         const sessionResult = await authService.getSession();
 
