@@ -517,7 +517,7 @@ class BlogService {
       });
     } catch (error) {
       // Silently fail view count increment
-      console.log("Failed to increment view count:", error);
+      console.warn("Failed to increment blog view count:", error);
     }
   }
 

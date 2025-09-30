@@ -20,6 +20,26 @@ export default [
     ],
   },
   js.configs.recommended,
+  // Override for scaffold / placeholder heavy page directories to reduce noise from unused imports during staged development
+  {
+    files: [
+      "src/pages/blog-content-hub/**/*.{js,jsx}",
+      "src/pages/portfolio-home-hero/**/*.{js,jsx}",
+      "src/pages/projects-portfolio-grid/**/*.{js,jsx}",
+      "src/pages/project-detail/**/*.{js,jsx}",
+      "src/pages/documentation/**/*.{js,jsx}",
+      "src/pages/search/**/*.{js,jsx}",
+      "src/pages/blog-post/**/*.{js,jsx}",
+    ],
+    rules: {
+      // Temporarily suppress unused import noise for scaffolding files
+      "unused-imports/no-unused-imports": "off",
+      "no-unused-vars": [
+        "warn",
+        { varsIgnorePattern: "^[A-Z]|^_", argsIgnorePattern: "^_" },
+      ],
+    },
+  },
   // Front-end (React) files
   {
     files: ["src/**/*.{js,jsx}", "test/**/*.{js,jsx}"],
