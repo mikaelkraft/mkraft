@@ -1,12 +1,12 @@
-import { json, error, getUrl } from '../_lib/respond.js';
-import { query } from '../_lib/db.js';
+const { json, error, getUrl } = require("../_lib/respond.js");
+const { query } = require("../_lib/db.js");
 
 // GET /api/projects/by-id?id=uuid
-export default async function handler(req, res) {
+module.exports = async function (req, res) {
   try {
     const url = getUrl(req);
-    const id = url.searchParams.get('id');
-    if (!id) return error(res, 'id is required');
+    const id = url.searchParams.get("id");
+    if (!id) return error(res, "id is required");
 
     const sql = `
       SELECT p.*, 
@@ -18,9 +18,9 @@ export default async function handler(req, res) {
     `;
 
     const { rows } = await query(sql, [id]);
-    if (!rows || rows.length === 0) return error(res, 'Not found', 404);
+    if (!rows || rows.length === 0) return error(res, "Not found", 404);
     return json(res, rows[0]);
   } catch (e) {
-    return error(res, 'Failed to load project', 500, { detail: e.message });
+    return error(res, "Failed to load project", 500, { detail: e.message });
   }
-}
+};
