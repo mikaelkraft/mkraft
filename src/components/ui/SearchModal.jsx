@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 const SearchModal = ({ isOpen, onClose, currentTheme }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -6,63 +6,66 @@ const SearchModal = ({ isOpen, onClose, currentTheme }) => {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
 
-  // Mock search data - in real app, this would come from API
-  const searchableContent = [
-    {
-      type: "page",
-      title: "Home",
-      url: "/portfolio-home-hero",
-      description: "Portfolio homepage with projects and skills",
-    },
-    {
-      type: "page",
-      title: "Projects",
-      url: "/projects-portfolio-grid",
-      description: "Browse all portfolio projects",
-    },
-    {
-      type: "page",
-      title: "Blog",
-      url: "/blog-content-hub",
-      description: "Read blog posts and articles",
-    },
-    {
-      type: "page",
-      title: "Admin Dashboard",
-      url: "/admin-dashboard-content-management",
-      description: "Content management and settings",
-    },
-    {
-      type: "page",
-      title: "Documentation",
-      url: "/documentation",
-      description: "API documentation and usage guides",
-    },
-    {
-      type: "project",
-      title: "E-commerce Platform",
-      url: "/project/1",
-      description: "Full-stack e-commerce solution with React and Node.js",
-    },
-    {
-      type: "project",
-      title: "Mobile App Design",
-      url: "/project/2",
-      description: "UI/UX design for iOS and Android application",
-    },
-    {
-      type: "blog",
-      title: "React Best Practices",
-      url: "/blog/react-best-practices",
-      description: "Essential tips for React development",
-    },
-    {
-      type: "blog",
-      title: "Web Performance Optimization",
-      url: "/blog/web-performance",
-      description: "Techniques to improve website speed",
-    },
-  ];
+  // Mock search data - in real app, this would come from API (stable via useMemo)
+  const searchableContent = useMemo(
+    () => [
+      {
+        type: "page",
+        title: "Home",
+        url: "/portfolio-home-hero",
+        description: "Portfolio homepage with projects and skills",
+      },
+      {
+        type: "page",
+        title: "Projects",
+        url: "/projects-portfolio-grid",
+        description: "Browse all portfolio projects",
+      },
+      {
+        type: "page",
+        title: "Blog",
+        url: "/blog-content-hub",
+        description: "Read blog posts and articles",
+      },
+      {
+        type: "page",
+        title: "Admin Dashboard",
+        url: "/admin-dashboard-content-management",
+        description: "Content management and settings",
+      },
+      {
+        type: "page",
+        title: "Documentation",
+        url: "/documentation",
+        description: "API documentation and usage guides",
+      },
+      {
+        type: "project",
+        title: "E-commerce Platform",
+        url: "/project/1",
+        description: "Full-stack e-commerce solution with React and Node.js",
+      },
+      {
+        type: "project",
+        title: "Mobile App Design",
+        url: "/project/2",
+        description: "UI/UX design for iOS and Android application",
+      },
+      {
+        type: "blog",
+        title: "React Best Practices",
+        url: "/blog/react-best-practices",
+        description: "Essential tips for React development",
+      },
+      {
+        type: "blog",
+        title: "Web Performance Optimization",
+        url: "/blog/web-performance",
+        description: "Techniques to improve website speed",
+      },
+    ],
+    [],
+  );
 
   const getThemeClasses = () => {
     switch (currentTheme) {
@@ -119,30 +122,29 @@ const SearchModal = ({ isOpen, onClose, currentTheme }) => {
     }
   }, [isOpen]);
 
+  const filteredResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return searchableContent
+      .filter(
+        (item) =>
+          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+      .slice(0, 8);
+  }, [searchQuery, searchableContent]);
+
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
       return;
     }
-
     setLoading(true);
-
-    // Simulate API delay
     const timeoutId = setTimeout(() => {
-      const results = searchableContent
-        .filter(
-          (item) =>
-            item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.description.toLowerCase().includes(searchQuery.toLowerCase()),
-        )
-        .slice(0, 8); // Limit to 8 results
-
-      setSearchResults(results);
+      setSearchResults(filteredResults);
       setLoading(false);
     }, 300);
-
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, searchableContent]);
+  }, [searchQuery, filteredResults]);
 
   const handleClose = () => {
     setSearchQuery("");

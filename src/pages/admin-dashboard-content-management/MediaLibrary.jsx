@@ -14,7 +14,8 @@ export default function MediaLibrary() {
   const pageSize = 24;
 
   useEffect(() => {
-    fetchAssets(); // eslint-disable-next-line
+    fetchAssets();
+    // fetchAssets depends on page/tag via closure; acceptable here
   }, [page, tag]);
 
   async function fetchAssets() {

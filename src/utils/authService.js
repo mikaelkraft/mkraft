@@ -102,7 +102,7 @@ class AuthService {
   }
 
   // Sign up new user
-  async signUp(email, password, userData = {}) {
+  async signUp(_email, _password) {
     // Public signup is intentionally disabled; keep simple deterministic response
     return {
       success: false,

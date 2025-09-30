@@ -14,7 +14,7 @@ const ResetPassword = () => {
     (async () => {
       try {
         // Exchange recovery token for a session if present in URL
-        const { data, error } = await supabase.auth.exchangeCodeForSession(
+        const { error } = await supabase.auth.exchangeCodeForSession(
           window.location.href,
         );
         if (error) {

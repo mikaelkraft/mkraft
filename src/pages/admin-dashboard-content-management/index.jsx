@@ -38,7 +38,6 @@ const AdminDashboardContentManagement = () => {
   };
   useEffect(() => {
     if (publisherProgramEnabled) loadPublisherRequests();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadPublisherRequests stable enough
   }, [publisherProgramEnabled]);
 
   const handlePublisherDecision = async (user_id, action) => {

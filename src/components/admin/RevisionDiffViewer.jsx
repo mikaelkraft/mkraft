@@ -24,7 +24,7 @@ export default function RevisionDiffViewer({ revisionId, onClose }) {
           data.after.content || "",
         );
         setDiffRows(diff.slice(0, 4000)); // safety cap
-      } catch (e) {
+      } catch {
         if (mounted) setError("Failed to load diff");
       } finally {
         if (mounted) setLoading(false);
