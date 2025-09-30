@@ -45,6 +45,8 @@ module.exports = [
       "react/prop-types": "off",
       "react/jsx-uses-react": "off", // React 17+ JSX transform
       "react/react-in-jsx-scope": "off",
+      // Ensure JSX component identifiers are marked as used for no-unused-vars
+      "react/jsx-uses-vars": "warn",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
       "import/no-unresolved": "off",

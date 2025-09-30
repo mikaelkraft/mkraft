@@ -1,20 +1,16 @@
+import React from "react";
 import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
 import "./styles/tailwind.css";
 import "./styles/index.css";
 
 const container = document.getElementById("root");
-const root = createRoot(container);
-
-const Root = (
-  <React.StrictMode>
-    {import.meta.env.DEV ? (
-      <Inspector>
-        <App />
-      </Inspector>
-    ) : (
+if (container) {
+  createRoot(container).render(
+    <React.StrictMode>
       <App />
-    )}
-  </React.StrictMode>
-);
-
-root.render(Root);
+    </React.StrictMode>,
+  );
+} else {
+  console.error("Root element #root not found");
+}

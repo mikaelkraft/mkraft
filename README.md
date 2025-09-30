@@ -1132,7 +1132,26 @@ If `NODE_ENV=production` and the resolved base ends in `localhost`, a startup wa
 ### Helpers
 
 - Server: `buildCanonicalUrl(path)` in `api/_lib/respond.js` returns absolute URL without trailing slash.
-- Client: `getCanonicalUrl(path)` in `src/utils/canonical.js` uses `VITE_SITE_BASE_URL` or `window.location.origin`.
+- Client: `getCanonicalUrl(pathOrUrl)` in `src/utils/canonical.js` precedence:
+  1.  `import.meta.env.VITE_SITE_BASE_URL`
+  2.  `window.__SITE_BASE_URL__` (runtime injection / tests)
+  3.  `process.env.SITE_BASE_URL` (SSR / tests)
+  4.  `window.location.origin` (browser fallback)
+  5.  Fallback `http://localhost`
+
+### React Component
+
+`<Canonical />` (in `src/components/seo/Canonical.jsx`) auto-injects a `<link rel="canonical">` tag per route.
+
+Props:
+
+| Prop       | Type    | Description                                                                   |
+| ---------- | ------- | ----------------------------------------------------------------------------- |
+| `path`     | string  | Override path (e.g. `/blog/post`) instead of current location pathname+search |
+| `url`      | string  | Provide a full absolute URL (bypasses helper path join)                       |
+| `suppress` | boolean | Skip rendering the canonical tag (404 pages, preview states)                  |
+
+Suppression can also be triggered via `window.__SUPPRESS_CANONICAL = true` (legacy pattern) prior to render.
 
 ### Recommended Setup
 
@@ -1157,6 +1176,11 @@ const canonical = buildCanonicalUrl("/blog/my-post");
 - Missing protocol: always include `https://` in `SITE_BASE_URL`.
 - Trailing slash differences: helper trims trailing slash to avoid duplicate variants.
 - Inconsistent staging domains: set a distinct `SITE_BASE_URL` per environment to keep analytics/SEO isolated.
+- Double canonical tags: ensure `<Canonical />` is mounted only once (root layout) and avoid manual `<link rel="canonical">` duplicates.
+
+### Testing
+
+Unit tests (`test/canonical.test.js`) cover helper behavior; integration test (`test/canonical.component.test.jsx`) validates component props & suppression logic.
 
 ## 🌐 Sitemap Architecture (Indexed)
 

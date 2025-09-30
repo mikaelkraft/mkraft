@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 // used in returned JSX
 import settingsService from "../../utils/settingsService";
 

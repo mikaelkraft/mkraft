@@ -1,13 +1,16 @@
 import { useLocation } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { getCanonicalUrl } from "../../utils/canonical";
 
 // Canonical tag injector. Place once near root so every route updates tag.
-export default function Canonical() {
+export default function Canonical({ path, suppress, url }) {
   const location = useLocation();
-  // External flag (window.__SUPPRESS_CANONICAL) can be toggled by routes like 404.
-  const suppress = typeof window !== "undefined" && window.__SUPPRESS_CANONICAL;
-  if (suppress) return null;
-  const canonical = getCanonicalUrl(location.pathname + location.search);
+  const legacySuppress =
+    typeof window !== "undefined" && window.__SUPPRESS_CANONICAL;
+  const isSuppressed = !!(suppress || legacySuppress);
+  if (isSuppressed) return null;
+  const effectivePath = path || location.pathname + location.search;
+  const canonical = getCanonicalUrl(url || effectivePath);
   return (
     <Helmet>
       <link rel="canonical" href={canonical} />
