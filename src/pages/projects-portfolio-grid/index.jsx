@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Helmet } from 'react-helmet';
-import Icon from '../../components/AppIcon';
-import Button from '../../components/ui/Button';
-import ProjectCard from './components/ProjectCard';
-import ProjectFilters from './components/ProjectFilters';
-import ProjectModal from './components/ProjectModal';
-import ProjectForm from './components/ProjectForm';
-import ProjectSkeleton from './components/ProjectSkeleton';
-import projectService from '../../utils/projectService';
+import React, { useState, useEffect, useMemo } from "react";
+// Helmet removed; global OGMeta handles tags
+import Icon from "../../components/AppIcon";
+import Button from "../../components/ui/Button";
+import ProjectCard from "./components/ProjectCard";
+import ProjectFilters from "./components/ProjectFilters";
+import ProjectModal from "./components/ProjectModal";
+import ProjectForm from "./components/ProjectForm";
+import ProjectSkeleton from "./components/ProjectSkeleton";
+import projectService from "../../utils/projectService";
 
 const ProjectsPortfolioGrid = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTechnology, setSelectedTechnology] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTechnology, setSelectedTechnology] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const [selectedProject, setSelectedProject] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -36,17 +36,17 @@ const ProjectsPortfolioGrid = () => {
             title: p.title,
             description: p.description,
             fullDescription: p.content || p.description,
-            image: p.featured_image || '/assets/images/no_image.png',
+            image: p.featured_image || "/assets/images/no_image.png",
             technologies: p.technologies || [],
-            status: p.status === 'published' ? 'completed' : p.status,
+            status: p.status === "published" ? "completed" : p.status,
             featured: !!p.featured,
-            liveUrl: p.live_url || '',
-            githubUrl: p.github_url || '',
-            completedDate: (p.updated_at || p.created_at || '').slice(0, 10),
-            duration: '',
-            client: 'Personal',
+            liveUrl: p.live_url || "",
+            githubUrl: p.github_url || "",
+            completedDate: (p.updated_at || p.created_at || "").slice(0, 10),
+            duration: "",
+            client: "Personal",
             features: [],
-            challenges: ''
+            challenges: "",
           }));
           setProjects(normalized);
         } else {
@@ -58,54 +58,70 @@ const ProjectsPortfolioGrid = () => {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Check admin status (mock implementation)
   useEffect(() => {
-    const adminStatus = localStorage.getItem('isAdmin') === 'true';
+    const adminStatus = localStorage.getItem("isAdmin") === "true";
     setIsAdmin(adminStatus);
   }, []);
 
   // Get unique technologies for filter
   const allTechnologies = useMemo(() => {
     const techs = new Set();
-    projects.forEach(project => {
-      project.technologies.forEach(tech => techs.add(tech));
+    projects.forEach((project) => {
+      project.technologies.forEach((tech) => techs.add(tech));
     });
     return Array.from(techs).sort();
   }, [projects]);
 
   // Filter and sort projects
   const filteredProjects = useMemo(() => {
-    let filtered = projects.filter(project => {
-      const matchesSearch = !searchTerm || 
+    let filtered = projects.filter((project) => {
+      const matchesSearch =
+        !searchTerm ||
         project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.technologies.some(tech => tech.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      const matchesTechnology = !selectedTechnology || 
+        project.technologies.some((tech) =>
+          tech.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
+
+      const matchesTechnology =
+        !selectedTechnology ||
         project.technologies.includes(selectedTechnology);
-      
-      const matchesStatus = !selectedStatus || project.status === selectedStatus;
-      
+
+      const matchesStatus =
+        !selectedStatus || project.status === selectedStatus;
+
       return matchesSearch && matchesTechnology && matchesStatus;
     });
 
     // Sort projects
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'oldest':
-          return new Date(a.completedDate || '1970-01-01') - new Date(b.completedDate || '1970-01-01');
-        case 'title':
+        case "oldest":
+          return (
+            new Date(a.completedDate || "1970-01-01") -
+            new Date(b.completedDate || "1970-01-01")
+          );
+        case "title":
           return a.title.localeCompare(b.title);
-        case 'featured':
+        case "featured":
           if (a.featured && !b.featured) return -1;
           if (!a.featured && b.featured) return 1;
-          return new Date(b.completedDate || '1970-01-01') - new Date(a.completedDate || '1970-01-01');
-        case 'newest':
+          return (
+            new Date(b.completedDate || "1970-01-01") -
+            new Date(a.completedDate || "1970-01-01")
+          );
+        case "newest":
         default:
-          return new Date(b.completedDate || '1970-01-01') - new Date(a.completedDate || '1970-01-01');
+          return (
+            new Date(b.completedDate || "1970-01-01") -
+            new Date(a.completedDate || "1970-01-01")
+          );
       }
     });
 
@@ -113,10 +129,10 @@ const ProjectsPortfolioGrid = () => {
   }, [projects, searchTerm, selectedTechnology, selectedStatus, sortBy]);
 
   const handleClearFilters = () => {
-    setSearchTerm('');
-    setSelectedTechnology('');
-    setSelectedStatus('');
-    setSortBy('newest');
+    setSearchTerm("");
+    setSelectedTechnology("");
+    setSelectedStatus("");
+    setSortBy("newest");
   };
 
   const handleViewDetails = (project) => {
@@ -131,17 +147,19 @@ const ProjectsPortfolioGrid = () => {
 
   const handleDeleteProject = (project) => {
     if (window.confirm(`Are you sure you want to delete "${project.title}"?`)) {
-      setProjects(prev => prev.filter(p => p.id !== project.id));
+      setProjects((prev) => prev.filter((p) => p.id !== project.id));
     }
   };
 
   const handleSaveProject = (projectData) => {
     if (editingProject) {
       // Update existing project
-      setProjects(prev => prev.map(p => p.id === projectData.id ? projectData : p));
+      setProjects((prev) =>
+        prev.map((p) => (p.id === projectData.id ? projectData : p)),
+      );
     } else {
       // Add new project
-      setProjects(prev => [projectData, ...prev]);
+      setProjects((prev) => [projectData, ...prev]);
     }
     setEditingProject(null);
   };
@@ -155,10 +173,19 @@ const ProjectsPortfolioGrid = () => {
     <>
       <Helmet>
         <title>Mikael Kraft — Projects</title>
-        <meta name="description" content="Explore Mikael Kraft's complete portfolio of web development, blockchain, and machine learning projects. View live demos, source code, and technical details." />
-        <meta name="keywords" content="portfolio, projects, web development, React, blockchain, machine learning, cyberpunk" />
+        <meta
+          name="description"
+          content="Explore Mikael Kraft's complete portfolio of web development, blockchain, and machine learning projects. View live demos, source code, and technical details."
+        />
+        <meta
+          name="keywords"
+          content="portfolio, projects, web development, React, blockchain, machine learning, cyberpunk"
+        />
         <meta property="og:title" content="Mikael Kraft — Projects" />
-        <meta property="og:description" content="A curated portfolio of software engineering projects by Mikael Kraft." />
+        <meta
+          property="og:description"
+          content="A curated portfolio of software engineering projects by Mikael Kraft."
+        />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://mkraft.tech/projects" />
         <meta property="og:image" content="/assets/images/no_image.png" />
@@ -174,17 +201,20 @@ const ProjectsPortfolioGrid = () => {
           <div className="text-center mb-12">
             <div className="inline-flex items-center space-x-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-6">
               <Icon name="FolderOpen" size={18} className="text-primary" />
-              <span className="text-primary font-caption text-sm">Portfolio Showcase</span>
+              <span className="text-primary font-caption text-sm">
+                Portfolio Showcase
+              </span>
             </div>
-            
+
             <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-text-primary mb-6">
               Project <span className="text-primary">Portfolio</span>
             </h1>
-            
+
             <p className="text-text-secondary text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-              Explore my collection of innovative projects spanning web development, blockchain technology, 
-              machine learning, and cyberpunk-themed applications. Each project represents a unique challenge 
-              and creative solution.
+              Explore my collection of innovative projects spanning web
+              development, blockchain technology, machine learning, and
+              cyberpunk-themed applications. Each project represents a unique
+              challenge and creative solution.
             </p>
           </div>
 
@@ -233,7 +263,8 @@ const ProjectsPortfolioGrid = () => {
                 No Projects Found
               </h3>
               <p className="text-text-secondary mb-6">
-                Try adjusting your search criteria or filters to find more projects.
+                Try adjusting your search criteria or filters to find more
+                projects.
               </p>
               <Button
                 variant="outline"

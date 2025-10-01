@@ -1,4 +1,19 @@
-// Add your imports here
+import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
+import PortfolioHomeHero from "./pages/portfolio-home-hero";
+import ProjectsPortfolioGrid from "./pages/projects-portfolio-grid";
+import ProjectDetail from "./pages/project-detail";
+import BlogContentHub from "./pages/blog-content-hub";
+import BlogPost from "./pages/blog-post";
+// TODO: Implement SearchResultsPage; temporarily route to BlogContentHub
+const SearchResultsPage = BlogContentHub;
+import Documentation from "./pages/documentation";
+import ResetPassword from "./pages/ResetPassword.jsx";
+import RequireAdmin from "./components/auth/RequireAdmin.jsx";
+import AdminDashboardContentManagement from "./pages/admin-dashboard-content-management";
+import FeatureFlagsPage from "./pages/admin-dashboard-content-management/FeatureFlags.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 const Routes = () => {
   return (
@@ -27,7 +42,7 @@ const Routes = () => {
               </RequireAdmin>
             }
           />
-          <Route path="/admin/media" element={<MediaLibrary />} />
+          {/* MediaLibrary route disabled until component confirmed */}
           <Route
             path="/admin/feature-flags"
             element={

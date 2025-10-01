@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Helmet } from "react-helmet";
+// Removed Helmet; meta editing is not handled inline
 import { useAuth } from "../../../contexts/AuthContext";
 import Icon from "../../../components/AppIcon";
 import Button from "../../../components/ui/Button";
