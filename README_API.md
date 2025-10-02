@@ -90,6 +90,108 @@ Notes
 - Storage: Image/video uploads are still going to Supabase Storage per earlier wiring. You can keep that or swap to S3-compatible storage later.
 - If you keep everything read-only via API, you do not need JWT verification yet.
 
+## Markdown authoring components (MarkdownField + MarkdownToolbar)
+
+The application ships with a reusable rich markdown editing experience composed of two React components:
+
+- `MarkdownToolbar`: a formatting + embed action bar (stateless aside from UI toggles)
+- `MarkdownField`: a higher-level wrapper combining the toolbar with a `<textarea>` and enhanced media UX
+
+Core capabilities
+
+- Headings H1–H6 insertion
+- Bold / Italic / Inline code / Code block / Preformatted block
+- Blockquote, Bulleted list, Numbered list
+- Link insertion (prompt-driven)
+- Image upload (via configured `onUploadImage` callback → Supabase Storage today) with automatic markdown snippet insertion
+- Media embeds (YouTube / Vimeo / Spotify) using sanitized iframe HTML snippets
+- Table insertion (generates a 3x3 markdown table scaffold)
+- Emoji picker (lightweight inlined set; inserts at cursor)
+- Advanced toggle: hides rarely used embed + table controls behind a disclosure for a cleaner default surface
+- Drag & drop image upload (drops anywhere over the field)
+- Clipboard paste image upload (pastes PNG/JPEG directly from clipboard)
+
+How uploads work
+
+`MarkdownField` accepts an `onUploadImage(file) -> Promise<{ url: string }>` prop. When provided:
+
+1. User clicks the image button OR drags/drops OR pastes an image
+2. The file is passed to `onUploadImage`
+3. On success, markdown `![alt text](url)` is injected at the cursor
+4. Basic error handling (alert) triggers if the upload fails
+
+Embeds
+
+Embeds are inserted as raw HTML blocks (fenced by blank lines) for immediate preview in most markdown renderers that allow HTML passthrough. Helper utilities in `src/utils/markdownEmbeds.js` provide:
+
+- `parseYouTubeId(urlOrId)`
+- `parseVimeoId(urlOrId)`
+- `parseSpotify(url)` (returns object describing type + id)
+- `buildYouTubeEmbed(id)` / `buildVimeoEmbed(id)` / `buildSpotifyEmbed({ type, id })`
+
+These assist both insertion and (future) server-side sanitation or transformation.
+
+Extending the toolbar
+
+Add a new button by editing `src/components/ui/MarkdownToolbar.jsx`. Follow existing patterns:
+
+1. Implement a small handler that manipulates the textarea selection (receive `textareaRef` via parent `MarkdownField`)
+2. Call shared `wrapSelection` or replicate selection logic (maintain start/end indices)
+3. Insert text + restore focus
+
+Selection utilities rely on plain DOM—no external markdown library—keeping bundle size low and behavior transparent.
+
+Drag & Drop / Paste specifics
+
+- Drop zone: the wrapping div around the textarea listens for `onDragOver` (preventDefault) and `onDrop`
+- Paste handler inspects `event.clipboardData.items` for image types
+- Both paths early-return if no `onUploadImage` prop is supplied
+
+Accessibility & UX notes
+
+- Buttons have `aria-label` attributes (add one when introducing new controls)
+- Advanced actions collapsed by default reduces cognitive overload for casual editing
+- Emoji picker state is toggled separately; clicking outside the picker (blur) can be extended to auto-close if desired
+
+Potential future enhancements (not implemented yet)
+
+- Slash command palette ("/table", " /img ")
+- Live markdown preview panel with diff mode
+- Syntax highlighting for fenced code blocks while typing
+- Automatic link normalization + title fetch
+- Pluggable extension registry (pass an array of action descriptors)
+
+Testing
+
+Embed builder + parser functions are covered in `test/markdownToolbar.embed.test.js`. If you add new embed types, extend that file with parser + builder round-trip tests.
+
+Usage example
+
+```jsx
+<MarkdownField
+  value={body}
+  onChange={setBody}
+  onUploadImage={async (file) => {
+    const { url } = await storageService.uploadFile(
+      "media",
+      file,
+      `blog/${file.name}`,
+    );
+    return { url };
+  }}
+  placeholder="Write your post..."
+  className="min-h-[300px]"
+/>
+```
+
+The toolbar will automatically wire to the underlying textarea via ref forwarding.
+
+Security reminder
+
+Because raw HTML for embeds is injected, ensure your markdown renderer either sanitizes or restricts to the expected iframe patterns. The provided helpers intentionally constrain attributes (allow, referrerpolicy, loading) to a safe minimal set.
+
+---
+
 Neon + Supabase recommended setup
 
 - Neon (or Railway/Render) hosts your Postgres for all content, reachable from anywhere.

@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Button from "./Button";
 import {
   parseYouTubeId,
@@ -36,6 +36,8 @@ export default function MarkdownToolbar({
   className = "",
 }) {
   const fileInputRef = useRef(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
   const canImage = (enableImageUpload ?? !!onUploadImage) === true;
 
   const getTA = () => (textareaId ? document.getElementById(textareaId) : null);
@@ -126,6 +128,71 @@ export default function MarkdownToolbar({
     applyLinePrefix(`${hashes} `, `Heading ${level}`);
   };
 
+  const insertTable = () => {
+    // Default 3x3 table
+    const header = "| Col 1 | Col 2 | Col 3 |";
+    const sep = "| --- | --- | --- |";
+    const row = "| Val 1 | Val 2 | Val 3 |";
+    const table = `\n\n${header}\n${sep}\n${row}\n${row}\n${row}\n\n`;
+    const ta = getTA();
+    if (!ta) return onChange((value || "") + table);
+    const start = ta.selectionStart ?? value.length;
+    const before = value.slice(0, start);
+    const after = value.slice(start);
+    onChange(before + table + after);
+    queueMicrotask(() => ta.focus());
+  };
+
+  const emojiList = [
+    "😀",
+    "😅",
+    "😂",
+    "🙂",
+    "😉",
+    "😍",
+    "🤔",
+    "😎",
+    "😭",
+    "😡",
+    "🔥",
+    "🚀",
+    "⭐",
+    "✅",
+    "⚠️",
+    "❌",
+    "💡",
+    "📌",
+    "📝",
+    "📎",
+    "🔗",
+    "💻",
+    "📱",
+    "🧪",
+    "🧠",
+    "🛠️",
+    "📦",
+    "🐛",
+    "✅",
+    "🔍",
+    "🎉",
+  ];
+  const insertEmoji = (emoji) => {
+    const ta = getTA();
+    if (!ta) {
+      onChange((value || "") + emoji);
+      return;
+    }
+    const start = ta.selectionStart ?? 0;
+    const end = ta.selectionEnd ?? 0;
+    const before = value.slice(0, start);
+    const after = value.slice(end);
+    onChange(before + emoji + after);
+    queueMicrotask(() => {
+      ta.focus();
+      setShowEmoji(false);
+    });
+  };
+
   // ---------- Embed helpers (now imported) ----------
   const insertEmbed = (html) => {
     const ta = getTA();
@@ -187,7 +254,7 @@ export default function MarkdownToolbar({
     }
   };
 
-  const buttons = [
+  const basicButtons = [
     {
       label: "B",
       title: "Bold",
@@ -237,6 +304,16 @@ export default function MarkdownToolbar({
       icon: "ListOrdered",
     },
     { label: "Link", title: "Insert link", action: insertLink, icon: "Link" },
+    { label: "Tbl", title: "Insert table", action: insertTable, icon: "Table" },
+    {
+      label: "😀",
+      title: "Emoji picker",
+      action: () => setShowEmoji((v) => !v),
+      icon: "Smile",
+    },
+  ];
+
+  const advancedButtons = [
     {
       label: "YT",
       title: "YouTube embed",
@@ -266,7 +343,7 @@ export default function MarkdownToolbar({
           H{lvl}
         </Button>
       ))}
-      {buttons.map((b) => (
+      {basicButtons.map((b) => (
         <Button
           key={b.title}
           type="button"
@@ -279,6 +356,30 @@ export default function MarkdownToolbar({
           {b.label}
         </Button>
       ))}
+      <Button
+        type="button"
+        size="sm"
+        variant={showAdvanced ? "primary" : "outline"}
+        onClick={() => setShowAdvanced((v) => !v)}
+        title="Toggle advanced embed tools"
+        iconName="Settings2"
+      >
+        {showAdvanced ? "Adv-" : "Adv+"}
+      </Button>
+      {showAdvanced &&
+        advancedButtons.map((b) => (
+          <Button
+            key={b.title}
+            type="button"
+            size="sm"
+            variant="outline"
+            title={b.title}
+            onClick={b.action}
+            iconName={b.icon}
+          >
+            {b.label}
+          </Button>
+        ))}
       {canImage && (
         <Button
           type="button"
@@ -299,6 +400,20 @@ export default function MarkdownToolbar({
           className="hidden"
           onChange={onFileChange}
         />
+      )}
+      {showEmoji && (
+        <div className="w-full flex flex-wrap gap-1 p-2 border border-border-accent/30 rounded bg-surface/70">
+          {emojiList.map((e) => (
+            <button
+              key={e}
+              type="button"
+              className="text-lg hover:scale-110 transition"
+              onClick={() => insertEmoji(e)}
+            >
+              {e}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
