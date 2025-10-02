@@ -4,6 +4,7 @@ require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const { Pool } = require("pg");
+const crypto = require("crypto");
 
 async function main() {
   const schemaPath = path.join(
@@ -38,14 +39,17 @@ async function main() {
 
     // Ensure marker table exists early so we can query it even if base already had it
     await client.query(
-      "CREATE TABLE IF NOT EXISTS wisdomintech.__applied_patches (patch_name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ DEFAULT now())",
+      "CREATE TABLE IF NOT EXISTS wisdomintech.__applied_patches (patch_name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ DEFAULT now(), patch_hash TEXT)",
     );
 
     // Fetch already applied patch names
     const { rows: appliedRows } = await client.query(
-      "SELECT patch_name FROM wisdomintech.__applied_patches",
+      "SELECT patch_name, patch_hash FROM wisdomintech.__applied_patches",
     );
     const applied = new Set(appliedRows.map((r) => r.patch_name));
+    const appliedMap = Object.fromEntries(
+      appliedRows.map((r) => [r.patch_name, r.patch_hash]),
+    );
 
     const toApply = [];
     for (const f of patchFiles) {
@@ -67,9 +71,29 @@ async function main() {
           "INSERT INTO wisdomintech.__applied_patches (patch_name) VALUES ($1) ON CONFLICT (patch_name) DO NOTHING",
           [marker],
         );
+        // Compute hash and update
+        const hash = crypto.createHash("sha256").update(sql).digest("hex");
+        await client.query(
+          "UPDATE wisdomintech.__applied_patches SET patch_hash=$2 WHERE patch_name=$1",
+          [marker, hash],
+        );
       }
     } else {
       console.log("No new patches to apply.");
+    }
+    // Backfill missing hashes
+    console.log("Backfilling patch hashes (if any missing)...");
+    for (const f of patchFiles) {
+      const marker = f.replace(/\.sql$/, "");
+      if (!appliedMap[marker]) {
+        const p = path.join(dbDir, f);
+        const sql = fs.readFileSync(p, "utf8");
+        const hash = crypto.createHash("sha256").update(sql).digest("hex");
+        await client.query(
+          "UPDATE wisdomintech.__applied_patches SET patch_hash=$2 WHERE patch_name=$1",
+          [marker, hash],
+        );
+      }
     }
     console.log("Migration completed successfully.");
   } catch (e) {

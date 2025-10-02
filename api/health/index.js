@@ -10,12 +10,28 @@ module.exports = async function handler(req, res) {
     const dbLatencyMs = Date.now() - start;
 
     // Patch count + optional latest patch name (defensive: table might not exist yet)
-    let patchInfo = { applied: 0 };
+    let patchInfo = { applied: 0, latest: null, pending: null };
     try {
       const r = await query(
-        "SELECT count(*)::int AS applied FROM wisdomintech.__applied_patches",
+        "SELECT patch_name, applied_at FROM wisdomintech.__applied_patches ORDER BY applied_at ASC",
       );
-      patchInfo.applied = r.rows[0].applied;
+      patchInfo.applied = r.rows.length;
+      if (r.rows.length)
+        patchInfo.latest = r.rows[r.rows.length - 1].patch_name;
+      // Derive pending by comparing to files present (best effort)
+      try {
+        const fs = require("fs");
+        const path = require("path");
+        const dbDir = path.join(process.cwd(), "db");
+        const files = fs
+          .readdirSync(dbDir)
+          .filter((f) => /^patch_\d+.*\.sql$/.test(f));
+        const appliedSet = new Set(r.rows.map((x) => x.patch_name));
+        const pending = files.filter(
+          (f) => !appliedSet.has(f.replace(/\.sql$/, "")),
+        );
+        patchInfo.pending = pending.length;
+      } catch (_) {}
     } catch (_) {}
 
     // Version / commit info (env injected at build/deploy optionally)

@@ -60,7 +60,8 @@
     "release:preview": "npm run changelog && tail -n 40 CHANGELOG.md",
     "lint": "eslint . --ext .js,.jsx",
     "lint:fix": "eslint . --ext .js,.jsx --fix",
-    "new:patch": "node scripts/new-patch.js"
+    "new:patch": "node scripts/new-patch.js",
+    "lint:patches": "node scripts/lint-patches.js"
   },
   "eslintConfig": {
     "extends": [
