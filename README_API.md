@@ -305,14 +305,18 @@ Security reminders
 
 ### /api/health
 
-Extended response now includes:
+Extended response includes infrastructure + performance + cache diagnostics:
 
 - `dbLatencyMs`: round trip latency for a simple `SELECT 1`
 - `version`: from `APP_VERSION` env (fallback package.json version)
 - `commit`: from `GIT_COMMIT` / `VERCEL_GIT_COMMIT_SHA`
 - `patches.applied`: integer count of applied schema patches
+- `metrics`: internal app metrics snapshot (extensible)
+- `memory`: process memory usage (`rss`, `heapUsed`, `heapTotal`, `external`)
+- `uptimeSec`: process uptime seconds
+- `flagCache`: feature flag cache diagnostics `{ count, ttlMs, ageMs, stale }`
 
-Sample:
+Sample (fields truncated for brevity):
 
 ```json
 {
@@ -322,13 +326,23 @@ Sample:
   "version": "0.3.0",
   "commit": "a1b2c3d",
   "patches": { "applied": 12 },
+  "memory": { "rss": 74289152, "heapUsed": 18273640 },
+  "uptimeSec": 351,
+  "flagCache": { "count": 5, "ttlMs": 30000, "ageMs": 1200, "stale": false },
   "timestamp": "2025-10-02T12:00:00.000Z"
 }
 ```
 
 ### /api/meta
 
-Returns build + schema + feature flag snapshot. Add `?verbose=1` to include `tableCounts` and a detailed feature flags list with notes/timestamps.
+Returns build + schema + feature flag snapshot. Add `?verbose=1` for extended diagnostics:
+
+Verbose additions:
+
+- `tableCounts`: lightweight counts for selected content tables
+- `featureFlags.list`: array of `{ key, enabled, note, updated_at }`
+- `featureFlags.map`: key -> boolean map for quick lookups
+- `flagCache`: cache timing diagnostics `{ ttlMs, loadedAt, ageMs, stale }`
 
 ### /api/feature-flags
 
@@ -370,7 +384,10 @@ Resolution order:
 1. Dedicated table `wisdomintech.feature_flags` (columns: key TEXT PK, enabled BOOLEAN)
 2. Fallback to `site_settings.ui` JSON path `ui.featureFlags`
 
-Caching: in-memory TTL (default 30s via `FEATURE_FLAGS_TTL_MS`). Call `getFeatureFlags(true)` to force refresh.
+Caching: in-memory TTL (default 30s via `FEATURE_FLAGS_TTL_MS`). Call `getFeatureFlags(true)` to force refresh. Diagnostics exposed:
+
+- `/api/health` → `flagCache.count`, `ttlMs`, `ageMs`, `stale`
+- `/api/meta?verbose=1` → `flagCache.loadedAt` (ISO), `ageMs`, `stale`
 
 Client usage (example future wiring): expose subset via `/api/meta` or dedicated endpoint, then hydrate a React context.
 
