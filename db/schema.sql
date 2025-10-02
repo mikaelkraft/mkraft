@@ -1,3 +1,7 @@
+-- DEPRECATED: This legacy schema is retained only for historical reference.
+-- The canonical baseline is now defined in wisdomintech_schema.sql and all
+-- future changes must be introduced via patch_*.sql files applied after that
+-- base. Do not modify this file further; add a patch instead.
 -- Schema for a plain Postgres deployment (Neon/Railway/Render)
 -- Create dedicated schema
 CREATE SCHEMA IF NOT EXISTS wisdomintech;

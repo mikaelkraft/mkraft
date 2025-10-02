@@ -8,6 +8,17 @@ import {
   buildVimeoEmbed,
   buildSpotifyEmbed,
 } from "../../utils/markdownEmbeds";
+import {
+  wrapInline,
+  applyLinePrefix as utilApplyLinePrefix,
+  insertCodeBlock as utilInsertCodeBlock,
+  insertPre as utilInsertPre,
+  insertList as utilInsertList,
+  insertTable as utilInsertTable,
+  insertEmoji as utilInsertEmoji,
+  insertEmbedHtml,
+  insertHeading as utilInsertHeading,
+} from "../../utils/markdownInsert";
 
 /**
  * Reusable Markdown editing toolbar.
@@ -42,79 +53,54 @@ export default function MarkdownToolbar({
 
   const getTA = () => (textareaId ? document.getElementById(textareaId) : null);
 
-  const applyAround = (prefix, suffix = prefix, placeholder = "text") => {
+  const getSelection = () => {
     const ta = getTA();
-    if (!ta) {
-      onChange((value || "") + `${prefix}${placeholder}${suffix}`);
-      return;
-    }
-    const start = ta.selectionStart ?? 0;
-    const end = ta.selectionEnd ?? 0;
-    const before = value.slice(0, start);
-    const selected = value.slice(start, end) || placeholder;
-    const after = value.slice(end);
-    const next = `${before}${prefix}${selected}${suffix}${after}`;
-    onChange(next);
-    queueMicrotask(() => ta.focus());
+    return {
+      ta,
+      start: ta?.selectionStart ?? value.length,
+      end: ta?.selectionEnd ?? value.length,
+    };
+  };
+
+  const applyAround = (prefix, suffix = prefix, placeholder = "text") => {
+    const { ta, start, end } = getSelection();
+    const { text } = wrapInline(value, start, end, prefix, suffix, placeholder);
+    onChange(text);
+    queueMicrotask(() => ta?.focus());
   };
 
   const applyLinePrefix = (prefix, placeholder = "text") => {
-    const ta = getTA();
-    if (!ta) {
-      onChange((value || "") + `\n${prefix}${placeholder}`);
-      return;
-    }
-    const start = ta.selectionStart ?? 0;
-    const end = ta.selectionEnd ?? 0;
-    const before = value.slice(0, start);
-    const selected = value.slice(start, end) || placeholder;
-    const after = value.slice(end);
-    const block = selected.replace(/^/gm, prefix);
-    onChange(before + block + after);
-    queueMicrotask(() => ta.focus());
+    const { ta, start, end } = getSelection();
+    const { text } = utilApplyLinePrefix(
+      value,
+      start,
+      end,
+      prefix,
+      placeholder,
+    );
+    onChange(text);
+    queueMicrotask(() => ta?.focus());
   };
 
   const insertCodeBlock = () => {
-    const ta = getTA();
-    const start = ta?.selectionStart ?? value.length;
-    const end = ta?.selectionEnd ?? value.length;
-    const before = value.slice(0, start);
-    const selected = value.slice(start, end) || "code";
-    const after = value.slice(end);
-    const snippet = `\n\n\
-\n${selected}\n\
-\n\n`;
-    onChange(before + snippet + after);
+    const { ta, start, end } = getSelection();
+    const { text } = utilInsertCodeBlock(value, start, end);
+    onChange(text);
     queueMicrotask(() => ta?.focus());
   };
 
   const insertPreformatted = () => {
-    const ta = getTA();
-    const start = ta?.selectionStart ?? value.length;
-    const end = ta?.selectionEnd ?? value.length;
-    const before = value.slice(0, start);
-    const selected = value.slice(start, end) || "preformatted text";
-    const after = value.slice(end);
-    const block = `\n\n<pre>\n${selected}\n</pre>\n\n`;
-    onChange(before + block + after);
+    const { ta, start, end } = getSelection();
+    const { text } = utilInsertPre(value, start, end);
+    onChange(text);
     queueMicrotask(() => ta?.focus());
   };
 
   const insertList = (ordered = false) => {
-    const ta = getTA();
-    const bullet = ordered ? "1." : "-";
-    if (!ta) {
-      onChange(`${value || ""}\n${bullet} item`);
-      return;
-    }
-    const start = ta.selectionStart ?? 0;
-    const end = ta.selectionEnd ?? 0;
-    const before = value.slice(0, start);
-    const selected = value.slice(start, end) || "item";
-    const after = value.slice(end);
-    const transformed = selected.replace(/^/gm, `${bullet} `);
-    onChange(`${before}${transformed}${after}`);
-    queueMicrotask(() => ta.focus());
+    const { ta, start, end } = getSelection();
+    const { text } = utilInsertList(value, start, end, ordered);
+    onChange(text);
+    queueMicrotask(() => ta?.focus());
   };
 
   const insertLink = () => {
@@ -124,23 +110,17 @@ export default function MarkdownToolbar({
   };
 
   const insertHeading = (level) => {
-    const hashes = "#".repeat(Math.min(6, Math.max(1, level)));
-    applyLinePrefix(`${hashes} `, `Heading ${level}`);
+    const { ta, start, end } = getSelection();
+    const { text } = utilInsertHeading(value, start, end, level);
+    onChange(text);
+    queueMicrotask(() => ta?.focus());
   };
 
   const insertTable = () => {
-    // Default 3x3 table
-    const header = "| Col 1 | Col 2 | Col 3 |";
-    const sep = "| --- | --- | --- |";
-    const row = "| Val 1 | Val 2 | Val 3 |";
-    const table = `\n\n${header}\n${sep}\n${row}\n${row}\n${row}\n\n`;
-    const ta = getTA();
-    if (!ta) return onChange((value || "") + table);
-    const start = ta.selectionStart ?? value.length;
-    const before = value.slice(0, start);
-    const after = value.slice(start);
-    onChange(before + table + after);
-    queueMicrotask(() => ta.focus());
+    const { ta, start } = getSelection();
+    const { text } = utilInsertTable(value, start);
+    onChange(text);
+    queueMicrotask(() => ta?.focus());
   };
 
   const emojiList = [
@@ -177,29 +157,20 @@ export default function MarkdownToolbar({
     "🎉",
   ];
   const insertEmoji = (emoji) => {
-    const ta = getTA();
-    if (!ta) {
-      onChange((value || "") + emoji);
-      return;
-    }
-    const start = ta.selectionStart ?? 0;
-    const end = ta.selectionEnd ?? 0;
-    const before = value.slice(0, start);
-    const after = value.slice(end);
-    onChange(before + emoji + after);
+    const { ta, start, end } = getSelection();
+    const { text } = utilInsertEmoji(value, start, end, emoji);
+    onChange(text);
     queueMicrotask(() => {
-      ta.focus();
+      ta?.focus();
       setShowEmoji(false);
     });
   };
 
   // ---------- Embed helpers (now imported) ----------
   const insertEmbed = (html) => {
-    const ta = getTA();
-    const pos = ta?.selectionStart ?? value.length;
-    const before = value.slice(0, pos);
-    const after = value.slice(pos);
-    onChange(`${before}\n\n${html}\n\n${after}`);
+    const { ta, start } = getSelection();
+    const { text } = insertEmbedHtml(value, start, html);
+    onChange(text);
     queueMicrotask(() => ta?.focus());
   };
   const handleYouTube = () => {

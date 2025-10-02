@@ -165,6 +165,21 @@ Testing
 
 Embed builder + parser functions are covered in `test/markdownToolbar.embed.test.js`. If you add new embed types, extend that file with parser + builder round-trip tests.
 
+## Live preview & slash commands (enhancements)
+
+Added features:
+
+- Preview toggle: renders sanitized HTML (marked + DOMPurify) lazily loaded on first use.
+- Slash command palette: type `/` at start of a new token to open a small action list. Supported commands: `/h1`, `/h2`, `/h3`, `/table`, `/code`, `/quote`.
+
+Implementation notes:
+
+- Preview loads `marked` and `dompurify` dynamically to avoid impacting initial bundle.
+- Slash detection uses regex `/\/(\w*)$/` on substring up to cursor; removal occurs by replacing final `/<word>` before applying transformed insertion.
+- Extend commands by adding entries to `slashActions` in `MarkdownField.jsx` and handling them inside `slashCommand` dispatcher in `markdownInsert.js`.
+
+Security: DOMPurify sanitization applied before injecting preview HTML; production markdown rendering path should also sanitize if raw HTML is permitted.
+
 Usage example
 
 ```jsx
@@ -215,3 +230,262 @@ Setup flow
 5. Optional: npm run seed
 6. Start API: npm run dev:api (or deploy to Vercel)
 7. Start client: npm run dev:client
+
+## Canonical schema, triggers & patch strategy
+
+Canonical baseline
+
+- The file `db/wisdomintech_schema.sql` is the only authoritative base schema.
+- Legacy `db/schema.sql` has been marked deprecated; do not edit it further. It remains only for historical reference.
+
+Patch workflow
+
+1. Every additive/change migration goes into a new `db/patch_YYYYMMDD[optional_suffix].sql` file.
+2. Each patch must be idempotent (use `IF NOT EXISTS`, `CREATE OR REPLACE`, defensive `DROP TRIGGER IF EXISTS`, etc.).
+3. Each patch should insert a marker row into `wisdomintech.__applied_patches` using its filename (without `.sql`) as `patch_name`.
+4. The migration runner (`scripts/migrate.js`) now:
+   - Applies the base schema (safe to run multiple times)
+   - Ensures the marker table exists
+   - Fetches already applied markers and only executes new patches
+   - Backfills a marker after executing a patch if the patch forgot to insert one
+
+Triggers added (2025-10-02 patch)
+
+`patch_20251002_triggers_and_enhancements.sql` introduced:
+
+- Generic `wisdomintech.set_updated_at()` trigger function applied to all mutable tables
+- Soft delete columns (`deleted_at`) on: `blog_posts`, `projects`, `comments`
+- Comment count maintenance triggers updating `blog_posts.comment_count` after INSERT/UPDATE/DELETE on `comments`
+- Like count recalculation triggers keeping `like_count` in `projects` and `blog_posts` aligned with `wisdomintech.likes` (hero slides currently lack a like counter)
+
+Design notes
+
+- Recalculation over incremental math keeps correctness simple (optimize later with partial increments if needed)
+- Soft deletes allow reversible removals and future audit logging without data loss
+- All triggers are schema-qualified to avoid search_path issues
+
+Adding a new patch (example template)
+
+```sql
+-- Patch: short description (YYYY-MM-DD)
+CREATE TABLE IF NOT EXISTS wisdomintech.__applied_patches (
+  patch_name TEXT PRIMARY KEY,
+  applied_at TIMESTAMPTZ DEFAULT now()
+);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM wisdomintech.__applied_patches WHERE patch_name = 'patch_YYYYMMDD_feature') THEN
+    -- Your idempotent DDL / DML here
+    ALTER TABLE wisdomintech.projects ADD COLUMN IF NOT EXISTS some_new_column TEXT;
+    INSERT INTO wisdomintech.__applied_patches(patch_name) VALUES('patch_YYYYMMDD_feature');
+  END IF;
+END
+$$;
+```
+
+Operational guidance
+
+- Local dev: rerun `npm run migrate` anytime; only unapplied patches run.
+- CI: treat migration as part of bootstrapping ephemeral DB for integration tests (repeatable because of idempotency).
+- Production: run the script during deploy (pre-start hook) to auto-apply new patches.
+
+Future improvements (optional)
+
+- Replace recalculation triggers with lighter incremental counters if performance profiling indicates need.
+- Add audit tables capturing OLD/NEW rows for moderation / history.
+- Introduce row-level security (RLS) if you migrate authenticated writes into this Postgres (currently not required for public reads via server API layer).
+
+Security reminders
+
+- Always qualify function and trigger names with schema to prevent collisions.
+- Keep destructive DDL (DROP COLUMN, etc.) in dedicated patches reviewed carefully—avoid inlining into multi-purpose enhancement patches.
+
+## Operational & metadata endpoints
+
+### /api/health
+
+Extended response now includes:
+
+- `dbLatencyMs`: round trip latency for a simple `SELECT 1`
+- `version`: from `APP_VERSION` env (fallback package.json version)
+- `commit`: from `GIT_COMMIT` / `VERCEL_GIT_COMMIT_SHA`
+- `patches.applied`: integer count of applied schema patches
+
+Sample:
+
+```json
+{
+  "status": "ok",
+  "db": "up",
+  "dbLatencyMs": 4,
+  "version": "0.3.0",
+  "commit": "a1b2c3d",
+  "patches": { "applied": 12 },
+  "timestamp": "2025-10-02T12:00:00.000Z"
+}
+```
+
+### /api/meta
+
+Returns build + schema + feature flag snapshot:
+
+```json
+{
+  "status": "ok",
+  "version": "0.3.0",
+  "commit": "a1b2c3d",
+  "patches": [
+    {
+      "patch_name": "patch_20251002_triggers_and_enhancements",
+      "applied_at": "2025-10-02T11:58:00Z"
+    }
+  ],
+  "featureFlags": { "experimentalMarkdown": true },
+  "timestamp": "2025-10-02T12:00:01.000Z"
+}
+```
+
+## Feature flags
+
+Loader utility: `api/_lib/featureFlags.js`
+
+Resolution order:
+
+1. Dedicated table `wisdomintech.feature_flags` (columns: key TEXT PK, enabled BOOLEAN)
+2. Fallback to `site_settings.ui` JSON path `ui.featureFlags`
+
+Caching: in-memory TTL (default 30s via `FEATURE_FLAGS_TTL_MS`). Call `getFeatureFlags(true)` to force refresh.
+
+Client usage (example future wiring): expose subset via `/api/meta` or dedicated endpoint, then hydrate a React context.
+
+## Server markdown sanitization
+
+Utility: `api/_lib/markdownSanitize.js`
+
+Pipeline (current implementation):
+
+1. Parse a minimal subset of markdown (headings, bold, italic, inline code, paragraphs) via an internal `miniMarkdown` string transformer. No external parser libraries are used server-side.
+2. Insert raw HTML placeholders for trusted iframe embed snippets before markdown transformation to avoid interference, then restore them after textual formatting.
+3. Load the result into JSDOM and perform a strict whitelist scrub:
+
+- Allowed tags: small curated set (paragraphs, headings, emphasis, code, lists, tables, img, iframe)
+- Attribute filtering per tag (only safe attributes preserved; `javascript:` and non-image `data:` URLs stripped)
+- Iframe `src` must match YouTube / Vimeo / Spotify allow-list regexes or the node is removed.
+
+4. Enforce lazy loading + referrer policy on iframes.
+
+Rationale:
+
+- Eliminates dependency weight / SSR bundling complexity from `marked` + `dompurify`.
+- Reduces attack surface by never generating broader HTML than explicitly supported.
+- Keeps behavior deterministic for tests and future extension.
+
+Usage in an endpoint:
+
+```js
+const { sanitizeMarkdown } = require("../_lib/markdownSanitize");
+const safeHtml = sanitizeMarkdown(untrustedMarkdownString);
+```
+
+Tests: `test/markdown.sanitize.test.js` covers iframe allow-list, tag stripping, attribute pruning, and italic/bold interactions with placeholders.
+
+Future enhancements (optional):
+
+- Add fenced code block handling with language class whitelisting
+- Permit configurable additional iframe origins passed via env/array
+- Swap mini parser for a battle-tested library if expanded markdown breadth is later required (still pass through same scrub stage)
+
+Security note: Because we explicitly re-escape user text before HTML shaping and then enforce tag/attribute origin constraints, the sanitizer rejects inline event handlers, script URLs, and unexpected embeds.
+
+## Supabase Postgres deployment (content schema alternative)
+
+If you prefer to host the canonical content schema on Supabase Postgres instead of (or in addition to) Neon:
+
+1. Create a new Supabase project (or reuse an existing one). Obtain the connection string (Project Settings → Database → Connection string → URI).
+2. Add that string to your local `.env` as `POSTGRES_URL` (Supabase includes `?sslmode=require` automatically for external connections).
+3. Run migrations locally:
+
+```bash
+npm run migrate
+```
+
+4. (Optional) Seed:
+
+```bash
+npm run seed
+```
+
+5. Confirm applied patches:
+
+```sql
+SELECT patch_name, applied_at FROM wisdomintech.__applied_patches ORDER BY applied_at;
+```
+
+6. In Supabase dashboard, disable (or do not enable) Row Level Security for publicly read tables since the API layer sits in front (you can later move to RLS with service key usage if you expose direct client queries).
+7. Keep Supabase Auth & Storage usage unchanged; your API `/api/*` endpoints will hit the same Supabase Postgres instead of Neon transparently because only `POSTGRES_URL` changed.
+
+Considerations:
+
+- Supabase migration history table (their own internal tracking) is separate; we maintain our own patch registry to stay portable across providers.
+- If you already had data in Supabase, ensure column additions are backward-compatible (all patches are additive / idempotent by design).
+
+## Verification & rollback guidance
+
+Verification after deploy:
+
+1. Health endpoint: `GET /api/health` should report `status: ok` and a non-zero `patches.applied` count.
+2. Meta endpoint: `GET /api/meta` should list the latest patch filename matching the most recent file in `db/`.
+3. Schema introspection (psql):
+
+```sql
+\dt wisdomintech.*
+SELECT count(*) FROM wisdomintech.__applied_patches;
+```
+
+4. Trigger spot check (example):
+
+```sql
+\d wisdomintech.blog_posts  -- verify updated_at, deleted_at columns
+\df+ wisdomintech.set_updated_at
+```
+
+5. Feature flags load test:
+
+```sql
+INSERT INTO wisdomintech.feature_flags (flag_key, enabled) VALUES ('_verification_temp', true)
+ON CONFLICT (flag_key) DO NOTHING;
+SELECT * FROM wisdomintech.feature_flags WHERE flag_key = '_verification_temp';
+```
+
+Then call `/api/meta` (if it exposes flags) or rely on `/api/_lib/featureFlags.js` via a temporary diagnostic endpoint to confirm caching.
+
+Rollback strategy (lightweight):
+
+- Because patches are additive and idempotent, rollback typically means deploying a hotfix patch that negates prior unintended changes (e.g., setting a flag false, dropping an accidentally added trigger) rather than deleting history.
+- Avoid deleting rows from `__applied_patches`; instead, create a compensating patch file (e.g., `patch_20251003_compensate_bad_trigger.sql`) that reverses or amends prior DDL.
+- For catastrophic cases (rare), snapshot the DB (provider backup) before applying new patches; restore from snapshot if needed.
+
+Suggested compensating patch template:
+
+```sql
+-- Patch: Remove incorrect trigger (YYYY-MM-DD)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM wisdomintech.__applied_patches WHERE patch_name = 'patch_20251003_compensate_bad_trigger'
+  ) THEN
+   DROP TRIGGER IF EXISTS some_faulty_trigger ON wisdomintech.blog_posts;
+   INSERT INTO wisdomintech.__applied_patches(patch_name) VALUES('patch_20251003_compensate_bad_trigger');
+  END IF;
+END$$;
+```
+
+Operational checklist (post-deploy):
+
+- [ ] Migrations applied cleanly (no errors in logs)
+- [ ] `/api/health` ok + latency within expected bounds
+- [ ] `/api/meta` lists new patch
+- [ ] Sample blog post request still resolves (e.g., `/api/blog/by-slug?slug=...`)
+- [ ] Feature flags reflect expected values
+- [ ] No unexpected privilege errors (search logs for `permission denied`)

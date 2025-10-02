@@ -20,8 +20,14 @@ CREATE TABLE IF NOT EXISTS wisdomintech.blog_post_revisions (
 CREATE INDEX IF NOT EXISTS idx_wit_blog_post_revisions_post_id ON wisdomintech.blog_post_revisions(blog_post_id);
 CREATE INDEX IF NOT EXISTS idx_wit_blog_post_revisions_created_at ON wisdomintech.blog_post_revisions(created_at);
 
-INSERT INTO wisdomintech.schema_patches (patch_name, applied_at)
-VALUES ('20250927b_revisions', now())
+-- Patch marker (align with __applied_patches convention; marker = filename without .sql)
+CREATE TABLE IF NOT EXISTS wisdomintech.__applied_patches (
+  patch_name TEXT PRIMARY KEY,
+  applied_at TIMESTAMPTZ DEFAULT now()
+);
+
+INSERT INTO wisdomintech.__applied_patches (patch_name)
+VALUES ('patch_20250927b_revisions')
 ON CONFLICT (patch_name) DO NOTHING;
 
 COMMIT;
