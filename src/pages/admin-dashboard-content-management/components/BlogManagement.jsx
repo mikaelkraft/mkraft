@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { validateBlog } from "../../../utils/validation";
+import MarkdownToolbar from "../../../components/ui/MarkdownToolbar";
+import storageService from "../../../utils/storageService";
+import MarkdownField from "../../../components/ui/MarkdownField";
 
 const BlogManagement = ({
   blogPosts,
@@ -8,139 +11,7 @@ const BlogManagement = ({
   onPostCreate,
   onOpenEditor,
 }) => {
-  const MarkdownEditor = ({
-    id = "md-editor",
-    value,
-    onChange,
-    placeholder = "Write your post in Markdown...",
-  }) => {
-    const applyWrap = (prefix, suffix = prefix) => {
-      const ta = document.getElementById(id);
-      if (!ta) return onChange((value || "") + `${prefix}${suffix}`);
-      const start = ta.selectionStart ?? 0;
-      const end = ta.selectionEnd ?? 0;
-      const before = value.slice(0, start);
-      const selected = value.slice(start, end);
-      const after = value.slice(end);
-      const next = `${before}${prefix}${selected || "text"}${suffix}${after}`;
-      onChange(next);
-      setTimeout(() => {
-        ta.focus();
-      }, 0);
-    };
-    const insertLink = () => {
-      const url = prompt("Enter URL");
-      if (url) applyWrap("[", `](${url})`);
-    };
-    const insertCodeBlock = () => {
-      const ta = document.getElementById(id);
-      const lang = prompt("Language (optional)") || "";
-      if (!ta)
-        return onChange(`${value || ""}\n\n\
-\n\n`);
-      const start = ta.selectionStart ?? 0;
-      const end = ta.selectionEnd ?? 0;
-      const before = value.slice(0, start);
-      const selected = value.slice(start, end) || "code";
-      const after = value.slice(end);
-      const next = `${before}\n\n\
-${lang}\n${selected}\n\
-\n\n${after}`;
-      onChange(next);
-    };
-    const insertList = (ordered = false) => {
-      const ta = document.getElementById(id);
-      const bullet = ordered ? "1." : "-";
-      if (!ta) return onChange(`${value || ""}\n${bullet} item`);
-      const start = ta.selectionStart ?? 0;
-      const end = ta.selectionEnd ?? 0;
-      const before = value.slice(0, start);
-      const selected = (value.slice(start, end) || "item").replace(
-        /^/gm,
-        `${bullet} `,
-      );
-      const after = value.slice(end);
-      const next = `${before}\n${selected}${after}`;
-      onChange(next);
-    };
-    return (
-      <div>
-        <div className="flex flex-wrap gap-2 mb-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => applyWrap("**")}
-          >
-            Bold
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => applyWrap("*")}
-          >
-            Italic
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => applyWrap("`")}
-          >
-            Code
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={insertCodeBlock}
-          >
-            Code Block
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => applyWrap("> ", "")}
-          >
-            Quote
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => insertList(false)}
-          >
-            • List
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => insertList(true)}
-          >
-            1. List
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={insertLink}
-          >
-            Link
-          </Button>
-        </div>
-        <textarea
-          id={id}
-          className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg min-h-[220px] font-mono text-sm"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-        />
-      </div>
-    );
-  };
+  // Removed local MarkdownEditor; using shared MarkdownToolbar + textarea where needed.
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPosts, setSelectedPosts] = useState([]);
   const [editingPost, setEditingPost] = useState(null);
@@ -818,12 +689,22 @@ ${lang}\n${selected}\n\
                   {showCreatePreview ? "Hide Preview" : "Preview Markdown"}
                 </Button>
               </div>
-              <MarkdownEditor
+              <MarkdownField
                 id="md-editor-create"
                 value={createForm.content}
                 onChange={(val) =>
                   setCreateForm({ ...createForm, content: val })
                 }
+                onUploadImage={async (file) => {
+                  const res = await storageService.uploadFile(file, {
+                    bucket: "media",
+                    pathPrefix: "blog/content",
+                  });
+                  if (res.success) return res.data.url;
+                  throw new Error("Upload failed");
+                }}
+                textareaClassName="min-h-[220px] mt-2"
+                placeholder="Write your post in Markdown..."
               />
               {formErrors.content && (
                 <p className="mt-1 text-xs text-error">{formErrors.content}</p>
@@ -1087,10 +968,20 @@ ${lang}\n${selected}\n\
                   {showEditPreview ? "Hide Preview" : "Preview Markdown"}
                 </Button>
               </div>
-              <MarkdownEditor
+              <MarkdownField
                 id="md-editor-edit"
                 value={editForm.content || ""}
                 onChange={(val) => setEditForm({ ...editForm, content: val })}
+                onUploadImage={async (file) => {
+                  const res = await storageService.uploadFile(file, {
+                    bucket: "media",
+                    pathPrefix: "blog/content",
+                  });
+                  if (res.success) return res.data.url;
+                  throw new Error("Upload failed");
+                }}
+                textareaClassName="min-h-[220px] mt-2"
+                placeholder="Write your post in Markdown..."
               />
               {formErrors.content && (
                 <p className="mt-1 text-xs text-error">{formErrors.content}</p>

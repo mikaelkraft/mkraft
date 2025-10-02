@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import MarkdownToolbar from "../../../components/ui/MarkdownToolbar"; // kept for any other future inline uses
+import MarkdownField from "../../../components/ui/MarkdownField";
+import storageService from "../../../utils/storageService";
 // Removed Helmet; meta editing is not handled inline
 import { useAuth } from "../../../contexts/AuthContext";
 import Icon from "../../../components/AppIcon";
@@ -383,14 +386,24 @@ const BlogModal = ({ isOpen, onClose, post, onSave, isAdmin }) => {
                   <label className="block text-sm font-medium text-text-primary mb-2">
                     Content *
                   </label>
-                  <textarea
-                    name="content"
+                  <MarkdownField
+                    id="blog-modal-content"
                     value={formData.content}
-                    onChange={handleInputChange}
-                    rows={12}
-                    className="w-full px-3 py-2 bg-background border border-border-accent/40 rounded-lg text-text-primary placeholder-text-secondary focus:border-primary/60 focus:outline-none resize-none"
+                    onChange={(val) =>
+                      handleInputChange({
+                        target: { name: "content", value: val },
+                      })
+                    }
+                    onUploadImage={async (file) => {
+                      const res = await storageService.uploadFile(file, {
+                        bucket: "media",
+                        pathPrefix: "blog/content",
+                      });
+                      if (res.success) return res.data.url;
+                      throw new Error("Upload failed");
+                    }}
+                    textareaClassName="min-h-[300px] bg-background border border-border-accent/40 text-text-primary placeholder-text-secondary focus:border-primary/60 focus:outline-none resize-none"
                     placeholder="Enter post content (supports markdown)"
-                    required
                   />
                 </div>
 

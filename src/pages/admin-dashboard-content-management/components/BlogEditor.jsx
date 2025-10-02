@@ -1,170 +1,9 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { validateBlog } from "../../../utils/validation";
 import storageService from "../../../utils/storageService";
+import MarkdownField from "../../../components/ui/MarkdownField";
 
-const MarkdownEditor = ({
-  id = "md-editor",
-  value,
-  onChange,
-  placeholder = "Write your post in Markdown...",
-}) => {
-  const fileInputRef = useRef(null);
-  const applyWrap = (prefix, suffix = prefix) => {
-    const ta = document.getElementById(id);
-    if (!ta) return onChange((value || "") + `${prefix}${suffix}`);
-    const start = ta.selectionStart ?? 0;
-    const end = ta.selectionEnd ?? 0;
-    const before = value.slice(0, start);
-    const selected = value.slice(start, end);
-    const after = value.slice(end);
-    const next = `${before}${prefix}${selected || "text"}${suffix}${after}`;
-    onChange(next);
-    setTimeout(() => {
-      ta.focus();
-    }, 0);
-  };
-  const insertLink = () => {
-    const url = prompt("Enter URL");
-    if (url) applyWrap("[", `](${url})`);
-  };
-  const insertCodeBlock = () => {
-    const ta = document.getElementById(id);
-    const lang = prompt("Language (optional)") || "";
-    const start = ta?.selectionStart ?? 0;
-    const end = ta?.selectionEnd ?? 0;
-    const before = value.slice(0, start);
-    const selected = value.slice(start, end) || "code";
-    const after = value.slice(end);
-    const block = "\n\n```" + lang + "\n" + selected + "\n```\n\n";
-    onChange(before + block + after);
-    setTimeout(() => {
-      ta?.focus();
-    }, 0);
-  };
-  const insertList = (ordered = false) => {
-    const ta = document.getElementById(id);
-    const bullet = ordered ? "1." : "-";
-    if (!ta) return onChange(`${value || ""}\n${bullet} item`);
-    const start = ta.selectionStart ?? 0;
-    const end = ta.selectionEnd ?? 0;
-    const before = value.slice(0, start);
-    const selected = (value.slice(start, end) || "item").replace(
-      /^/gm,
-      `${bullet} `,
-    );
-    const after = value.slice(end);
-    const next = `${before}\n${selected}${after}`;
-    onChange(next);
-  };
-  const onPickImage = () => fileInputRef.current?.click();
-  const onFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const res = await storageService.uploadFile(file, {
-      bucket: "media",
-      pathPrefix: "blog/content",
-    });
-    if (res.success) {
-      const url = res.data.url;
-      const ta = document.getElementById(id);
-      const start = ta?.selectionStart ?? value.length;
-      const end = ta?.selectionEnd ?? value.length;
-      const before = value.slice(0, start);
-      const after = value.slice(end);
-      const md = `![image](${url})`;
-      onChange(before + md + after);
-    }
-    e.target.value = "";
-  };
-  return (
-    <div>
-      <div className="flex flex-wrap gap-2 mb-2">
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => applyWrap("**")}
-        >
-          Bold
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => applyWrap("*")}
-        >
-          Italic
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => applyWrap("`")}
-        >
-          Code
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={insertCodeBlock}
-        >
-          Code Block
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => applyWrap("> ", "")}
-        >
-          Quote
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => insertList(false)}
-        >
-          • List
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => insertList(true)}
-        >
-          1. List
-        </Button>
-        <Button type="button" size="sm" variant="outline" onClick={insertLink}>
-          Link
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={onPickImage}
-          iconName="Image"
-        >
-          Image
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={onFileChange}
-        />
-      </div>
-      <textarea
-        id={id}
-        className="w-full px-3 py-2 bg-surface border border-border-accent/20 rounded-lg min-h-[320px] font-mono text-sm"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-      />
-    </div>
-  );
-};
+// Removed inline MarkdownEditor in favor of shared MarkdownToolbar component.
 
 const BlogEditor = ({
   mode = "create",
@@ -490,10 +329,20 @@ const BlogEditor = ({
                   {preview ? "Hide Preview" : "Preview Markdown"}
                 </Button>
               </div>
-              <MarkdownEditor
+              <MarkdownField
                 id="blog-md-editor"
                 value={form.content}
                 onChange={(val) => setForm({ ...form, content: val })}
+                onUploadImage={async (file) => {
+                  const res = await storageService.uploadFile(file, {
+                    bucket: "media",
+                    pathPrefix: "blog/content",
+                  });
+                  if (res.success) return res.data.url;
+                  throw new Error("Upload failed");
+                }}
+                textareaClassName="min-h-[320px] mt-2"
+                placeholder="Write your post in Markdown..."
               />
               {errors.content && (
                 <p className="mt-1 text-xs text-error">{errors.content}</p>
