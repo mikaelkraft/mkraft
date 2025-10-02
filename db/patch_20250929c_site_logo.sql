@@ -15,22 +15,26 @@ UPDATE wisdomintech.site_settings
   WHERE site_logo_url IS NULL AND logo_url IS NOT NULL;
 
 -- Keep alias columns in sync (trigger)
-DO $$ BEGIN
+CREATE OR REPLACE FUNCTION wisdomintech._sync_logo_alias()
+RETURNS TRIGGER AS $fn$
+BEGIN
+  IF NEW.logo_url IS NOT NULL AND (NEW.site_logo_url IS NULL OR NEW.site_logo_url <> NEW.logo_url) THEN
+    NEW.site_logo_url := NEW.logo_url;
+  ELSIF NEW.site_logo_url IS NOT NULL AND (NEW.logo_url IS NULL OR NEW.logo_url <> NEW.site_logo_url) THEN
+    NEW.logo_url := NEW.site_logo_url;
+  END IF;
+  RETURN NEW;
+END;
+$fn$ LANGUAGE plpgsql;
+
+DO $trg$
+BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_sync_logo_alias') THEN
-    CREATE OR REPLACE FUNCTION wisdomintech._sync_logo_alias()
-    RETURNS TRIGGER AS $$
-    BEGIN
-      IF NEW.logo_url IS NOT NULL AND (NEW.site_logo_url IS NULL OR NEW.site_logo_url <> NEW.logo_url) THEN
-        NEW.site_logo_url := NEW.logo_url;
-      ELSIF NEW.site_logo_url IS NOT NULL AND (NEW.logo_url IS NULL OR NEW.logo_url <> NEW.site_logo_url) THEN
-        NEW.logo_url := NEW.site_logo_url;
-      END IF;
-      RETURN NEW;
-    END; $$ LANGUAGE plpgsql;
     CREATE TRIGGER trg_sync_logo_alias BEFORE INSERT OR UPDATE ON wisdomintech.site_settings
       FOR EACH ROW EXECUTE FUNCTION wisdomintech._sync_logo_alias();
   END IF;
-END $$;
+END
+$trg$;
 
 INSERT INTO wisdomintech.__applied_patches (patch_name)
 VALUES ('patch_20250929c_site_logo')
