@@ -328,7 +328,22 @@ Sample:
 
 ### /api/meta
 
-Returns build + schema + feature flag snapshot:
+Returns build + schema + feature flag snapshot. Add `?verbose=1` to include `tableCounts` and a detailed feature flags list with notes/timestamps.
+
+### /api/feature-flags
+
+Admin endpoint for inspecting and toggling feature flags.
+
+Methods:
+
+- GET `/api/feature-flags` -> `{ flags: { key: boolean, ... } }` (forces refresh)
+- POST `/api/feature-flags` body: `{ key: string, enabled: boolean, note?: string }` -> upserts flag (admin auth required via Supabase JWT / admin email heuristic)
+
+### Tooling additions
+
+- Patch generator: `npm run new:patch add_column_x` creates a timestamped patch template.
+- Pre-push hook: runs lint + full tests before pushing.
+- GitHub Actions CI (`.github/workflows/ci.yml`): lint + tests on pushes and PRs to `main`.
 
 ```json
 {
