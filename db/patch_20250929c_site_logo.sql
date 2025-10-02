@@ -5,20 +5,14 @@
 ALTER TABLE wisdomintech.site_settings
   ADD COLUMN IF NOT EXISTS logo_url TEXT;
 
--- Optionally create a view aliasing future naming (site_logo_url) if desired by clients
--- (Skip if already present)
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns 
-    WHERE table_schema='wisdomintech' AND table_name='site_settings' AND column_name='site_logo_url'
-  ) THEN
-    BEGIN
-      ALTER TABLE wisdomintech.site_settings ADD COLUMN site_logo_url TEXT;
-      -- Backfill new alias from existing logo_url if null
-      UPDATE wisdomintech.site_settings SET site_logo_url = logo_url WHERE site_logo_url IS NULL AND logo_url IS NOT NULL;
-    EXCEPTION WHEN duplicate_column THEN NULL; END;
-  END IF;
-END $$;
+-- Ensure alias column exists (simple additive; IF NOT EXISTS handles idempotency)
+ALTER TABLE wisdomintech.site_settings
+  ADD COLUMN IF NOT EXISTS site_logo_url TEXT;
+
+-- Backfill alias from primary if empty
+UPDATE wisdomintech.site_settings
+  SET site_logo_url = logo_url
+  WHERE site_logo_url IS NULL AND logo_url IS NOT NULL;
 
 -- Keep alias columns in sync (trigger)
 DO $$ BEGIN

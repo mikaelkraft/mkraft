@@ -464,6 +464,150 @@ Considerations:
 
 ## Verification & rollback guidance
 
+## End-to-end migration steps (Neon + Supabase Auth/Storage)
+
+Below is a concise, repeatable playbook to stand up (or re-sync) the full content schema on a fresh Postgres (Neon) while retaining Supabase for Auth + Storage.
+
+### 1. Prerequisites
+
+- Node.js installed (>=18)
+- Access to a Neon project (or any Postgres URL) and a Supabase project for Auth/Storage
+- Environment variables prepared (see `.env.example`)
+
+### 2. Create / update your `.env`
+
+Minimum required for migrations:
+
+```
+POSTGRES_URL=postgres://user:pass@host:5432/dbname
+POSTGRES_SSL=true
+FEATURE_FLAGS_TTL_MS=30000
+```
+
+Optional (but recommended) duplicates:
+
+```
+DATABASE_URL=${POSTGRES_URL}
+PG_POOL_MAX=5
+PG_IDLE_TIMEOUT=30000
+```
+
+Add Supabase auth if you will exercise admin endpoints locally:
+
+```
+SUPABASE_URL=... (project URL)
+SUPABASE_ANON_KEY=... (anon key)
+ADMIN_EMAIL=your_admin_email
+```
+
+### 3. Run migrations
+
+Command (idempotent: safe to re-run):
+
+```bash
+npm run migrate
+```
+
+What happens:
+
+1. Applies `db/wisdomintech_schema.sql` (CREATE SCHEMA + tables/functions/triggers) – safe if already present
+2. Ensures marker table: `wisdomintech.__applied_patches`
+3. Discovers patch files matching `patch_*.sql` (sorted lexicographically)
+4. Skips any patch whose filename (without `.sql`) is already in marker table
+5. Executes remaining patches in order; each patch inserts its own marker or the runner backfills it
+
+### 4. Verify schema state
+
+Using psql (or any SQL client):
+
+```sql
+SELECT patch_name, applied_at FROM wisdomintech.__applied_patches ORDER BY applied_at;
+```
+
+Result should list every `patch_YYYYMMDD...` file present in `db/` locally.
+
+Quick object spot checks:
+
+```sql
+\dt wisdomintech.*                -- all tables
+\d wisdomintech.blog_posts        -- confirm updated_at, deleted_at, like_count, comment_count
+\df+ wisdomintech.set_updated_at  -- trigger function
+```
+
+### 5. Seed (optional)
+
+If you have a `scripts/seed.js` implemented:
+
+```bash
+npm run seed
+```
+
+### 6. Run API locally
+
+```bash
+npm run dev:api
+```
+
+Hit health + meta endpoints:
+
+```bash
+curl -s http://localhost:5000/api/health | jq '.status, .patches'
+curl -s http://localhost:5000/api/meta?verbose=1 | jq '.patches | length'
+```
+
+### 7. Deploy (Vercel example)
+
+In Vercel project settings → Environment Variables (Production & Preview):
+
+```
+POSTGRES_URL=...
+POSTGRES_SSL=true
+DATABASE_URL=...              # optional mirror
+FEATURE_FLAGS_TTL_MS=30000
+VITE_USE_API=true
+VITE_API_BASE_URL=/api
+SUPABASE_URL=...
+SUPABASE_ANON_KEY=...
+ADMIN_EMAIL=...
+SITE_BASE_URL=https://your-domain
+VITE_SITE_BASE_URL=https://your-domain
+```
+
+After first deploy, Vercel serverless function cold start will execute migration (if you wire it as a build/prestart step) or invoke manually once by calling a protected admin route that triggers migration (future enhancement).
+
+### 8. Ongoing patch workflow
+
+1. Generate new patch skeleton:
+
+```bash
+npm run new:patch add_feature_xyz
+```
+
+2. Edit generated file in `db/patch_YYYYMMDD_add_feature_xyz.sql`
+3. Make idempotent changes (use IF NOT EXISTS / CREATE OR REPLACE)
+4. Add marker insert inside patch block
+5. Commit & push → deploy → migration runner applies only new patch
+
+### 9. Troubleshooting
+
+| Symptom                                       | Likely Cause                        | Resolution                                             |
+| --------------------------------------------- | ----------------------------------- | ------------------------------------------------------ |
+| Migration script exits: POSTGRES_URL required | Env var missing in runtime          | Set POSTGRES_URL locally / provider                    |
+| Patch not applying                            | Filename marker already inserted    | Rename patch (new file) with correct change and push   |
+| Health endpoint slow                          | Network latency to managed Postgres | Confirm region proximity; reduce cold start by warming |
+| Flag cache stale too long                     | TTL too high                        | Lower FEATURE_FLAGS_TTL_MS                             |
+
+### 10. Supabase-only deployment variant
+
+If you use Supabase Postgres for content + Auth + Storage:
+
+1. Set `POSTGRES_URL` to Supabase connection string (includes `sslmode=require`)
+2. Run `npm run migrate`
+3. Keep `SUPABASE_URL` / `SUPABASE_ANON_KEY` for auth in both server and client
+4. All API reads now target Supabase Postgres transparently
+
+No further adjustments required—the schema + patches are provider-agnostic.
+
 Verification after deploy:
 
 1. Health endpoint: `GET /api/health` should report `status: ok` and a non-zero `patches.applied` count.
