@@ -22,13 +22,28 @@ module.exports = async function handler(req, res) {
 
     let featureFlags = {};
     let flagCount = 0;
+    let flagCacheMeta = null;
     try {
       const r = await query(
         "SELECT flag_key as key, enabled, note, updated_at FROM wisdomintech.feature_flags ORDER BY flag_key ASC",
       );
       featureFlags = Object.fromEntries(r.rows.map((r) => [r.key, r.enabled]));
       flagCount = r.rows.length;
-      if (verbose) featureFlags = { list: r.rows, map: featureFlags };
+      if (verbose) {
+        // Include cache TTL diagnostics if loader has run
+        try {
+          const ffMod = require("../_lib/featureFlags.js");
+          const ttlMs = Number(process.env.FEATURE_FLAGS_TTL_MS || 30000);
+          const loadedAt = ffMod.__cache?.loadedAt || 0;
+          flagCacheMeta = {
+            ttlMs,
+            loadedAt: loadedAt ? new Date(loadedAt).toISOString() : null,
+            ageMs: loadedAt ? Date.now() - loadedAt : null,
+            stale: loadedAt ? Date.now() - loadedAt > ttlMs : null,
+          };
+        } catch (_) {}
+        featureFlags = { list: r.rows, map: featureFlags };
+      }
     } catch (_) {
       try {
         const r2 = await query(
@@ -50,6 +65,7 @@ module.exports = async function handler(req, res) {
       flagCount,
       timestamp: new Date().toISOString(),
     };
+    if (verbose && flagCacheMeta) payload.flagCache = flagCacheMeta;
     if (verbose) {
       try {
         const { rows } = await query(

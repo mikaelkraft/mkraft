@@ -47,4 +47,4 @@ function isEnabled(flag, defaultValue = false) {
   return !!v;
 }
 
-module.exports = { getFeatureFlags, isEnabled, loadFlagsFresh };
+module.exports = { getFeatureFlags, isEnabled, loadFlagsFresh, __cache: cache };
