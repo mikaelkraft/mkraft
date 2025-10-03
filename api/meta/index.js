@@ -11,11 +11,11 @@ module.exports = async function handler(req, res) {
       process.env.GIT_COMMIT || process.env.VERCEL_GIT_COMMIT_SHA || "unknown";
     const verbose = /(?:^|[?&])verbose=1/.test(req.originalUrl);
 
-    // Applied patches
+    // Applied patches (will include hash array if verbose)
     let patches = [];
     try {
       const r = await query(
-        "SELECT patch_name, applied_at FROM wisdomintech.__applied_patches ORDER BY applied_at ASC",
+        "SELECT patch_name, applied_at, patch_hash FROM wisdomintech.__applied_patches ORDER BY applied_at ASC",
       );
       patches = r.rows;
     } catch (_) {}

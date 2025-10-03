@@ -46,7 +46,7 @@ if (fs.existsSync(fullPath)) {
   process.exit(1);
 }
 
-const template = `-- Patch: ${desc.replace(/_/g, " ")} (${y}-${m}-${d})\n-- Idempotent migration template. Include only additive / safe operations.\n\nCREATE TABLE IF NOT EXISTS wisdomintech.__applied_patches (\n  patch_name TEXT PRIMARY KEY,\n  applied_at TIMESTAMPTZ DEFAULT now()\n);\n\nDO $$\nBEGIN\n  IF NOT EXISTS (SELECT 1 FROM wisdomintech.__applied_patches WHERE patch_name = '${filename.replace(/\.sql$/, "")}') THEN\n    -- TODO: Add DDL / DML here (use IF NOT EXISTS / CREATE OR REPLACE etc.)\n\n    INSERT INTO wisdomintech.__applied_patches(patch_name) VALUES('${filename.replace(/\.sql$/, "")}');\n  END IF;\nEND$$;\n`;
+const template = `-- Patch: ${desc.replace(/_/g, " ")} (${y}-${m}-${d})\n-- Idempotent migration template. Include only additive / safe operations.\n-- Pattern: apply DDL with IF NOT EXISTS / CREATE OR REPLACE, then insert marker.\n\nCREATE TABLE IF NOT EXISTS wisdomintech.__applied_patches (\n  patch_name TEXT PRIMARY KEY,\n  applied_at TIMESTAMPTZ DEFAULT now(),\n  patch_hash TEXT\n);\n\n-- TODO: Add DDL / DML here (wrap destructive changes in new compensating patch instead of editing history).\n\nINSERT INTO wisdomintech.__applied_patches(patch_name) VALUES('${filename.replace(/\.sql$/, "")}')\nON CONFLICT (patch_name) DO NOTHING;\n`;
 
 fs.writeFileSync(fullPath, template, "utf8");
 console.log("Created patch file:", path.relative(process.cwd(), fullPath));
