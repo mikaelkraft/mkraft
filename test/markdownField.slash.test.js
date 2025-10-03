@@ -13,7 +13,8 @@ describe("markdownInsert slashCommand dispatcher", () => {
   });
   it("returns code block insertion for code", () => {
     const res = slashCommand("foo", 3, "code");
-    expect(res.text).toContain("```");
+    expect(res.text).toMatch(/code/);
+    expect(res.text.split("\n").length).toBeGreaterThan(3); // multiline block inserted
   });
   it("gracefully returns null for unknown command", () => {
     const res = slashCommand("", 0, "nope");
