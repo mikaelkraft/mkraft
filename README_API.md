@@ -608,33 +608,6 @@ If you use Supabase Postgres for content + Auth + Storage:
 
 No further adjustments required—the schema + patches are provider-agnostic.
 
-## Patch automation & drift detection (enhanced)
-
-Recent additions:
-
-- `patch_hash` column on `wisdomintech.__applied_patches` capturing SHA-256 of each patch file at apply time.
-- Migration runner computes & backfills hashes on each run; if you change a historical patch file you can detect drift by recomputing (future: add warning script).
-- `npm run lint:patches` validates each `patch_*.sql` contains its marker name and flags excessive procedural `DO $$` usage.
-- GitHub Actions `patches` job spins up Postgres 15, runs patch lint, and executes migrations for early syntax validation.
-- `/api/health` now includes `patches.latest` and `patches.pending` (best-effort by scanning local filesystem in deployment context).
-- `/api/migrate` (POST, admin only) triggers an in-process migration run (useful for on-demand apply after adding new patches without redeploy).
-
-Example health excerpt:
-
-```json
-{
-  "patches": {
-    "applied": 14,
-    "latest": "patch_20251002b_patch_hash",
-    "pending": 0
-  }
-}
-```
-
-Security note: Restrict `/api/migrate` to admin; it executes server-side scripts. Avoid exposing in public client features.
-
-Operational tip: Treat modifications to already-applied patch files as an anti-pattern—create a new compensating patch instead. Hash drift detection will help surface unexpected edits in future tooling.
-
 Verification after deploy:
 
 1. Health endpoint: `GET /api/health` should report `status: ok` and a non-zero `patches.applied` count.
