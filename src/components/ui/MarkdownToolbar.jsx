@@ -198,6 +198,13 @@ export default function MarkdownToolbar({
     const html = buildSpotifyEmbed(type, id);
     insertEmbed(html);
   };
+  // Accessibility: keyboard close for emoji / advanced panels
+  const onKeyPanel = (e) => {
+    if (e.key === "Escape") {
+      setShowEmoji(false);
+      setShowAdvanced(false);
+    }
+  };
 
   const onPickImage = () => fileInputRef.current?.click();
   const onFileChange = async (e) => {
@@ -301,7 +308,12 @@ export default function MarkdownToolbar({
   ];
 
   return (
-    <div className={`flex flex-wrap gap-1 ${className}`}>
+    <div
+      className={`flex flex-wrap gap-1 ${className}`}
+      role="toolbar"
+      aria-label="Markdown formatting toolbar"
+      onKeyDown={onKeyPanel}
+    >
       {headingLevels.map((lvl) => (
         <Button
           key={lvl}
@@ -334,23 +346,35 @@ export default function MarkdownToolbar({
         onClick={() => setShowAdvanced((v) => !v)}
         title="Toggle advanced embed tools"
         iconName="Settings2"
+        aria-expanded={showAdvanced}
+        aria-controls="md-advanced-embeds"
+        aria-label="Toggle advanced embed tools"
       >
         {showAdvanced ? "Adv-" : "Adv+"}
       </Button>
-      {showAdvanced &&
-        advancedButtons.map((b) => (
-          <Button
-            key={b.title}
-            type="button"
-            size="sm"
-            variant="outline"
-            title={b.title}
-            onClick={b.action}
-            iconName={b.icon}
-          >
-            {b.label}
-          </Button>
-        ))}
+      {showAdvanced && (
+        <div
+          id="md-advanced-embeds"
+          role="group"
+          aria-label="Advanced embed tools"
+          className="flex flex-wrap gap-1"
+        >
+          {advancedButtons.map((b) => (
+            <Button
+              key={b.title}
+              type="button"
+              size="sm"
+              variant="outline"
+              title={b.title}
+              aria-label={b.title}
+              onClick={b.action}
+              iconName={b.icon}
+            >
+              {b.label}
+            </Button>
+          ))}
+        </div>
+      )}
       {canImage && (
         <Button
           type="button"
@@ -373,13 +397,22 @@ export default function MarkdownToolbar({
         />
       )}
       {showEmoji && (
-        <div className="w-full flex flex-wrap gap-1 p-2 border border-border-accent/30 rounded bg-surface/70">
+        <div
+          className="w-full flex flex-wrap gap-1 p-2 border border-border-accent/30 rounded bg-surface/70"
+          role="listbox"
+          aria-label="Emoji picker"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setShowEmoji(false);
+          }}
+        >
           {emojiList.map((e) => (
             <button
               key={e}
               type="button"
               className="text-lg hover:scale-110 transition"
               onClick={() => insertEmoji(e)}
+              role="option"
+              aria-label={`Insert emoji ${e}`}
             >
               {e}
             </button>
