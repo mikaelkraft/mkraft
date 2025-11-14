@@ -169,16 +169,16 @@ Embed builder + parser functions are covered in `test/markdownToolbar.embed.test
 
 Added features:
 
-- Preview toggle: renders sanitized HTML (marked + DOMPurify) lazily loaded on first use.
+- Preview toggle: renders sanitized HTML using lightweight inline markdown transform (no external marked/DOMPurify at runtime in client bundle).
 - Slash command palette: type `/` at start of a new token to open a small action list. Supported commands: `/h1`, `/h2`, `/h3`, `/table`, `/code`, `/quote`.
 
 Implementation notes:
 
-- Preview loads `marked` and `dompurify` dynamically to avoid impacting initial bundle.
+- Preview now avoids dynamic imports entirely; inline mini-renderer handles headings, bold, italic, and code, then passes through shared sanitizer.
 - Slash detection uses regex `/\/(\w*)$/` on substring up to cursor; removal occurs by replacing final `/<word>` before applying transformed insertion.
 - Extend commands by adding entries to `slashActions` in `MarkdownField.jsx` and handling them inside `slashCommand` dispatcher in `markdownInsert.js`.
 
-Security: DOMPurify sanitization applied before injecting preview HTML; production markdown rendering path should also sanitize if raw HTML is permitted.
+Security: Client preview HTML is passed through the shared sanitizeClientHtml utility aligned with server whitelist (no raw third-party parser output).
 
 Usage example
 

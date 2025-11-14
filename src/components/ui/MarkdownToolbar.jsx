@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Button from "./Button";
 import {
   parseYouTubeId,
@@ -49,6 +49,7 @@ export default function MarkdownToolbar({
   const fileInputRef = useRef(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [emojiIndex, setEmojiIndex] = useState(0);
   const canImage = (enableImageUpload ?? !!onUploadImage) === true;
 
   const getTA = () => (textareaId ? document.getElementById(textareaId) : null);
@@ -154,6 +155,24 @@ export default function MarkdownToolbar({
     "🐛",
     "✅",
     "🔍",
+    "🔒",
+    "🔑",
+    "💬",
+    "📢",
+    "🙏",
+    "🤝",
+    "🤖",
+    "💸",
+    "🌐",
+    "⚡",
+    "🔋",
+    "🎯",
+    "🐛",
+    "✅",
+    "🚧",
+    "💰",
+    "📈",
+    "📉",
     "🎉",
   ];
   const insertEmoji = (emoji) => {
@@ -165,6 +184,10 @@ export default function MarkdownToolbar({
       setShowEmoji(false);
     });
   };
+  // keep index in range when list toggles
+  useEffect(() => {
+    if (!showEmoji) setEmojiIndex(0);
+  }, [showEmoji]);
 
   // ---------- Embed helpers (now imported) ----------
   const insertEmbed = (html) => {
@@ -401,18 +424,38 @@ export default function MarkdownToolbar({
           className="w-full flex flex-wrap gap-1 p-2 border border-border-accent/30 rounded bg-surface/70"
           role="listbox"
           aria-label="Emoji picker"
+          aria-activedescendant={`emoji-${emojiIndex}`}
           onKeyDown={(e) => {
-            if (e.key === "Escape") setShowEmoji(false);
+            if (e.key === "Escape") {
+              setShowEmoji(false);
+              return;
+            }
+            if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+              e.preventDefault();
+              setEmojiIndex((i) => (i + 1 >= emojiList.length ? 0 : i + 1));
+            } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+              e.preventDefault();
+              setEmojiIndex(
+                (i) => (i - 1 + emojiList.length) % emojiList.length,
+              );
+            } else if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              insertEmoji(emojiList[emojiIndex]);
+            }
           }}
+          tabIndex={0}
         >
-          {emojiList.map((e) => (
+          {emojiList.map((e, i) => (
             <button
-              key={e}
+              key={e + i}
+              id={`emoji-${i}`}
               type="button"
-              className="text-lg hover:scale-110 transition"
+              className={`text-lg hover:scale-110 transition rounded ${i === emojiIndex ? "ring-2 ring-primary" : ""}`}
               onClick={() => insertEmoji(e)}
               role="option"
+              aria-selected={i === emojiIndex}
               aria-label={`Insert emoji ${e}`}
+              tabIndex={-1}
             >
               {e}
             </button>
