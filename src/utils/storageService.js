@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import supabase from "./supabase";
 
 // Buckets expected: 'media', 'logos'. Ensure they exist in Supabase Storage.
 const DEFAULT_BUCKET = "media";
