@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { sanitizeClientHtml } from "../../utils/markdownSanitizeClient";
 import MarkdownToolbar from "./MarkdownToolbar";
-import { slashCommand } from "../../utils/markdownInsert";
+
+const slashCommand = (cmd, label, insert) => ({ cmd, label, insert });
 
 // Clean MarkdownField (purged legacy dynamic imports and duplicate code)
 export default function MarkdownField({
@@ -208,6 +209,8 @@ export default function MarkdownField({
         <div
           className="absolute z-50 bg-surface border border-border-accent/40 rounded shadow-md text-sm"
           style={{ left: slashPos.x, top: slashPos.y }}
+          role="listbox"
+          aria-label="Slash commands"
         >
           {filteredActions.map((a, i) => (
             <button
@@ -215,6 +218,8 @@ export default function MarkdownField({
               key={a.cmd}
               onClick={() => applySlash(a)}
               className={`block w-full text-left px-3 py-1 hover:bg-surface-alt ${i === slashIndex ? "bg-primary/20" : ""}`}
+              role="option"
+              aria-selected={i === slashIndex}
             >
               /{a.cmd} <span className="opacity-70 ml-1">{a.label}</span>
             </button>

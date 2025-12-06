@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "../AppIcon";
 
 const Button = React.forwardRef(
   (
