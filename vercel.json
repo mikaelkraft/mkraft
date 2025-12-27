@@ -1,7 +1,7 @@
 {
   "version": 2,
   "builds": [
-    { "src": "vite.config.mjs", "use": "@vercel/static-build", "config": { "distDir": "build" } },
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } },
     { "src": "api/**/*.[jt]s", "use": "@vercel/node" }
   ],
   "routes": [
