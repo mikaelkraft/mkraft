@@ -1,6 +1,9 @@
 {
   "name": "mikaelkraft_portfolio",
   "version": "0.1.0",
+  "engines": {
+    "node": "24.x"
+  },
   "private": true,
   "dependencies": {
     "@hapi/boom": "^10.0.1",
