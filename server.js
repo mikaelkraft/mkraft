@@ -70,13 +70,11 @@ const wrap = (handler) => async (req, res) => {
       err: e.message,
       stack: e.stack,
     });
-    res
-      .status(500)
-      .json({
-        error: "Internal Server Error",
-        detail: e.message,
-        requestId: req.id,
-      });
+    res.status(500).json({
+      error: "Internal Server Error",
+      detail: e.message,
+      requestId: req.id,
+    });
   }
 };
 
@@ -245,7 +243,7 @@ app.get("/healthz", (req, res) => res.json({ ok: true }));
 
 // Optionally serve the built frontend in production
 if (process.env.NODE_ENV === "production") {
-  const buildDir = path.join(__dirname, "build");
+  const buildDir = path.join(__dirname, "dist");
   app.use(express.static(buildDir));
   app.get("*", (req, res) => res.sendFile(path.join(buildDir, "index.html")));
 }
