@@ -8,10 +8,5 @@
       "source": "/((?!api|ads\\.txt|sw\\.js|favicon\\.ico).*)",
       "destination": "/"
     }
-  ],
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs22.x"
-    }
-  }
+  ]
 }
