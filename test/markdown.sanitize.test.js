@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sanitizeMarkdown } from "../api/_lib/markdownSanitize.js";
+import { sanitizeMarkdown } from "../backend/_lib/markdownSanitize.js";
 
 describe("sanitizeMarkdown", () => {
   it("allows basic formatting", () => {
