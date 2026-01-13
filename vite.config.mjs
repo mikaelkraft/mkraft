@@ -5,6 +5,7 @@ import { inspectorServer } from "@react-dev-inspector/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/',
   build: {
     chunkSizeWarningLimit: 2000,
   },
