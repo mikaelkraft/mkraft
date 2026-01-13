@@ -1,7 +1,7 @@
 .DS_Store
 node_modules
 .idea
-package-lock.json
+# package-lock.json
 /build
 .vscode/
 .idea/
