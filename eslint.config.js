@@ -65,7 +65,7 @@ module.exports = [
   },
   // Backend Node API files (CommonJS style)
   {
-    files: ["api/**/*.js", "server.js"],
+    files: ["api/**/*.js", "backend/**/*.js", "server.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "script",

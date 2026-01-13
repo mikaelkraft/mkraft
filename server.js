@@ -5,14 +5,14 @@ const path = require("path");
 const cors = require("cors");
 const nodeCrypto = require("crypto");
 
-const { withTransform } = require("./api/_lib/responseWrap.js");
-const { log } = require("./api/_lib/log.js");
-const { inc, observe } = require("./api/_lib/metrics.js");
+const { withTransform } = require("./backend/_lib/responseWrap.js");
+const { log } = require("./backend/_lib/log.js");
+const { inc, observe } = require("./backend/_lib/metrics.js");
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
 
-const { resolveBaseUrl } = require("./api/_lib/respond.js");
+const { resolveBaseUrl } = require("./backend/_lib/respond.js");
 // Host mismatch warning (production only)
 if (process.env.NODE_ENV === "production") {
   const configured = (() => {
@@ -82,7 +82,7 @@ const wrap = (handler) => async (req, res) => {
 app.all(
   "/api/settings",
   wrap(
-    withTransform(require("./api/settings/index.js"), {
+    withTransform(require("./backend/settings/index.js"), {
       camel: true,
       cacheSeconds: 30,
     }),
@@ -91,7 +91,7 @@ app.all(
 app.all(
   "/api/settings/features",
   wrap(
-    withTransform(require("./api/settings/features.js"), {
+    withTransform(require("./backend/settings/features.js"), {
       camel: true,
       cacheSeconds: 5,
     }),
@@ -100,7 +100,7 @@ app.all(
 app.all(
   "/api/projects",
   wrap(
-    withTransform(require("./api/projects/index.js"), {
+    withTransform(require("./backend/projects/index.js"), {
       camel: true,
       cacheSeconds: 10,
     }),
@@ -109,7 +109,7 @@ app.all(
 app.all(
   "/api/projects/by-id",
   wrap(
-    withTransform(require("./api/projects/by-id.js"), {
+    withTransform(require("./backend/projects/by-id.js"), {
       camel: true,
       cacheSeconds: 10,
     }),
@@ -118,7 +118,7 @@ app.all(
 app.all(
   "/api/blog",
   wrap(
-    withTransform(require("./api/blog/index.js"), {
+    withTransform(require("./backend/blog/index.js"), {
       camel: true,
       cacheSeconds: 15,
     }),
@@ -127,7 +127,7 @@ app.all(
 app.all(
   "/api/blog/by-slug",
   wrap(
-    withTransform(require("./api/blog/by-slug.js"), {
+    withTransform(require("./backend/blog/by-slug.js"), {
       camel: true,
       cacheSeconds: 60,
     }),
@@ -136,7 +136,7 @@ app.all(
 app.all(
   "/api/blog/related",
   wrap(
-    withTransform(require("./api/blog/related.js"), {
+    withTransform(require("./backend/blog/related.js"), {
       camel: true,
       cacheSeconds: 30,
     }),
@@ -144,12 +144,12 @@ app.all(
 );
 app.all(
   "/api/blog/revisions",
-  wrap(withTransform(require("./api/blog/revisions.js"), { camel: true })),
+  wrap(withTransform(require("./backend/blog/revisions.js"), { camel: true })),
 );
 app.all(
   "/api/blog/search",
   wrap(
-    withTransform(require("./api/blog/search.js"), {
+    withTransform(require("./backend/blog/search.js"), {
       camel: true,
       cacheSeconds: 10,
     }),
@@ -158,52 +158,56 @@ app.all(
 app.all(
   "/api/slides",
   wrap(
-    withTransform(require("./api/slides/index.js"), {
+    withTransform(require("./backend/slides/index.js"), {
       camel: true,
       cacheSeconds: 30,
     }),
   ),
 );
-app.all("/api/slides/reorder", wrap(require("./api/slides/reorder.js")));
+app.all("/api/slides/reorder", wrap(require("./backend/slides/reorder.js")));
 app.all(
   "/api/comments",
-  wrap(withTransform(require("./api/comments/index.js"), { camel: true })),
+  wrap(withTransform(require("./backend/comments/index.js"), { camel: true })),
 );
 app.all(
   "/api/comments/moderate",
-  wrap(withTransform(require("./api/comments/moderate.js"), { camel: true })),
+  wrap(
+    withTransform(require("./backend/comments/moderate.js"), { camel: true }),
+  ),
 );
 app.all(
   "/api/likes/toggle",
-  wrap(withTransform(require("./api/likes/toggle.js"), { camel: true })),
+  wrap(withTransform(require("./backend/likes/toggle.js"), { camel: true })),
 );
 app.all(
   "/api/views/increment",
-  wrap(withTransform(require("./api/views/increment.js"), { camel: true })),
+  wrap(withTransform(require("./backend/views/increment.js"), { camel: true })),
 );
 app.all(
   "/api/newsletter",
-  wrap(withTransform(require("./api/newsletter/index.js"), { camel: true })),
+  wrap(
+    withTransform(require("./backend/newsletter/index.js"), { camel: true }),
+  ),
 );
 app.all(
   "/api/profile/avatar",
-  wrap(withTransform(require("./api/profile/avatar.js"), { camel: true })),
+  wrap(withTransform(require("./backend/profile/avatar.js"), { camel: true })),
 );
 app.all(
   "/api/media",
-  wrap(withTransform(require("./api/media/index.js"), { camel: true })),
+  wrap(withTransform(require("./backend/media/index.js"), { camel: true })),
 );
 app.all(
   "/api/media/upload",
-  wrap(withTransform(require("./api/media/upload.js"), { camel: true })),
+  wrap(withTransform(require("./backend/media/upload.js"), { camel: true })),
 );
-app.all("/api/health", wrap(require("./api/health/index.js")));
-app.get("/sitemap.xml", wrap(require("./api/sitemap.xml.js")));
+app.all("/api/health", wrap(require("./backend/health/index.js")));
+app.get("/sitemap.xml", wrap(require("./backend/sitemap.xml.js")));
 // Publisher program related routes
 app.all(
   "/api/profile/publisher-request",
   wrap(
-    withTransform(require("./api/profile/publisher-request.js"), {
+    withTransform(require("./backend/profile/publisher-request.js"), {
       camel: true,
     }),
   ),
@@ -211,7 +215,7 @@ app.all(
 app.all(
   "/api/profile/publisher-requests",
   wrap(
-    withTransform(require("./api/profile/publisher-requests.js"), {
+    withTransform(require("./backend/profile/publisher-requests.js"), {
       camel: true,
     }),
   ),
@@ -219,7 +223,7 @@ app.all(
 app.all(
   "/api/profile/publisher-approval",
   wrap(
-    withTransform(require("./api/profile/publisher-approval.js"), {
+    withTransform(require("./backend/profile/publisher-approval.js"), {
       camel: true,
     }),
   ),
@@ -227,15 +231,19 @@ app.all(
 // User management (admin)
 app.all(
   "/api/admin/users",
-  wrap(withTransform(require("./api/admin/users/index.js"), { camel: true })),
+  wrap(
+    withTransform(require("./backend/admin/users/index.js"), { camel: true }),
+  ),
 );
 app.all(
   "/api/admin/users/warn",
-  wrap(withTransform(require("./api/admin/users/warn.js"), { camel: true })),
+  wrap(
+    withTransform(require("./backend/admin/users/warn.js"), { camel: true }),
+  ),
 );
 app.all(
   "/api/admin/users/ban",
-  wrap(withTransform(require("./api/admin/users/ban.js"), { camel: true })),
+  wrap(withTransform(require("./backend/admin/users/ban.js"), { camel: true })),
 );
 
 // Health check
