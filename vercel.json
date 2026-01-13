@@ -11,7 +11,7 @@
     },
     {
       "source": "/((?!api|assets|ads\\.txt|sw\\.js|favicon\\.ico).*)",
-      "destination": "/"
+      "destination": "/index.html"
     }
   ]
 }
