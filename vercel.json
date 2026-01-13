@@ -10,7 +10,7 @@
       "destination": "/api/index.js"
     },
     {
-      "source": "/((?!api|ads\\.txt|sw\\.js|favicon\\.ico).*)",
+      "source": "/((?!api|assets|ads\\.txt|sw\\.js|favicon\\.ico).*)",
       "destination": "/"
     }
   ]
