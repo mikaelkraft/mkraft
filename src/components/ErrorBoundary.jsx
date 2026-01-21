@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "./AppIcon.jsx";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {

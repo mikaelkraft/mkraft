@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import settingsService from "../../utils/settingsService";
+import Image from "../AppImage.jsx";
 
 function Header() {
   const [logo, setLogo] = useState(null);
