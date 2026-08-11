@@ -35,7 +35,7 @@ This repo = Portfolio + CMS + Blog + Engagement layer, shipping today with a pra
 - **Blog Platform** - Integrated blog with categories, tags, and commenting system
 - **Project Showcase** - Dynamic project grid with filtering and detailed views
 - **Dual Backend Support** - Works with both Supabase and custom PostgreSQL + Express API
-- **React 18** - Latest React with improved rendering and concurrent features
+- **React 18 or higher** - Latest React with improved rendering and concurrent features
 - **Vite** - Lightning-fast build tool and development server
 - **Redux Toolkit** - Efficient state management
 - **TailwindCSS** - Modern utility-first CSS framework with custom themes
@@ -52,7 +52,7 @@ This repo = Portfolio + CMS + Blog + Engagement layer, shipping today with a pra
 
 ## 📋 Prerequisites
 
-- Node.js (v14.x or higher)
+- Node.js (v24.x.x)
 - npm or yarn
 - PostgreSQL database (Neon, Railway, Render, or Supabase)
 - Optional: Supabase account for auth and storage
@@ -213,7 +213,7 @@ npm run build
 
 - Make sure all environment variables are set
 - Check that database connection is working
-- Verify Node.js version (14.x or higher)
+- Verify Node.js version (24.x.x)
 
 **Database Connection Issues**
 
